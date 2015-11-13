@@ -1,0 +1,34 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css', integrity='sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==', crossorigin='anonymous')
+  body
+    .topnav
+      .container
+        .row
+          .col-sm-4
+            a(href="/users")
+              img.logo(src="/images/cool-logo.png")
+          .col-sm-8.topnav-right
+            if currentUser
+              |Welcome 
+              a#username(href='/users/myprofile') #{currentUser.name}
+              |!
+              a.signout(href='/logout') Sign out
+            else
+              a(href='#') Sign in
+    .container
+      if alert
+        .alert.alert-danger #{alert}
+      if successAlert
+        .alert.alert-success #{successAlert}
+      .content
+        block content
+
+  script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+  script(src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js")
+  script(src='/javascripts/myscript.js')
+  script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js', integrity='sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==', crossorigin='anonymous')
+  

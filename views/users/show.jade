@@ -1,0 +1,41 @@
+extends ../layout
+
+block content
+  .row
+    .col-sm-3.profile-left
+      a(href='/users/#{user._id}/edit')
+        img.responsive#profile-picture(src="#{imgURL}")
+    .col-sm-9.profile-right
+
+      h3.
+        #{user.name} 
+      
+      dl.dl-horizontal
+        dt Email
+        dd #{user.email}
+        dt About Me
+        dd #{user.description}
+        if editable
+          dt Am I an Admin
+          dd #{user.role == 1 || user.role == 2} 
+        
+      if editable
+        .pull-right
+          form(action='/users/#{user._id}/delete',method='post',enctype='application/x-www-form-urlencoded')
+            input(type='hidden',value='DELETE',name='_method')
+            a.btn.btn-success(href='/users/#{user._id}/edit') 
+              i.glyphicon.glyphicon-pencil
+              &nbsp;
+              | Edit
+            &nbsp;
+            button.btn.btn-danger(type='submit')
+              i.glyphicon.glyphicon-trash
+              &nbsp;
+              span Delete
+          br
+          if canPromote
+            form(action='/users/#{user._id}/makeAdmin',method='post',enctype='application/x-www-form-urlencoded')
+              button.btn.btn-success(type='submit')
+                i.glyphicon.glyphicon-pencil
+                &nbsp;
+                span Make Admin

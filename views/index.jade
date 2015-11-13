@@ -1,0 +1,67 @@
+extends layout
+
+block content
+  .container
+    h1= title
+    p Welcome to #{title}, the hot new social network on your campus.
+
+    .row
+      .col-sm-6
+        #loginbox.mainbox
+          .panel.panel-info
+            .panel-heading
+              .panel-title Sign In
+              div(style='float:right; font-size: 80%; position: relative; top:-10px')
+            .panel-body(style='padding-top:30px')
+              form#loginform.form-horizontal(role='form', action='/login', method="post")
+                .input-group(style='margin-bottom: 25px')
+                  span.input-group-addon
+                    i.glyphicon.glyphicon-user
+                  input#login-username.form-control(type='text', name='email', value='', placeholder='username or email')
+                .input-group(style='margin-bottom: 25px')
+                  span.input-group-addon
+                    i.glyphicon.glyphicon-lock
+                  input#login-password.form-control(type='password', name='password', placeholder='password')
+                .form-group(style='margin-top:10px')
+                  // Button
+                  .col-sm-12.controls
+                    button#btn-login.btn.btn-success(type='submit') 
+                      i.glyphicon.glyphicon-user
+                      | &nbsp; Login
+      .col-sm-6
+        #signupbox.mainbox
+          .panel.panel-info
+            .panel-heading
+              .panel-title Sign Up
+              div(style='float:right; font-size: 85%; position: relative; top:-10px')
+            .panel-body
+              form#signupform.form-horizontal(name="adduser",method="post",action="/users",  enctype="multipart/form-data", role='form')
+                .form-group
+                  label.col-md-3.control-label(for='email') Email
+                  .col-md-9
+                    input.form-control(type='text', name='email', placeholder='Email Address')
+                .form-group
+                  label.col-md-3.control-label(for='name') Name
+                  .col-md-9
+                    input.form-control(type='text', name='name', placeholder='Name')
+                .form-group
+                  label.col-md-3.control-label(for='password') Password
+                  .col-md-9
+                    input.form-control#password1(type='password', name='password', placeholder='Password')
+                .form-group
+                  label.col-md-3.control-label(for='confirmPassword') Confirm Password
+                  .col-md-9
+                    input.form-control#password2(type='password', name='confirmPassword', placeholder='Password')
+                .form-group
+                  label.col-md-3.control-label(for='description') Describe Yourself
+                  .col-md-9
+                    textarea.form-control(type='password', name='description', placeholder='Description')
+                .form-group
+                  label.col-md-3.control-label(for='file') Upload Image
+                  .col-md-9
+                    input.form-control(type='file', name='profilePicture')
+                .form-group
+                  .col-md-offset-3.col-md-9
+                    button#btn-signup.btn.btn-info(type='submit')
+                      i.glyphicon.glyphicon-user
+                      | &nbsp; Sign Up

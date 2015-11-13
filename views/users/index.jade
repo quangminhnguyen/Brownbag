@@ -1,0 +1,19 @@
+extends ../layout
+
+block content
+  h1.
+    #{title}
+  table.table.user-list.table-striped.table-bordered.table-hover
+    thead
+      tr
+        th.
+          Name
+        th.
+          Email
+    - each user, i in users
+      tr
+        td
+          a(href='/users/#{user._id}')= user.name
+        td
+          a(href='/users/#{user._id}')= user.email
+        
