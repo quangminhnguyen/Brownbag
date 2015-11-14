@@ -1,0 +1,19 @@
+{
+  "name": "a4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "mongodb": "^2.0.47",
+    "mongoose": "^4.2.3",
+    "multer": "^1.1.0"
+  }
+}
