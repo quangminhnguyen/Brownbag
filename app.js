@@ -36,6 +36,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Set current user as signed in User
 app.use(function(req, res, next) {
   mongoose.model('User').findById(req.session.userId, function (err, user) {
     res.locals.currentUser = user;
@@ -51,7 +52,7 @@ app.use(function(req, res, next) {
   });
 });
 
-app.use('/pictures', pictures);
+app.use('/avatars', avatars);
 app.use('/', routes);
 
 // redirects not signed in users to log in page
@@ -67,9 +68,8 @@ app.use(function(req, res, next) {
 });
  
 
-
 app.use('/users', users);
-
+app.use('/messages', messages);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

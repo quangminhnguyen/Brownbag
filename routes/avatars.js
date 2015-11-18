@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var mongoose = require('mongoose'); //mongo connection
+var mongoose = require('mongoose');
 var fs = require('fs');
 
 
