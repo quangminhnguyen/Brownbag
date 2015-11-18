@@ -1,0 +1,43 @@
+extends ../layout
+
+block content
+  form(action='/users/#{user._id}/edit',method='post',name='update',enctype='application/x-www-form-urlencoded')
+    h2.
+      Edit Profile
+    .row
+      .col-sm-6
+        img(src=user.profilePic)
+      .col-sm-6
+        .form-group
+          label(for="inputEmail") Email
+          input.form-control#inputEmail(disabled='disabled', type='email', value='#{user.email}', name='email')
+        
+        .form-group
+          label(for="inputName") Name
+          input.form-control#inputName(type='text', value='#{user.name}', name='name')
+        input(type='hidden',value='PUT',name='_method')
+
+        .form-group
+          label(for="inputDescription") Description
+          textarea.form-control#inputDescription(type='text', value='#{user.description}', name='description')
+        
+        button.btn.btn-primary#btnSubmit(type='submit').
+          Update
+        &nbsp;
+        a.btn.btn-default(href='/users/#{user._id}') Cancel
+  h3 Change Password
+  form(action='/users/#{user._id}/updatePassword',method='post',name='update_password',enctype='application/x-www-form-urlencoded')
+    .form-group
+      label(for="inputPassword") Current password
+      input.form-control#inputPassword(type='password', name='password')
+    
+    .form-group
+      label(for="inputNewPassword") New Password
+      input.form-control#inputNewPassword(type='password', name='newPassword')
+
+    .form-group
+      label(for="inputConfirmPassword") Confirm New Password
+      input.form-control#inputConfirmPassword(type='password', name='confirmPassword')
+
+    button.btn.btn-primary#changePasswordButton(type='submit').
+      Change Password
