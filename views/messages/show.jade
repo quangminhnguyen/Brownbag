@@ -1,0 +1,17 @@
+block content
+  h1.
+    #{title}
+  table.table.user-list.table-striped.table-bordered.table-hover
+    thead
+      tr
+        th.
+          Timestamp
+        th.
+          Message
+    - each msg, i in msgs
+      tr
+        td
+          a(href='/users/#{user._id}')= msg.timestamp
+        td
+          a(href='/users/#{user._id}')= msg.message
+        
