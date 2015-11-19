@@ -76,7 +76,7 @@ router.post('/sendMessage', function(req, res) {
 });
 
 
-router.get('/forperson/:id', function(req, res) {
+router.get('/conversation/:id', function(req, res) {
   var sender = res.locals.currentUser; 
   var recipientId  = req.body.recipient; 
 
