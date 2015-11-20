@@ -7,13 +7,19 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
 
+/* Register the models */
 var db = require('./model/db');
 var user = require('./model/users');
-var picture = require('./model/pictures');
+var picture = require('./model/avatars');
+var authentication = require('./model/authentications');
+var restaurant = require('./model/restaurants')
+var reviews = require('./model/reviews');
+var messages = require('./model/messages');
 
+/* Define some routes */
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var pictures = require('./routes/pictures');
+var pictures = require('./routes/avatars');
 
 var app = express();
 
@@ -38,7 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set current user as signed in User
 app.use(function(req, res, next) {
-  mongoose.model('User').findById(req.session.userId, function (err, user) {
+  mongoose.model('Auth').findById(req.session.userId, function (err, user) {
     res.locals.currentUser = user;
     if (req.session.alert) {
       res.locals.alert = req.session.alert;
@@ -52,7 +58,7 @@ app.use(function(req, res, next) {
   });
 });
 
-app.use('/avatars', avatars);
+//app.use('/avatars', avatars);
 app.use('/', routes);
 
 // redirects not signed in users to log in page
@@ -69,7 +75,7 @@ app.use(function(req, res, next) {
  
 
 app.use('/users', users);
-app.use('/messages', messages);
+//app.use('/messages', messages);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -101,6 +107,5 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;

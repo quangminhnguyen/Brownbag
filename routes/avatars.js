@@ -10,11 +10,9 @@ router.get('/:id', function(req, res) {
         if (err) {
             console.log('GET Error: There was a problem retrieving PICTURE: ' + err);
         } else {
-
           res.writeHead(200, {'Content-Type': picture.img.contentType});
           res.write(picture.img.data);
           res.end();
-
         }
     });
 });

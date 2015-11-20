@@ -7,7 +7,7 @@ var app = express();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Netnome' });
+  res.render('index', { title: 'FoodsNet' });
 });
 
 router.route('/login')
@@ -15,7 +15,7 @@ router.route('/login')
       res.render('login');
     })
 
-    .post(function (req, res){
+    .post(function (req, res) {
 
       var emailAdr = req.body.email;
       var pass = req.body.password;
@@ -24,6 +24,7 @@ router.route('/login')
       // Find the user requested.
       user.findOne ({ 'email': emailAdr }, function (err, user) {
         if (err) {
+            
           // Add message for the user to see on the next page view.
           req.session.alert = "Invalid Username or Password";
           req.session.save(function(err){});
@@ -58,14 +59,18 @@ router.route('/login')
           res.redirect('back');
         }
       });
-
     });
 
+
+router.get('/signup', function(req, res, next) {
+    console.log("SIGN UP");
+    res.render('signup');
+});
 
 router.get('/logout', function(req, res, next) {
   // Clear the user's session.
   req.session.destroy(function(err) {});
-  res.redirect("/")
+  res.render("/")
 });
 
 
