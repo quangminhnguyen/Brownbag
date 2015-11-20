@@ -1,11 +1,20 @@
-$("#signupform").submit(function (e) {
+$("signupform").submit(function (e) {
     e.preventDefault();
     var form = this;
-    console.log('one is ' + $('input[name=password]').val());
-    console.log('one is ' + $('input[name=confirmPassword]').val());
     if ($('#password1').val() == $('#password2').val()) {
         form.submit();
     } else {
         alert("Passwords don't match");
     }
 });
+
+$('#user-radio').click(function() {
+    $('.restaurant-section').hide();
+    $('.user-only').show();
+});
+
+$('#rest-radio').click(function() {
+    $('.restaurant-section').show();
+    $('.user-only').hide();
+});
+

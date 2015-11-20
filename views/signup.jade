@@ -8,28 +8,32 @@ block content
               .panel-title Sign Up
               div(style='float:right; font-size: 85%; position: relative; top:-10px')
             .panel-body
-              form#signupform.form-horizontal(name="adduser",method="post",action="/users",  enctype="multipart/form-data", role='form')
+              form#signupform.form-horizontal(name="adduser", method="post", action="/users",  enctype="multipart/form-data", role='form')
+                .form-group
+                  label.col-md-3.control-label Account Type
+                  .col-md-9
+                    label.radio-inline
+                      input#user-radio(type='radio' name='user' value='user' checked=true)
+                      |  I am a food lover
+                    label.radio-inline
+                      input#rest-radio(type='radio' name='user' value='owner')
+                      |  I am a restaurant owner
                 .form-group
                   label.col-md-3.control-label(for='email') Email
                   .col-md-9
                     input.form-control(type='text', name='email', placeholder='Email Address')
-                .form-group
+                .form-group.user-only
                   label.col-md-3.control-label(for='name') Name
                   .col-md-9
                     input.form-control(type='text', name='name', placeholder='Name')
-                .form-group
+                .form-group.restaurant-section(style='display: none')
+                  label.col-md-3.control-label(for='restName') Restaurant Name
+                  .col-md-9
+                    input.form-control(type='text', name='restName' placeholder='Your restaurant name')
+                .form-group.user-only
                   label.col-md-3.control-label(for='age') Age
                   .col-md-9
                     input.form-control(type='text', name='age', placeholder='Age')
-                .form-group
-                  label.col-md-3.control-label Account Type
-                  .col-md-9
-                    label.checkbox-inline
-                      input(type='checkbox' name='user' value='user')
-                      | I am a food lover
-                    label.checkbox-inline
-                      input(type='checkbox' name='owner' value='owner')
-                      | I am a restaurant owner 
                 .form-group
                   label.col-md-3.control-label(for='password') Password
                   .col-md-9
@@ -39,7 +43,8 @@ block content
                   .col-md-9
                     input.form-control#password2(type='password', name='confirmPassword', placeholder='Password')
                 .form-group
-                  label.col-md-3.control-label Favorite cuisines
+                  label.col-md-3.control-label.user-only Favorite cuisines
+                  label.col-md-3.control-label.restaurant-section(style='display: none') Restaurant cuisines
                   .col-md-9
                     label.checkbox-inline
                       input(type='checkbox' name='Japanese' value='Japan') 
@@ -68,8 +73,12 @@ block content
                     label.checkbox-inline
                       input(type='checkbox' name='FastFood' value='FastFood')
                       | Fast Food
+                .form-group.restaurant-section(style='display: none')
+                  label.col-md-3.control-label Restaurant Location
+                  .col-md-9
+                    input.form-control(type='text', name='location', placeholder='Restaurant Address')
                 .form-group
-                  label.col-md-3.control-label(for='file') Upload Your Avatar
+                  label.col-md-3.control-label(for='file') Upload Avatar
                   .col-md-9
                     input.form-control(type='file', name='profilePicture')
                 .form-group

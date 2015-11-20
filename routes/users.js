@@ -14,7 +14,7 @@ var bcrypt = require('bcrypt');
 
 var ROLE_USER = 0;
 var ROLE_ADMIN = 1;
-var FAV_CUSINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'VietNamese', 'Indian', 'FastFood'];
+var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'VietNamese', 'Indian', 'FastFood'];
 
 express().use(qt.static(__dirname + '/'));
 router.use(bodyParser.urlencoded({
@@ -50,121 +50,126 @@ router.route('/')
             }
         });
     })
+    // POST a new User
+    // Redirect the browser.
+    .post(function (req, res) {
+        var form = new formidable.IncomingForm();
+        form.parse(req, function (err, fields, files) {
+            var email = fields.email;
 
+            // Checking for duplicated email. 
+            mongoose.model('Auth').count({
+                email: email
+            }, function (err, count) {
+                if (count == 0) {
+                    var doesExist = mongoose.model('Auth');
 
-// POST a new User
-// Redirect the browser.
-.post(function (req, res) {
-    var form = new formidable.IncomingForm();
-    form.parse(req, function (err, fields, files) {
-        var email = fields.email;
-
-        // Checking for duplicated email. 
-        mongoose.model('Auth').count({
-            email: email
-        }, function (err, count) {
-            if (count == 0) {
-                var doesExist = mongoose.model('Auth');
-
-                // Counting # of user 
-                var users = doesExist.count("", function (err, c) {
-                    var age = fields.age;
-                    var name = fields.name;
-                    var password = fields.password;
-                    var pic = files.profilePicture;
-                    var role = ROLE_USER;
-                    var favCusine = [];
-                    var isRestaurant = false;
-
-                    if (fields.owner) {
-                        isRestaurant = true;
-                    }
-
-                    for (var key in fields) {
-                        if (FAV_CUSINE.indexOf(key) != -1) {
-                            favCusine.push(key);
-                        }
-                    }
-                    console.log("fav Cuisine", favCusine);
-
-                    // if first user, make that user admin
-                    if (c < 1) {
-                        role = ROLE_ADMIN;
-                    }
-                    if (!name) {
-                        name = email;
-                    }
-
-                    // Use default image if none is specified.
-                    var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
-                    fs.readFile(fileToRead, function (err, data) {
-                        if (err) throw err;
-                        var img = {
-                            data: data,
-                            contentType: pic.type
-                        };
-
-                        // Save binary image.
-                        var profilePicture = mongoose.model('Avatar').create({
-                            img: img
-                        }, function (err, picture) {
-                            if (err) {
-                                res.send("There was a problem adding the PROFILE PICTURE to the database.");
+                    // Counting # of user 
+                    var users = doesExist.count("", function (err, c) {
+                        var age = fields.age; // regular user only
+                        var name = fields.name; // regular user only
+                        var password = fields.password; 
+                        var pic = files.profilePicture;
+                        var role = ROLE_USER; // regular user by default
+                        var cuisine = [];
+                        var who = fields.user; // restaurant owner or basic user 
+                        var restName = fields.restName; // Restaurant only
+                        var location = fields.location; // Restaurant only
+                        
+                        //onsole.log("test: " + req.param.favCusine);
+                        //console.log(who);
+                        
+                        for (var key in fields) {
+                            if (CUISINE.indexOf(key) != -1) {
+                                cuisine.push(key);
                             }
+                        }
+                        console.log('cuisine', cuisine);
 
-                            // Store hashed passwords.
-                            hashPassword(password, function (err, hashedPassword) {
+                        // if first user, make that user admin
+                        if (c < 1) {
+                            role = ROLE_ADMIN;
+                        }
+                        if (!name) {
+                            name = email;
+                        }
 
-                                // Create new user.
-                                mongoose.model('Auth').create({
-                                    email: email,
-                                    password: hashedPassword,
-                                    // profilePicture: picture._id,
-                                }, function (err, user) {
-                                    if (err) {
-                                        res.send("There was a problem adding the USER to the database.");
-                                    } else {
-                                        
-                                        // Normal user
-                                        if (!isRestaurant) {
-                                            mongoose.model('User').create({
-                                                name: name,
-                                                age: age,
-                                                preferredCuisine: favCusine,
-                                                avatar: picture._id,
-                                                auth: user._id,
-                                                role: role
-                                            });
-                                            
-                                        // User is a restaurant
+                        // Use default image if none is specified.
+                        var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
+                        fs.readFile(fileToRead, function (err, data) {
+                            if (err) throw err;
+                            var img = {
+                                data: data,
+                                contentType: pic.type
+                            };
+
+                            // Save binary image.
+                            var profilePicture = mongoose.model('Avatar').create({
+                                img: img
+                            }, function (err, picture) {
+                                if (err) {
+                                    res.send("There was a problem adding the PROFILE PICTURE to the database.");
+                                }
+
+                                // Store hashed passwords.
+                                hashPassword(password, function (err, hashedPassword) {
+
+                                    // Create new user.
+                                    mongoose.model('Auth').create({
+                                        email: email,
+                                        password: hashedPassword,
+                                        // profilePicture: picture._id,
+                                    }, function (err, user) {
+                                        if (err) {
+                                            res.send("There was a problem adding the USER to the database.");
                                         } else {
-                                            // TODO
+
+                                            // Normal user
+                                            if (who == 'user') {
+                                                mongoose.model('User').create({
+                                                    name: name,
+                                                    age: age,
+                                                    preferredCuisine: cuisine,
+                                                    avatar: picture._id,
+                                                    auth: user._id,
+                                                    role: role
+                                                });
+
+                                            // User is a restaurant
+                                            } else if (who == 'owner') {
+                                                mongoose.model('Restaurant').create({
+                                                    name: restName,
+                                                    location: location,
+                                                    cuisine: cuisine,
+                                                    avatar: picture._id,
+                                                    auth: user._id
+                                                });
+                                            }
+
+                                            // user has been created
+                                            req.session.userId = user._id;
+                                            req.session.save(function (err) {});
+                                            console.log("SUCCESS");
+                                            req.session.alert = null;
+                                            res.redirect('back');
+                                            //res.redirect("/users/myprofile");
                                         }
-                                        
-                                        // user has been created
-                                        req.session.userId = user._id;
-                                        req.session.save(function (err) {});
-                                        console.log("SUCCESS");
-                                        req.session.alert = null;
-                                        res.redirect('back');
-                                        //res.redirect("/users/myprofile");
-                                    }
+                                    });
                                 });
                             });
                         });
                     });
-                });
 
-                /* Indicate that email has been used */
-            } else {
-                // console.log("Warning this email has been used");
-                req.session.alert = "The email you typed in has been used";
-                // req.session.save(function(err){});
-                res.redirect('back');
-            }
+                    /* Indicate that email has been used */
+                } else {
+                    // console.log("Warning this email has been used");
+                    req.session.alert = "The email you typed in has been used";
+                    // req.session.save(function(err){});
+                    res.redirect('back');
+                }
+            });
         });
     });
-});
 
 
 function hashPassword(password, cb) {
