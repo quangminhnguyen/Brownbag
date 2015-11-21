@@ -6,20 +6,22 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "bcrypt": "*",
     "body-parser": "^1.13.3",
     "cookie-parser": "~1.3.5",
     "debug": "~2.2.0",
     "express": "~4.13.1",
+    "express-session": "*",
+    "formidable": "*",
+    "fs": "*",
     "jade": "~1.11.0",
     "method-override": "^2.3.5",
     "mongoose": "^4.2.4",
     "morgan": "~1.6.1",
-    "serve-favicon": "~2.3.0",
-    "formidable": "*",
-    "fs": "*",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.0.0",
     "path": "*",
-    "express-session": "*",
-    "bcrypt": "*",
-    "quickthumb": "*"
+    "quickthumb": "*",
+    "serve-favicon": "~2.3.0"
   }
 }

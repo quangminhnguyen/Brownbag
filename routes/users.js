@@ -85,7 +85,6 @@ router.route('/')
                             }
                         }
                         console.log('cuisine', cuisine);
-
                         // if first user, make that user admin
                         if (c < 1) {
                             role = ROLE_ADMIN;
@@ -93,7 +92,6 @@ router.route('/')
                         if (!name) {
                             name = email;
                         }
-
                         // Use default image if none is specified.
                         var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
                         fs.readFile(fileToRead, function (err, data) {

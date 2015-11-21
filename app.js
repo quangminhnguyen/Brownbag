@@ -1,3 +1,4 @@
+// Importing modules 
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -6,8 +7,9 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
+var passport = require('passport');
 
-/* Register the models */
+// Register the models */
 var db = require('./model/db');
 var user = require('./model/users');
 var picture = require('./model/avatars');
@@ -15,20 +17,24 @@ var authentication = require('./model/authentications');
 var restaurant = require('./model/restaurants')
 var reviews = require('./model/reviews');
 var messages = require('./model/messages');
+require('./configuration/passport')(passport);
 
-/* Define some routes */
+// Define some routes 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var pictures = require('./routes/avatars');
 
 var app = express();
 
-
 app.use(session({
   secret: 'thisismysecret',
   resave: false,
   saveUninitialized: true
 }));
+
+/* Intialize Passport */
+app.use(passport.initialize());
+app.use(passport.session());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -58,6 +64,18 @@ app.use(function(req, res, next) {
   });
 });
 
+
+
+app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'photo'] }));
+
+app.get('/auth/facebook/callback', passport.authenticate('facebook', {
+    failureRedirect: '/'
+}), function (req, res) {
+    console.log("A new facebook user has been signed in");
+    res.redirect('/');
+});
+
+
 //app.use('/avatars', avatars);
 app.use('/', routes);
 
@@ -76,6 +94,7 @@ app.use(function(req, res, next) {
 
 app.use('/users', users);
 //app.use('/messages', messages);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
