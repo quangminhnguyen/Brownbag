@@ -2,8 +2,9 @@ var mongoose = require('mongoose');
 var fbSchema = new mongoose.Schema({
   name: String,
   email: {type: String},
-  id: {type: String, required: true},
+  fbID: {type: String, required: true},
   token: {type: String, required: true},
+  auth: {type: mongoose.Schema.Types.ObjectId, required: true,  ref: 'Auth'},
   age: Number,
   token: String,
   preferredCuisine: [String],
@@ -13,4 +14,3 @@ var fbSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('FBUser', fbSchema);
-

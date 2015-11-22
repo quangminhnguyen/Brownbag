@@ -17,6 +17,8 @@ var authentication = require('./model/authentications');
 var restaurant = require('./model/restaurants')
 var reviews = require('./model/reviews');
 var messages = require('./model/messages');
+
+/* Running some configurations for the passport. */
 require('./configuration/passport')(passport);
 
 // Define some routes 
@@ -48,14 +50,34 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+//app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/facebook/callback', passport.authenticate('facebook', {
+    failureRedirect: '/',
+    successRedirect: '/users/main'
+}));
+
 // Set current user as signed in User
 app.use(function(req, res, next) {
+  console.log("1");
+  console.log("req.session.userId: " + req.session.userId);
+  // Find in relation Auth for the userID, req.session.userId is the id of the user 
+  // that is online
   mongoose.model('Auth').findById(req.session.userId, function (err, user) {
+    if (err) {
+        console.log(err);
+        return;
+    }
     res.locals.currentUser = user;
+    
+    // check if alert message is set. 
     if (req.session.alert) {
       res.locals.alert = req.session.alert;
       req.session.alert = null;
     }
+    
+    // check if successAlert message is set. 
     if (req.session.successAlert) {
       res.locals.successAlert = req.session.successAlert;
       req.session.successAlert = null;
@@ -65,22 +87,13 @@ app.use(function(req, res, next) {
 });
 
 
-
-app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'photo'] }));
-
-app.get('/auth/facebook/callback', passport.authenticate('facebook', {
-    failureRedirect: '/'
-}), function (req, res) {
-    console.log("A new facebook user has been signed in");
-    res.redirect('/');
-});
-
-
 //app.use('/avatars', avatars);
 app.use('/', routes);
 
+
 // redirects not signed in users to log in page
 app.use(function(req, res, next) {
+  console.log("2");
   var isCreatingUser = req.url == '/users' && req.method == 'POST';
   var isNotSignedIn = !req.session.userId;
   if (isNotSignedIn && !isCreatingUser) {
@@ -90,7 +103,7 @@ app.use(function(req, res, next) {
     next();
   }
 });
- 
+
 
 app.use('/users', users);
 //app.use('/messages', messages);
@@ -104,7 +117,6 @@ app.use(function(req, res, next) {
 });
 
 // error handlers
-
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {

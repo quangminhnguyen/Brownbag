@@ -76,9 +76,6 @@ router.route('/')
                         var restName = fields.restName; // Restaurant only
                         var location = fields.location; // Restaurant only
                         
-                        //onsole.log("test: " + req.param.favCusine);
-                        //console.log(who);
-                        
                         for (var key in fields) {
                             if (CUISINE.indexOf(key) != -1) {
                                 cuisine.push(key);
@@ -92,6 +89,7 @@ router.route('/')
                         if (!name) {
                             name = email;
                         }
+                        
                         // Use default image if none is specified.
                         var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
                         fs.readFile(fileToRead, function (err, data) {
@@ -119,7 +117,7 @@ router.route('/')
                                         // profilePicture: picture._id,
                                     }, function (err, user) {
                                         if (err) {
-                                            res.send("There was a problem adding the USER to the database.");
+                                            res.send("There was a problem adding the user to the Auth relation.");
                                         } else {
 
                                             // Normal user
@@ -147,10 +145,9 @@ router.route('/')
                                             // user has been created
                                             req.session.userId = user._id;
                                             req.session.save(function (err) {});
-                                            console.log("SUCCESS");
                                             req.session.alert = null;
                                             res.redirect('back');
-                                            //res.redirect("/users/myprofile");
+                                            // res.redirect("/users/myprofile");
                                         }
                                     });
                                 });
@@ -181,6 +178,21 @@ function hashPassword(password, cb) {
         });
     });
 }
+
+// "/users/main"
+router.get('/main', function(req, res) {
+    console.log("alo");
+    mongoose.model('Restaurant').find({}, function (err, restaurants){
+        if (err) {
+            console.log(err);
+            return;
+        }
+        console.log("here: " + restaurants);
+        res.send("Successfully logged in");
+        // res.render('users/main', {restaurants: restaurants});
+    });
+});
+
 
 //// Redirect the browser.
 //router.get('/myprofile', function (req, res) {
