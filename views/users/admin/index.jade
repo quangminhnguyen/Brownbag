@@ -1,4 +1,4 @@
-extends ../layout
+extends ../../layout
 
 block content
   h1.
@@ -9,10 +9,10 @@ block content
         th.
           Name
         th.
-          Email
+          Logo
     - each user, i in users
       tr
         td
           a(href='/users/#{user._id}')= user.name
         td
-          a(href='/users/#{user._id}')= user.email
+          img.responsive.img-circle.logo-small(src="/avatars/#{user.avatar}") 

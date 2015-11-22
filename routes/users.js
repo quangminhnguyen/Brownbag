@@ -39,20 +39,22 @@ router.route('/')
                 return console.error(err);
             } else {
                 // Render the response.
-                res.format({
-                    html: function () {
-                        res.render('users/index', {
-                            title: 'Welcome, ',
-                            "users": users
-                        });
-                    }
-                });
+//                res.format({
+//                    html: function () {
+//                        res.render('users/index', {
+//                            title: 'Welcome, ',
+//                            "users": users
+//                        });
+//                    }
+//                });
+                res.redirect('users/main');
             }
         });
     })
+
     // POST a new User
     // Redirect the browser.
-    .post(function (req, res) {
+    .post(function (req, res, next) {
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
             var email = fields.email;
@@ -68,14 +70,14 @@ router.route('/')
                     var users = doesExist.count("", function (err, c) {
                         var age = fields.age; // regular user only
                         var name = fields.name; // regular user only
-                        var password = fields.password; 
+                        var password = fields.password;
                         var pic = files.profilePicture;
                         var role = ROLE_USER; // regular user by default
                         var cuisine = [];
                         var who = fields.user; // restaurant owner or basic user 
                         var restName = fields.restName; // Restaurant only
                         var location = fields.location; // Restaurant only
-                        
+
                         for (var key in fields) {
                             if (CUISINE.indexOf(key) != -1) {
                                 cuisine.push(key);
@@ -89,7 +91,7 @@ router.route('/')
                         if (!name) {
                             name = email;
                         }
-                        
+
                         // Use default image if none is specified.
                         var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
                         fs.readFile(fileToRead, function (err, data) {
@@ -129,9 +131,22 @@ router.route('/')
                                                     avatar: picture._id,
                                                     auth: user._id,
                                                     role: role
+                                                }, function (err, doc) {
+                                                    if (err) {
+                                                        console.log(err);
+                                                    }
+                                                    // user has been created
+                                                    req.session.userId = user._id;
+                                                    req.session.save(function (err) {});
+                                                    req.session.alert = null;
+                                                    if (role == ROLE_ADMIN) {
+                                                        res.redirect('users/admin/index')
+                                                    } else {
+                                                        res.redirect('users/main')
+                                                    }
                                                 });
 
-                                            // User is a owner is a restaurant.
+                                                // User is a owner is a restaurant.
                                             } else if (who == 'owner') {
                                                 mongoose.model('Restaurant').create({
                                                     name: restName,
@@ -139,37 +154,30 @@ router.route('/')
                                                     cuisine: cuisine,
                                                     avatar: picture._id,
                                                     auth: user._id
+                                                }, function (err, doc) {
+                                                    // user has been created
+                                                    req.session.userId = user._id;
+                                                    req.session.save(function (err) {});
+                                                    req.session.alert = null;
+                                                    res.redirect('users/main')
                                                 });
                                             }
-                                            
-                                            // user has been created
-                                            req.session.userId = user._id;
-                                            req.session.save(function (err) {});
-                                            req.session.alert = null;
-                                            
-                                            if (who = 'user') {
-                                                res.redirect('users/main');
-                                            } else if (who = 'owener') {
-                                                res.redirect('users/main');
-                                            }
-                                            // res.redirect("/users/myprofile");
                                         }
                                     });
                                 });
                             });
                         });
                     });
-                /* Indicate that email has been used */
+                    /* Indicate that email has been used */
                 } else {
                     // console.log("Warning this email has been used");
                     req.session.alert = "The email you typed in has been used";
-                    // req.session.save(function(err){});
+                    req.session.save(function (err) {});
                     res.redirect('back');
                 }
             });
         });
     });
-
 
 function hashPassword(password, cb) {
     bcrypt.genSalt(10, function (err, salt) {
@@ -184,14 +192,39 @@ function hashPassword(password, cb) {
 }
 
 // "/users/main" Displaying list of restaurants in the main page of the user
-router.get('/main', function(req, res) {
-    console.log("alo");
-    mongoose.model('Restaurant').find({}, function (err, restaurants){
+router.get('/main', function (req, res) {
+    mongoose.model('Restaurant').find({}, function (err, restaurants) {
         if (err) {
             console.log(err);
             return;
         }
-        res.render('users/main', {restaurants: restaurants});
+        res.render('users/main', {
+            restaurants: restaurants
+        });
+    });
+});
+
+// "/users/admin/index" 
+router.get('/admin/index', function (req, res) {
+    mongoose.model('Restaurant').find({}, function(err, allRestaurants) {
+        if (err) {
+            console.log(err);
+            return;
+        } 
+        mongoose.model('User').find({}, function(err, allRegUsers){
+            if (err) {
+                console.log(err);
+                return;
+            }
+            mongoose.model('FBUser').find({}, function(err, allFBUsers){
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                var allUsers = allRestaurants.concat(allRegUsers, allFBUsers);
+                res.render('users/admin/index', {users: allUsers});
+            });
+        });
     });
 });
 
@@ -445,12 +478,6 @@ router.get('/main', function(req, res) {
 //    });
 //});
 //
-//function canPromote(user, role) {
-//    if (role == ROLE_SUPER_ADMIN && user.role == ROLE_USER) {
-//        return true;
-//    }
-//    return false;
-//}
 //
 //function getUserRole(req, cb) {
 //    var userId = req.session.userId;

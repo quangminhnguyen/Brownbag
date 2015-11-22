@@ -24,7 +24,7 @@ require('./configuration/passport')(passport);
 // Define some routes 
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var pictures = require('./routes/avatars');
+var avatars = require('./routes/avatars');
 
 var app = express();
 
@@ -63,7 +63,6 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', {
 app.use(function(req, res, next) {
   console.log("1");
   console.log("req.session.userId: " + req.session.userId);
-  
   // Find in relation Auth for the userID, req.session.userId is the id of the user 
   // that is online
   mongoose.model('Auth').findById(req.session.userId, function (err, user) {
@@ -72,7 +71,6 @@ app.use(function(req, res, next) {
         return;
     }
     res.locals.currentUser = user;
-    
     // check if alert message is set. 
     if (req.session.alert) {
       res.locals.alert = req.session.alert;
@@ -88,8 +86,7 @@ app.use(function(req, res, next) {
   });
 });
 
-
-//app.use('/avatars', avatars);
+app.use('/avatars', avatars);
 app.use('/', routes);
 
 // redirects not signed in users to log in page

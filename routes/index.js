@@ -41,7 +41,26 @@ router.route('/login')
                     if (isMatch) {
                         req.session.userId = user._id;
                         req.session.save(function (err) {});
-                        res.redirect("/users/main");
+                        
+                        mongoose.model('User').find({auth: user._id}, function(err, allRegUser) {
+                            if(err) {
+                                console.log(err);
+                                return;
+                            }
+                            /* This is user is a regular user */
+                            if(allRegUser.length == 1) {
+                                if (allRegUser[0].role == 1) {
+                                    res.redirect('/users/admin/index');
+                                } else {
+                                    res.redirect('/users/main');
+                                }
+                            /* This user is a restaurant */
+                            } else {
+                                mongoose.model('Restaurant')
+                                res.redirect('/users/main');
+                            }
+                        });
+                        
                     
                     // login fail
                     } else {
@@ -68,9 +87,7 @@ router.get('/signup', function (req, res, next) {
 router.get('/logout', function (req, res, next) {
     // Clear the user's session.
     req.session.destroy(function (err) {});
-    res.render("index", {
-        title: 'FoodsNet'
-    });
+    res.redirect('/');
 });
 
 

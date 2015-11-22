@@ -6,7 +6,6 @@ var fbSchema = new mongoose.Schema({
   token: {type: String, required: true},
   auth: {type: mongoose.Schema.Types.ObjectId, required: true,  ref: 'Auth'},
   age: Number,
-  token: String,
   preferredCuisine: [String],
   avatar: {type: mongoose.Schema.Types.ObjectId, ref: 'Avatar'},
   // 0 - User, 1 - Admin

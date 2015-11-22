@@ -16,7 +16,7 @@ html
           .col-sm-8.topnav-right
             if currentUser
               |Welcome 
-              a#username(href='/users/myprofile') #{currentUser.name}
+              a#username(href='/users/myprofile') #{currentUser.email}
               |!
               a.signout(href='/logout') Sign out
             else

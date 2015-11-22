@@ -5,8 +5,7 @@ var fs = require('fs');
 
 
 router.get('/:id', function(req, res) {
-
-    mongoose.model('Picture').findById(req.params.id, function (err, picture) {
+    mongoose.model('Avatar').findById(req.params.id, function (err, picture) {
         if (err) {
             console.log('GET Error: There was a problem retrieving PICTURE: ' + err);
         } else {
