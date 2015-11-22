@@ -92,16 +92,15 @@ app.use('/', routes);
 
 
 // redirects not signed in users to log in page
-app.use(function(req, res, next) {
-  console.log("2");
-  var isCreatingUser = req.url == '/users' && req.method == 'POST';
-  var isNotSignedIn = !req.session.userId;
-  if (isNotSignedIn && !isCreatingUser) {
-    res.redirect("/");
-  }
-  else {
-    next();
-  }
+app.use(function (req, res, next) {
+    console.log("2");
+    var isCreatingUser = req.url == '/users' && req.method == 'POST';
+    var isNotSignedIn = !req.session.userId;
+    if (isNotSignedIn && !isCreatingUser) {
+        res.redirect("/");
+    } else {
+        next();
+    }
 });
 
 

@@ -11,9 +11,9 @@ router.get('/', function(req, res, next) {
 });
 
 router.route('/login')
-    .get(function(req, res, next) {
-      res.render('login');
-    })
+//    .get(function(req, res, next) {
+//      res.render('login');
+//    })
 
     .post(function (req, res) {
 

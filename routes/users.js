@@ -187,9 +187,9 @@ router.get('/main', function(req, res) {
             console.log(err);
             return;
         }
-        console.log("here: " + restaurants);
-        res.send("Successfully logged in");
-        // res.render('users/main', {restaurants: restaurants});
+        // console.log("here: " + restaurants);
+        // res.send("Successfully logged in");
+        res.render('users/main', {restaurants: restaurants});
     });
 });
 

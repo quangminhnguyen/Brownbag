@@ -1,0 +1,18 @@
+extends ../layout
+
+block list
+  h1.
+    #{title}
+  table.table.user-list.table-striped.table-bordered.table-hover
+    thead
+      tr
+        th.
+          Restaurant
+        th.
+          Address
+    - each restaurant, i in restaurants
+      tr
+        td
+          a= restaurant.name
+        td
+          a= restaurant.location
