@@ -37,6 +37,10 @@
   margin-left: 10px;
 }
 
+.glowing-blue:hover{
+    box-shadow: 0 0 50px deepskyblue, 0 0 150px deepskyblue;
+}
+
 #username {
   color: #ffd;
   font-weight: bold;

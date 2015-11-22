@@ -131,7 +131,7 @@ router.route('/')
                                                     role: role
                                                 });
 
-                                            // User is a restaurant
+                                            // User is a owner is a restaurant.
                                             } else if (who == 'owner') {
                                                 mongoose.model('Restaurant').create({
                                                     name: restName,
@@ -141,12 +141,17 @@ router.route('/')
                                                     auth: user._id
                                                 });
                                             }
-
+                                            
                                             // user has been created
                                             req.session.userId = user._id;
                                             req.session.save(function (err) {});
                                             req.session.alert = null;
-                                            res.redirect('back');
+                                            
+                                            if (who = 'user') {
+                                                res.redirect('users/main');
+                                            } else if (who = 'owener') {
+                                                res.redirect('users/main');
+                                            }
                                             // res.redirect("/users/myprofile");
                                         }
                                     });
@@ -154,8 +159,7 @@ router.route('/')
                             });
                         });
                     });
-
-                    /* Indicate that email has been used */
+                /* Indicate that email has been used */
                 } else {
                     // console.log("Warning this email has been used");
                     req.session.alert = "The email you typed in has been used";
@@ -179,7 +183,7 @@ function hashPassword(password, cb) {
     });
 }
 
-// "/users/main"
+// "/users/main" Displaying list of restaurants in the main page of the user
 router.get('/main', function(req, res) {
     console.log("alo");
     mongoose.model('Restaurant').find({}, function (err, restaurants){
@@ -187,8 +191,6 @@ router.get('/main', function(req, res) {
             console.log(err);
             return;
         }
-        // console.log("here: " + restaurants);
-        // res.send("Successfully logged in");
         res.render('users/main', {restaurants: restaurants});
     });
 });

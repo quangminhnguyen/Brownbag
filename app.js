@@ -58,10 +58,12 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', {
     successRedirect: '/users/main'
 }));
 
+
 // Set current user as signed in User
 app.use(function(req, res, next) {
   console.log("1");
   console.log("req.session.userId: " + req.session.userId);
+  
   // Find in relation Auth for the userID, req.session.userId is the id of the user 
   // that is online
   mongoose.model('Auth').findById(req.session.userId, function (err, user) {
@@ -89,7 +91,6 @@ app.use(function(req, res, next) {
 
 //app.use('/avatars', avatars);
 app.use('/', routes);
-
 
 // redirects not signed in users to log in page
 app.use(function (req, res, next) {

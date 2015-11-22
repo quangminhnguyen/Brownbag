@@ -2,12 +2,11 @@ extends layout
 
 block content
   .container
-    h1= title
-    p Welcome to #{title}, the best restaurant search service in UofT.
+    h1.text-center= title
+    p.text-center Welcome to #{title}, the best restaurant search service in UofT.
 
     .row
-      .col-sm-3
-      .col-sm-6
+      .col-md-6.col-md-offset-3
         #loginbox.mainbox
           .panel.panel-info
             .panel-heading
@@ -18,23 +17,22 @@ block content
                 .input-group(style='margin-bottom: 25px')
                   span.input-group-addon
                     i.glyphicon.glyphicon-user
-                  input#login-username.form-control(type='text', name='email', value='', placeholder='username or email')
+                  input.form-control(type='text', name='email', value='', placeholder='username or email')
                 .input-group(style='margin-bottom: 25px')
                   span.input-group-addon
                     i.glyphicon.glyphicon-lock
-                  input#login-password.form-control(type='password', name='password', placeholder='password')
-                .form-group(style='margin-top:10px; margin-bottom:0px')
+                  input.form-control(type='password', name='password', placeholder='password')
+                .form-group(style='margin-top:5px; margin-bottom:0px')
                   // Button
-                  .col-sm-3.controls
-                    button#btn-login.btn.btn-success(type='submit') 
+                  .col-md-3.controls
+                    button.btn.btn-success(type='submit' style='margin-top:5px') 
                       i.glyphicon.glyphicon-user
                       | &nbsp; Login
-                  .col-sm-3.controls
-                    a.btn.btn-info.btn-social.btn-facebook(href='/auth/facebook' style='margin-top:0px') 
+                  .col-md-3.controls
+                    a.btn.btn-info.btn-social.btn-facebook(href='/auth/facebook' style='margin-top:5px') 
                       i.fa.fa-facebook
                       | &nbsp; Facebook Login  
             form(action='/signup', method='get' style='margin-top:0px')
               button#signup.btn.btn-link
                 | &nbsp;Don't have an account yet? Sign Up Here!
-      .col-sm-3
 
