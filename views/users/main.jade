@@ -1,0 +1,22 @@
+extends ../layout
+
+block list
+  h1.
+    #{title}
+  table.table.user-list.table-striped.table-bordered.table-hover.text-center
+    thead
+      tr
+        th 
+          h4 Logo / Avatar
+        th 
+          h4 Restaurant Name
+        th 
+          h4 Cuisines
+    - each restaurant, i in restaurants
+      tr
+        td 
+          img.responsive.img-circle.logo-small(src="/avatars/#{restaurant.avatar}")
+        td
+          a= restaurant.name
+        td
+          a= restaurant.cuisine

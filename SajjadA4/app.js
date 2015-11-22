@@ -37,6 +37,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(req, res, next) {
+  console.log("1");
   mongoose.model('User').findById(req.session.userId, function (err, user) {
     res.locals.currentUser = user;
     if (req.session.alert) {
@@ -56,6 +57,7 @@ app.use('/', routes);
 
 // redirects not signed in users to log in page
 app.use(function(req, res, next) {
+  console.log("2");
   var isCreatingUser = req.url == '/users' && req.method == 'POST';
   var isNotSignedIn = !req.session.userId;
   if (isNotSignedIn && !isCreatingUser) {

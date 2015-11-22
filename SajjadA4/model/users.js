@@ -5,7 +5,7 @@ var bcrypt = require('bcrypt');
 
 var userSchema = new mongoose.Schema({
   email: {type: String, required: true, index: { unique: true } },
-  password: {type: String, required: true },
+  password: {type: String, required: true}, // not required because user may use fb login.
   name: String,
   description: String,
   profilePicture: {type: mongoose.Schema.Types.ObjectId, ref: 'Picture'},
@@ -13,7 +13,6 @@ var userSchema = new mongoose.Schema({
   role: {type: Number, required: true } 
 
 });
-
 
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
   console.log('comparing: ' + candidatePassword + '-' + this.password);

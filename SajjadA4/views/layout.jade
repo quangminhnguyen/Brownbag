@@ -17,8 +17,6 @@ html
               a#username(href='/users/myprofile') #{currentUser.name}
               |!
               a.signout(href='/logout') Sign out
-            else
-              a(href='#') Sign in
     .container
       if alert
         .alert.alert-danger #{alert}

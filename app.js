@@ -1,3 +1,4 @@
+// Importing modules 
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -6,23 +7,36 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
+var passport = require('passport');
 
+// Register the models */
 var db = require('./model/db');
 var user = require('./model/users');
-var picture = require('./model/pictures');
+var picture = require('./model/avatars');
+var authentication = require('./model/authentications');
+var restaurant = require('./model/restaurants')
+var reviews = require('./model/reviews');
+var messages = require('./model/messages');
 
+/* Running some configurations for the passport. */
+require('./configuration/passport')(passport);
+
+// Define some routes 
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var pictures = require('./routes/pictures');
+var avatars = require('./routes/avatars');
 
 var app = express();
-
 
 app.use(session({
   secret: 'thisismysecret',
   resave: false,
   saveUninitialized: true
 }));
+
+/* Intialize Passport */
+app.use(passport.initialize());
+app.use(passport.session());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -36,14 +50,34 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+//app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/facebook/callback', passport.authenticate('facebook', {
+    failureRedirect: '/',
+    successRedirect: '/users/main'
+}));
+
+
 // Set current user as signed in User
 app.use(function(req, res, next) {
-  mongoose.model('User').findById(req.session.userId, function (err, user) {
+  console.log("1");
+  console.log("req.session.userId: " + req.session.userId);
+  // Find in relation Auth for the userID, req.session.userId is the id of the user 
+  // that is online
+  mongoose.model('Auth').findById(req.session.userId, function (err, user) {
+    if (err) {
+        console.log(err);
+        return;
+    }
     res.locals.currentUser = user;
+    // check if alert message is set. 
     if (req.session.alert) {
       res.locals.alert = req.session.alert;
       req.session.alert = null;
     }
+    
+    // check if successAlert message is set. 
     if (req.session.successAlert) {
       res.locals.successAlert = req.session.successAlert;
       req.session.successAlert = null;
@@ -56,20 +90,21 @@ app.use('/avatars', avatars);
 app.use('/', routes);
 
 // redirects not signed in users to log in page
-app.use(function(req, res, next) {
-  var isCreatingUser = req.url == '/users' && req.method == 'POST';
-  var isNotSignedIn = !req.session.userId;
-  if (isNotSignedIn && !isCreatingUser) {
-    res.redirect("/");
-  }
-  else {
-    next();
-  }
+app.use(function (req, res, next) {
+    console.log("2");
+    var isCreatingUser = req.url == '/users' && req.method == 'POST';
+    var isNotSignedIn = !req.session.userId;
+    if (isNotSignedIn && !isCreatingUser) {
+        res.redirect("/");
+    } else {
+        next();
+    }
 });
- 
+
 
 app.use('/users', users);
-app.use('/messages', messages);
+//app.use('/messages', messages);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -79,7 +114,6 @@ app.use(function(req, res, next) {
 });
 
 // error handlers
-
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
@@ -101,6 +135,5 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;
