@@ -1,18 +1,23 @@
 extends ../../layout
 
-block content
+block list
   h1.
     #{title}
   table.table.user-list.table-striped.table-bordered.table-hover
     thead
       tr
         th.
+          Avatar / Logo
+        th.
           Name
         th.
-          Logo
+          Account Type
     - each user, i in users
       tr
         td
+          a(href='/users/#{user._id}')
+            img.responsive.img-circle.logo-small(src="/avatars/#{user.avatar}") 
+        td
           a(href='/users/#{user._id}')= user.name
         td
-          img.responsive.img-circle.logo-small(src="/avatars/#{user.avatar}") 
+          a(href='/users/#{user._id}')= user.accountType

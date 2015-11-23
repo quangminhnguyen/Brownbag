@@ -56,12 +56,9 @@ router.route('/login')
                                 }
                             /* This user is a restaurant */
                             } else {
-                                mongoose.model('Restaurant')
                                 res.redirect('/users/main');
                             }
                         });
-                        
-                    
                     // login fail
                     } else {
                         // Add message for the user to see on the next page view.

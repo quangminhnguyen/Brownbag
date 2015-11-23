@@ -7,9 +7,7 @@ var fbSchema = new mongoose.Schema({
   auth: {type: mongoose.Schema.Types.ObjectId, required: true,  ref: 'Auth'},
   age: Number,
   preferredCuisine: [String],
-  avatar: {type: mongoose.Schema.Types.ObjectId, ref: 'Avatar'},
-  // 0 - User, 1 - Admin
-  role: {type: Number} 
+  avatar: {type: mongoose.Schema.Types.ObjectId, ref: 'Avatar'}
 });
 
 module.exports = mongoose.model('FBUser', fbSchema);

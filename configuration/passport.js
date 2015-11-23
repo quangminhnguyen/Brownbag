@@ -3,6 +3,7 @@ var fbUser = require('../model/fbuser');
 var fbConfig = require('./fb.js');
 var auth = require('../model/authentications');
 var mongoose = require('mongoose');
+var ACCOUNT_TYPE = ['FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
 
 module.exports = function (passport) {
 
@@ -41,6 +42,7 @@ module.exports = function (passport) {
                 } else {
                     var newAuth = new auth();
                     newAuth.email = profile.emails[0].value;
+                    newAuth.accountType = ACCOUNT_TYPE[0];
 
                     auth.create(newAuth, function (err, user) {
                         if (err) {

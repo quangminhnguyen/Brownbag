@@ -33,9 +33,3 @@ block content
               &nbsp;
               span Delete
           br
-          if canPromote
-            form(action='/users/#{user._id}/makeAdmin',method='post',enctype='application/x-www-form-urlencoded')
-              button.btn.btn-success(type='submit')
-                i.glyphicon.glyphicon-pencil
-                &nbsp;
-                span Make Admin
