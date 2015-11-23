@@ -300,15 +300,19 @@ router.route('/:id')
                 getAccountType(req.id, function (err, accountType) {
                     // If this is a restaurant
                     if (accountType == ACCOUNT_TYPE[3]) {
-                        // TODOOOOOOOO
+                        // TODOOOOOOOO, you have to find the corresponding restaurant object that has auth.equals(req.id)
+                        // in the restaurant relation.
                         res.render('users/restaurant-profile', {
-                            targetUser: req.id
+                            targetUser: null // place the restaurant object here 
                         });
-                        // If this is a regular user, admin or facebook user.
+                    
+                    // If this is a regular user, admin or facebook user.
                     } else {
-                        // TODOOOOOOOOO
+                        // TODOOOOOOOOO, you have to find the corresponding user object with auth.equals(req.id)
+                        // The object can be in either FBUser or User relations, you know which relation to check
+                        // by their accountType.
                         res.render('users/user-profile', {
-                            targetUser: req.id
+                            targetUser: null // place the user object here.
                         });
                     }
                 });
