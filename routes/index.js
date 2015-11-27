@@ -50,18 +50,15 @@ router.route('/login')
                             /* This is user is a regular user */
                             if(allRegUser.length == 1) {
                                 if (allRegUser[0].role == 1) {
-                                    res.redirect('/users/admin/index');
+                                    res.redirect('/users/admin');
                                 } else {
                                     res.redirect('/users/main');
                                 }
                             /* This user is a restaurant */
                             } else {
-                                mongoose.model('Restaurant')
                                 res.redirect('/users/main');
                             }
                         });
-                        
-                    
                     // login fail
                     } else {
                         // Add message for the user to see on the next page view.

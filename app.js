@@ -28,6 +28,8 @@ var avatars = require('./routes/avatars');
 
 var app = express();
 
+var ACCOUNT_TYPE = ['FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
+
 app.use(session({
   secret: 'thisismysecret',
   resave: false,
@@ -51,7 +53,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-//app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 app.get('/auth/facebook', passport.authenticate('facebook'));
 app.get('/auth/facebook/callback', passport.authenticate('facebook', {
     failureRedirect: '/',
@@ -61,8 +62,8 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', {
 
 // Set current user as signed in User
 app.use(function(req, res, next) {
-  console.log("1");
   console.log("req.session.userId: " + req.session.userId);
+    
   // Find in relation Auth for the userID, req.session.userId is the id of the user 
   // that is online
   mongoose.model('Auth').findById(req.session.userId, function (err, user) {
@@ -89,13 +90,30 @@ app.use(function(req, res, next) {
 app.use('/avatars', avatars);
 app.use('/', routes);
 
+
+//// redirect signed in user to their main page, and admin to their admin page.
+//app.use(function (req, res, next) {
+//    var isSignedIn = !!req.session.userId;
+//    if (isSignedIn) {
+//        mongoose.model('Auth').findById(req.session.userId, function(err, user) {
+//            if (user.accountType == 'ADMIN USER') {
+//                res.redirect('users/')
+//            } else {
+//                res.redirect('users/')
+//            }
+//        });
+//    } else {
+//        next();
+//    }
+//});
+
+
 // redirects not signed in users to log in page
 app.use(function (req, res, next) {
-    console.log("2");
     var isCreatingUser = req.url == '/users' && req.method == 'POST';
     var isNotSignedIn = !req.session.userId;
     if (isNotSignedIn && !isCreatingUser) {
-        res.redirect("/");
+        res.redirect('/');
     } else {
         next();
     }

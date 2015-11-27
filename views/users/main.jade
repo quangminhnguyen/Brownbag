@@ -14,9 +14,10 @@ block list
           h4 Cuisines
     - each restaurant, i in restaurants
       tr
-        td 
-          img.responsive.img-circle.logo-small(src="/avatars/#{restaurant.avatar}")
         td
-          a= restaurant.name
+          a(href='/users/#{restaurant.auth}')
+            img.responsive.img-circle.logo-small(src="/avatars/#{restaurant.avatar}")
         td
-          a= restaurant.cuisine
+          a(href='/users/#{restaurant.auth}')= restaurant.name
+        td
+          a(href='/users/#{restaurant.auth}')= restaurant.cuisine

@@ -1,0 +1,23 @@
+extends ../layout
+
+block list
+  h1.
+    #{title}
+  table.table.user-list.table-striped.table-bordered.table-hover.text-center
+    thead
+      tr
+        th
+          h4 Avatar / Logo
+        th
+          h4 Display Name
+        th
+          h4 Account Type
+    - each user, i in users
+      tr
+        td
+          a(href='/users/#{user.auth}')
+            img.responsive.img-circle.logo-small(src="/avatars/#{user.avatar}") 
+        td
+            a(href='/users/#{user.auth}')= user.name
+        td
+            a(href='/users/#{user.auth}')= user.accountType
