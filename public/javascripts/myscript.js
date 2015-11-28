@@ -10,7 +10,7 @@ $("#signupform").submit(function (e) {
         $('#email-helper').text('');
         ready = true && ready;
     } else {
-        $('#email-helper').text('Invalid Email');
+        $('#email-helper').text('Invalid Email Address');
         ready = false;
     }
 
@@ -87,14 +87,14 @@ $('#user-radio').click(function() {
     $('.restaurant-section').hide();
     $('.user-only').show();
     $('.helper').text('');
-    $('signupform').trigger('reset');
+    //$('signupform').trigger('reset');
 });
 
 $('#rest-radio').click(function() {
     $('.restaurant-section').show();
     $('.user-only').hide();
     $('.helper').text('');
-    $('#signupform').trigger('reset');
+    // $('#signupform').trigger('reset');
 });
 
 
