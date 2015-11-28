@@ -1,10 +1,26 @@
-#profile-picture {
-  width: 100%;
+#restaurant-picture {
+    width: 100%;
+    max-height: 300px;
+    border-radius: 5px;
+    border: 2px solid;
+    border-color: grey;
+    margin-top: 10px;
+}
+
+#user-picture {
+    width: 93%;
+    position: relative;
+    margin: 0 auto;
+    min-height: 208px;
+    max-height: 420px;
+    margin-top: 10px !important;
 }
 
 h4 {
     text-align: center;
+    color: dodgerblue
 }
+
 .topnav {
   background-color: #589660;
   padding: 5px;
@@ -12,43 +28,40 @@ h4 {
 }
 
 .topnav a {
-  color: white;
+    color: white;
 }
 
 .content {
-  padding: 0px;
-}
-
-.profile-right {
-  border-left: 1px solid #eee;
+    padding: 0px;
 }
 
 .logo {
-  height: 60px;
+    height: 60px;
 }
 
 .topnav-right {
-  text-align: right;
-  padding: 15px 15px 0 0;
+    text-align: right;
+    padding: 15px 15px 0 0;
 }
 
 .dl-horizontal dt {
-  text-align: left !important;
+    text-align: left !important;
 }
 
 .signout {
-  margin-left: 10px;
+    margin-left: 10px;
 }
 
-.glowing-blue:hover{
+.glowing-blue:hover {
     box-shadow: 0 0 50px deepskyblue, 0 0 150px deepskyblue;
 }
 
-.logo-small{
+.logo-small {
     width: 100px;
     height: 100px;
 }
 
+<<<<<<< HEAD
 #signupbox {
   width: 70%;
   margin: 10px auto;
@@ -60,10 +73,14 @@ h4 {
 }
 
 .logo-small:hover{
+=======
+.logo-small:hover {
+>>>>>>> cd02078ea13eb591a5adfcc56ccbe47091ead964
     width: 120px;
     height: 120px;
 }
 
+<<<<<<< HEAD
 #username {
   color: #26412a;
   font-weight: bold;
@@ -71,4 +88,27 @@ h4 {
 
 .heading {
   margin: 16px 0px;
+=======
+.inlinea {
+    word-wrap: break-word;
+    display: inline-block;
+}
+
+.display-profile, .display-comment, .comment {
+    border: 2px solid;
+    border-color: grey;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.helper {
+    padding: 2px;
+    color: indianred;
+    font-style: italic;
+}
+
+#username {
+    color: #ffd;
+    font-weight: bold;
 }

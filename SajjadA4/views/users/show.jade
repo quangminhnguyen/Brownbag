@@ -6,10 +6,8 @@ block content
       a(href='/users/#{user._id}/edit')
         img.responsive#profile-picture(src="#{imgURL}")
     .col-sm-9.profile-right
-
       h3.
         #{user.name} 
-      
       dl.dl-horizontal
         dt Email
         dd #{user.email}

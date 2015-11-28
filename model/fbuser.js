@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+
 var fbSchema = new mongoose.Schema({
   name: String,
   email: {type: String},
