@@ -2,11 +2,18 @@ extends layout
 
 block content
   .container
-    h1.text-center= title
-    p.text-center Welcome to #{title}, the best restaurant search service in UofT.
+    .heading
+      h2.text-center
+        |Welcome to #{title}, the best restaurant search service in UofT.
 
     .row
-      .col-md-6.col-md-offset-3
+      .col-md-6.col-md
+        .infobox
+          h3
+            |Brownbag lets you search for your favorite foood around campus. 
+            p
+            |Always be on the lookout for new restaurants with our recommendation system! 
+      .col-md-6.col-md
         #loginbox.mainbox
           .panel.panel-info
             .panel-heading

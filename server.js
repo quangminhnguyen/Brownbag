@@ -5,7 +5,7 @@
  */
 
 var app = require('./app');
-var debug = require('debug')('netnome:server');
+var debug = require('debug')('brownbag:server');
 var http = require('http');
 
 /**

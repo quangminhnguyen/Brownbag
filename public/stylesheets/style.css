@@ -49,12 +49,26 @@ h4 {
     height: 100px;
 }
 
+#signupbox {
+  width: 70%;
+  margin: 10px auto;
+}
+
+#loginbox {
+  border-left: solid #aaa;
+  padding-left: 10px;
+}
+
 .logo-small:hover{
     width: 120px;
     height: 120px;
 }
 
 #username {
-  color: #ffd;
+  color: #26412a;
   font-weight: bold;
+}
+
+.heading {
+  margin: 16px 0px;
 }

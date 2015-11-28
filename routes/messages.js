@@ -57,6 +57,8 @@ var router = express.Router();
   }
 
 */
+
+// sends message to recipient
 router.post('/sendMessage', function(req, res) {
   var sender = res.locals.currentUser; 
   var recipientId  = req.body.recipient;
@@ -74,7 +76,6 @@ router.post('/sendMessage', function(req, res) {
     message: message   
     }, createCallback); 
 });
-
 
 router.get('/conversation/:id', function(req, res) {
   var sender = res.locals.currentUser; 
@@ -103,5 +104,4 @@ router.get('/conversation/:id', function(req, res) {
     .sort({ timestamp: -1 }) // -1 decsending order
     .select({ message: 1, timestamp: 1 })
     .exec(messagesCallback);
-
 });
