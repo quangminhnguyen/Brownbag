@@ -1,4 +1,38 @@
 extends ../layout
 
-block content
-  .h4.text-center SHOW USER PROFILE HERE
+block list
+  h3.text-center User Profile
+  .row
+    .col-md-3.text-center
+      img.img-rounded.img-responsive#user-picture(src="/avatars/#{user.avatar}")
+    .col-md-9
+      .display-profile
+        div
+          label.inlinea
+            strong Display Name: 
+          p.inlinea
+            | &nbsp #{user.name}
+        div 
+          label.inlinea
+            strong Age:
+          p.inlinea
+            | &nbsp #{user.age}
+        div
+          label.inlinea
+            strong Email:
+          p.inlinea
+            | &nbsp #{email}
+        div
+          label.inlinea
+            strong Favorite Cuisines:
+          p.inlinea
+            | &nbsp #{user.preferredCuisine}
+        div 
+          label.inlinea
+            strong Account Type:
+          p.inlinea
+            | &nbsp #{accountType}
+        if canEdit
+          a.btn.btn-success(href='/users/#{user.auth}/edit')
+            i.glyphicon.glyphicon-pencil
+            | &nbsp Edit

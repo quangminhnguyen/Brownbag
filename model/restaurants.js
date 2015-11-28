@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var restaurantSchema = new mongoose.Schema({ 
   name: String,
   location: String,
-  cuisine: String,
+  cuisine: [String],
   avatar: {type: mongoose.Schema.Types.ObjectId, ref: 'Avatar'},
   auth: {type: mongoose.Schema.Types.ObjectId, required: true,  ref: 'Auth'},
   rating: {type: Number, min: 0, max: 5}

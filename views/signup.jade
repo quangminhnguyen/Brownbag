@@ -21,27 +21,33 @@ block content
                 .form-group
                   label.col-md-3.control-label(for='email') Email
                   .col-md-9
-                    input.form-control(type='text', name='email', placeholder='Email Address')
+                    input.form-control#input-email(type='text', name='email', placeholder='Email Address')
+                    .helper#email-helper
                 .form-group.user-only
                   label.col-md-3.control-label(for='name') Name
                   .col-md-9
-                    input.form-control(type='text', name='name', placeholder='Name')
+                    input.form-control#input-user-name(type='text', name='name', placeholder='Name')
+                    .helper#name-helper
                 .form-group.restaurant-section(style='display: none')
                   label.col-md-3.control-label(for='restName') Restaurant Name
                   .col-md-9
-                    input.form-control(type='text', name='restName' placeholder='Your restaurant name')
+                    input.form-control#input-res-name(type='text', name='restName' placeholder='Your restaurant name')
+                    .helper#res-name-helper
                 .form-group.user-only
                   label.col-md-3.control-label(for='age') Age
                   .col-md-9
-                    input.form-control(type='text', name='age', placeholder='Age')
+                    input.form-control#input-age(type='text', name='age', placeholder='Age')
+                    .helper#age-helper
                 .form-group
                   label.col-md-3.control-label(for='password') Password
                   .col-md-9
                     input.form-control#password1(type='password', name='password', placeholder='Password')
+                    .helper#pass1-helper
                 .form-group
                   label.col-md-3.control-label(for='confirmPassword') Confirm Password
                   .col-md-9
                     input.form-control#password2(type='password', name='confirmPassword', placeholder='Password')
+                    .helper#pass2-helper
                 .form-group
                   label.col-md-3.control-label.user-only Favorite cuisines
                   label.col-md-3.control-label.restaurant-section(style='display: none') Restaurant cuisines
@@ -73,10 +79,15 @@ block content
                     label.checkbox-inline
                       input(type='checkbox' name='FastFood' value='FastFood')
                       | Fast Food
+                    label.checkbox-inline
+                      input(type='checkbox' name='Others' value='Others')
+                      | Others
+                    .helper#checkbox-helper
                 .form-group.restaurant-section(style='display: none')
                   label.col-md-3.control-label Restaurant Location
                   .col-md-9
-                    input.form-control(type='text', name='location', placeholder='Restaurant Address')
+                    input.form-control#input-location(type='text', name='location', placeholder='Restaurant Address')
+                    .helper#location-helper
                 .form-group
                   label.col-md-3.control-label(for='file') Upload Avatar
                   .col-md-9
