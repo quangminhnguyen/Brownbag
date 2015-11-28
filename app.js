@@ -72,6 +72,12 @@ app.use(function(req, res, next) {
         return;
     }
     res.locals.currentUser = user;
+    
+    // check if current user is an admin
+    if (user && user.accountType == ACCOUNT_TYPE[2])  {
+        res.locals.isCurrentUserAdmin = true;
+    } 
+      
     // check if alert message is set. 
     if (req.session.alert) {
       res.locals.alert = req.session.alert;
