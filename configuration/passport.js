@@ -23,9 +23,9 @@ var fs = require('fs');module.exports = function (passport) {
         clientSecret: fbConfig.appSecret,
         callbackURL: fbConfig.callbackUrl,
         profileFields: fbConfig.profileFields,
-        auth_type: fbConfig.type,
         passReqToCallback: true
     }, function (req, accessToken, refreshToken, profile, done) {
+        console.log(profile);
         process.nextTick(function () {
             auth.findOne({
                 'email': profile.emails[0].value
@@ -43,7 +43,6 @@ var fs = require('fs');module.exports = function (passport) {
                     var newAuth = new auth();
                     newAuth.email = profile.emails[0].value;
                     newAuth.accountType = ACCOUNT_TYPE[0];
-
                     auth.create(newAuth, function (err, user) {
                         if (err) {
                             res.send("There was a problem adding this user into the Auth relation");

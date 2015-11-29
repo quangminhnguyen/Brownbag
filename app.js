@@ -53,7 +53,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.get('/auth/facebook', passport.authenticate('facebook'), {scope : ['email']});
+app.get('/auth/facebook', passport.authenticate('facebook', {scope:['email']}));
 app.get('/auth/facebook/callback', passport.authenticate('facebook', {
     failureRedirect: '/',
     successRedirect: '/users/main'

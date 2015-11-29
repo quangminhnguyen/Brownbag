@@ -15,7 +15,7 @@ html
               img.logo(src="/images/cool-logo.png")
           .col-sm-8.topnav-right
             if currentUser
-              |Welcome 
+              |Welcome     
               a#username(href='/users/myprofile') #{currentUser.email}
               | ! &nbsp | &nbsp
               if isCurrentUserAdmin
