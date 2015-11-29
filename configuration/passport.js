@@ -23,6 +23,7 @@ var fs = require('fs');module.exports = function (passport) {
         clientSecret: fbConfig.appSecret,
         callbackURL: fbConfig.callbackUrl,
         profileFields: fbConfig.profileFields,
+        authType: fbConfig.authType,
         passReqToCallback: true
     }, function (req, accessToken, refreshToken, profile, done) {
         console.log(profile);
