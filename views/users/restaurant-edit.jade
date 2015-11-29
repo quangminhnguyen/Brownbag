@@ -1,4 +1,99 @@
 extends ../layout
 
 block list
-  h3.text-center Restaurant Edit Page for #{restaurant.name}
+  h2.text-center Edit Restaurant Profile
+  .row
+    .col-md-3
+      .display-block
+        h4.text-center Update Restaurant Logo
+        form(action='', method='post', name='upload-rest-logo', enctype='application/x-www-form-urlencoded', role='form')
+          .form-group
+            img.img-rounded.img-responsive(alt='Restaurant Logo' src='/avatars/#{restaurant.avatar}')
+            input(type='file' accept='image/*')
+          .form-group
+            button.btn.btn-xs.btn-info.active#rest-new-logo-button(type='submit')
+              i.glyphicon.glyphicon-upload
+              | &nbsp; Upload
+    .col-md-9
+      .display-block
+        h4.text-center Update Restaurant Information
+        form.form-horizontal(action='/users/#{restaurant.auth}/edit', method='put', name='update-restaurant', enctype='application/x-www-form-urlencoded', role = 'form')
+          .form-group
+            label.col-md-3.control-label Email
+            .col-md-9
+              input.form-control(disabled='disabled', type='email', value='#{displayEmail}', name='email')
+          .form-group
+            label.col-md-3.control-label Restaurant Name
+            .col-md-9
+              input.form-control(type='text', name='name', value='#{restaurant.name}', placeholder='Name of the restaurant')
+              .helper#rest-name-edit-helper
+          .form-group
+            label.col-md-3.control-label Restaurant Location
+            .col-md-9
+              input.form-control(type='text', name='location', value='#{restaurant.location}', placeholder='Location of the restaurant.')
+              .helper#rest-loc-edit-helper
+          .form-group
+            label.col-md-3.control-label Restaurant Cuisines
+            .col-md-9
+              label.checkbox-inline
+                input(type='checkbox' name='Japanese' value='Japan') 
+                | Japanese Food
+              label.checkbox-inline
+                input(type='checkbox' name='Thai' value='Thai')
+                | Thai Food
+              label.checkbox-inline
+                input(type='checkbox' name='Chinese' value='China')
+                | Chinese Food
+              label.checkbox-inline
+                input(type='checkbox' name='Korean' value='Korea')
+                | Korean Food
+              label.checkbox-inline
+                input(type='checkbox' name='Italian' value='Italy')
+                | Italian Food
+              label.checkbox-inline
+                input(type='checkbox' name='French' value='France')
+                | French Food
+              label.checkbox-inline
+                input(type='checkbox' name='VietNamese' value='VietNam')
+                | VietNamese Food
+              label.checkbox-inline
+                input(type='checkbox' name='Indian' value='India')
+                | Indian Food
+              label.checkbox-inline
+                input(type='checkbox' name='FastFood' value='FastFood')
+                | Fast Food
+              label.checkbox-inline
+                input(type='checkbox' name='Others' value='Others')
+                | Others
+              .helper#rest-checkbox-edit-helper
+          .form-group
+            .col-md-offset-3.col-md-9
+              button.btn.btn-info.active(type='submit')
+                i.glyphicon.glyphicon-wrench
+                | &nbsp; Update Profile
+  .row
+    .col-md-offset-3.col-md-9
+      .display-block
+        h4.text-center Update Password
+        form.form-horizontal(action='/users/#{restaurant.auth}/updatePassword', method='post', name='update_restaurant_password', enctype='application/x-www-form-urlencoded')
+          .form-group
+            label.col-md-3.control-label Current password
+            .col-md-9
+              input.form-control(type='password', name='old-password')
+              .helper#rest-old-pass-helper
+          .form-group
+            label.col-md-3.control-label New Password 
+            .col-md-9
+              input.form-control(type='password', name='new-password')
+              .helper#rest-new-pass-helper
+          .form-group
+            label.col-md-3.control-label Confirm New Password
+            .col-md-9
+              input.form-control(type='password' name='confirm-new-password')
+              .helper#rest-confirm-pass-helper
+          .form-group
+            .col-md-offset-3.col-md-10
+              button.btn.btn-info.active(type='submit')
+                i.glyphicon.glyphicon-wrench
+                | &nbsp; Update password
+            

@@ -534,14 +534,15 @@ router.route('/:id/edit')
                                 if (fbUser == null && normalUser != null) {
                                     displayUser = normalUser;
                                 } else if (fbUser != null && normalUser == null) {
-                                    displayUser = fbuser;
+                                    displayUser = fbUser;
                                 } else {
                                     console.log(err);
                                     return;
                                 }
 
                                 res.render('users/user-edit', {
-                                    user: displayUser
+                                    user: displayUser,
+                                    displayEmail: user.email
                                 });
                             });
                         });
