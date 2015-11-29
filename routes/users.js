@@ -223,7 +223,7 @@ router.route('/')
                             });
                         });
                     });
-                    /* Indicate that email has been used */
+                /* Indicate that email has been used */
                 } else {
                     // console.log("Warning this email has been used");
                     req.session.alert = "The email you typed in has been used";

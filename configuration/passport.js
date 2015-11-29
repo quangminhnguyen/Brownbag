@@ -28,64 +28,70 @@ var fs = require('fs');module.exports = function (passport) {
     }, function (req, accessToken, refreshToken, profile, done) {
         console.log(profile);
         process.nextTick(function () {
-            auth.findOne({
-                'email': profile.emails[0].value
-            }, function (err, user) {
-                if (err)
-                    return done(err);
-                if (user) {
-                    req.session.userId = user._id;
-                    req.session.save(function (err) {
-                        if (err) console.log(err)
-                    });
-                    req.session.alert = null;
-                    return done(null, user);
-                } else {
-                    var newAuth = new auth();
-                    newAuth.email = profile.emails[0].value;
-                    newAuth.accountType = ACCOUNT_TYPE[0];
-                    auth.create(newAuth, function (err, user) {
-                        if (err) {
-                            res.send("There was a problem adding this user into the Auth relation");
-                        } else {
-                            console.log(__dirname);
-                            var fileToRead = path.join(__dirname, '../') + '/public/images/avatar.jpg';
-                            fs.readFile(fileToRead, function (err, data) {
-                                if (err) throw err;
-                                var img = {
-                                    data: data,
-                                    contentType: 'image/jpg'
-                                }
-                                mongoose.model('Avatar').create({
-                                    img: img
-                                }, function (err, picture) {
-                                    if (err) {
-                                        res.send("There was a problem adding this user avatar to the Avatar relation.")
+            if (profile.emails) {
+                auth.findOne({
+                    'email': profile.emails[0].value
+                }, function (err, user) {
+                    if (err)
+                        return done(err);
+                    if (user) {
+                        req.session.userId = user._id;
+                        req.session.save(function (err) {
+                            if (err) console.log(err)
+                        });
+                        req.session.alert = null;
+                        return done(null, user);
+                    } else {
+                        var newAuth = new auth();
+                        newAuth.email = profile.emails[0].value;
+                        newAuth.accountType = ACCOUNT_TYPE[0];
+                        auth.create(newAuth, function (err, user) {
+                            if (err) {
+                                res.send("There was a problem adding this user into the Auth relation");
+                            } else {
+                                console.log(__dirname);
+                                var fileToRead = path.join(__dirname, '../') + '/public/images/avatar.jpg';
+                                fs.readFile(fileToRead, function (err, data) {
+                                    if (err) throw err;
+                                    var img = {
+                                        data: data,
+                                        contentType: 'image/jpg'
                                     }
-                                    var newFBUser = new fbUser();
-                                    newFBUser.fbID = profile.id;
-                                    newFBUser.token = accessToken;
-                                    newFBUser.name = profile.displayName;
-                                    newFBUser.avatar = picture._id;
-                                    newFBUser.auth = user._id;
-                                    fbUser.create(newFBUser, function (err, fbuser) {
+                                    mongoose.model('Avatar').create({
+                                        img: img
+                                    }, function (err, picture) {
                                         if (err) {
-                                            res.send("There was a problem adding this user into the fbUser relation")
+                                            res.send("There was a problem adding this user avatar to the Avatar relation.")
                                         }
-                                        console.log("user_.id", user._id);
-                                        req.session.userId = user._id;
-                                        req.session.save(function (err) {
-                                            if (err) console.log(err)
+                                        var newFBUser = new fbUser();
+                                        newFBUser.fbID = profile.id;
+                                        newFBUser.token = accessToken;
+                                        newFBUser.name = profile.displayName;
+                                        newFBUser.avatar = picture._id;
+                                        newFBUser.auth = user._id;
+                                        fbUser.create(newFBUser, function (err, fbuser) {
+                                            if (err) {
+                                                res.send("There was a problem adding this user into the fbUser relation")
+                                            }
+                                            console.log("user_.id", user._id);
+                                            req.session.userId = user._id;
+                                            req.session.save(function (err) {
+                                                if (err) console.log(err)
+                                            });
+                                            req.session.alert = null;
+                                            return done(null, user);
                                         });
-                                        req.session.alert = null;
-                                        return done(null, user);
                                     });
                                 });
-                            });
-                        }
-                    });
-                }
-            });
+                            }
+                        });
+                    }
+                });
+            } else {
+                req.session.alert = "There is no valid email associated with this Facebook account please sign up as a regular user.";
+                req.session.save(function (err) {});
+                return done();
+            }
         });
     }));
 };
