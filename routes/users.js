@@ -4,12 +4,12 @@ var mongoose = require('mongoose'); //mongo connection
 var bodyParser = require('body-parser'); //parses information from POST
 var methodOverride = require('method-override'); //used to manipulate POST
 var formidable = require('formidable');
-var qt = require('quickthumb');
+//var qt = require('quickthumb');
 var fs = require('fs');
 var path = require('path');
 var Schema = mongoose.Schema;
 var session = require('express-session');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 // CONSTANT
 var ROLE_USER = 0;
@@ -18,10 +18,10 @@ var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'Vi
 var ACCOUNT_TYPE = ['FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
 var MAIL_VALID_REX = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;
 
-express().use(qt.static(__dirname + '/'));
-router.use(bodyParser.urlencoded({
-    extended: true
-}));
+//express().use(qt.static(__dirname + '/'));
+//router.use(bodyParser.urlencoded({
+//    extended: true
+//}));
 
 router.use(methodOverride(function (req, res) {
     if (req.body && typeof req.body === 'object' && '_method' in req.body) {
@@ -281,7 +281,7 @@ router.get('/main', function (req, res) {
     //Case 3
     else if (req.query.cuisine && req.query.rating) {
         console.log('Searching for:'+ req.query.cuisine + ' and:' + parseFloat(req.query.rating));
-        mongoose.model('Restaurant').find({'cuisine' : req.query.cuisine, 'rating' : { $gt: parseFloat(req.query.rating) }}, function (err, restaurants) {
+        mongoose.model('Restaurant').find({'cuisine' : req.query.cuisine, 'rating' : { $gte: parseFloat(req.query.rating) }}, function (err, restaurants) {
             if (err) {
                 console.log(err);
                 return;
@@ -297,7 +297,7 @@ router.get('/main', function (req, res) {
     //Case 4
     else if (!req.query.cuisine && req.query.rating) {
         console.log('Searching for:' + parseFloat(req.query.rating));
-        mongoose.model('Restaurant').find({'rating' : { $gt: parseFloat(req.query.rating) }}, function (err, restaurants) {
+        mongoose.model('Restaurant').find({'rating' : { $gte: parseFloat(req.query.rating) }}, function (err, restaurants) {
             if (err) {
                 console.log(err);
                 return;
