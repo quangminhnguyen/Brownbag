@@ -478,15 +478,88 @@ router.route('/:id')
                             }
                         
                             getAccountType(req.session.userId, function (err, requestAccountType) {
-                            
-                            /* TODO: Search through the reviews table to get all reviews object of this restaurant
-                            and send list of these objects to the front end. */
-                                res.render('users/restaurant-profile', {
-                                    restaurant: restaurant,
-                                    email: user.email,
-                                    canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                    comments: [] // insert the review object here
+
+                                var obj = [];
+                                mongoose.model('Review').find({
+                                    restaurantId: restaurant.auth
+                                }, function (err, reviews) {
+
+
+                                    if (reviews.length==0){
+                                        res.render('users/restaurant-profile', {
+                                            restaurant: restaurant,
+                                            email: user.email,
+                                            canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                            comments: []
+
+                                        });
+                                    }
+                                    else {
+                                        var counter = 0;
+
+                                        for(var i = 0; i<reviews.length; i++){
+                                            if(reviews[i].comment) {
+                                                counter++;
+                                            }
+                                        }
+
+                                        for(var i = 0; i<reviews.length; i++){
+                                            if(reviews[i].comment) {
+                                                item = {};
+                                                item["comment"] = reviews[i].comment;
+                                                item["rating"] = reviews[i].rating;
+
+                                                finduser(reviews[i].userId,item, counter)
+
+                                            }
+                                        }
+                                    }
+
                                 });
+
+                                function finduser(userId, itemn, count) {
+
+                                    mongoose.model('User').findOne({
+                                        auth: userId
+                                    }, function (err, user) {
+                                        if (user) {
+                                            itemn["name"] = user.name;
+                                            obj.push(itemn);
+
+
+                                            if(count==obj.length){
+                                                res.render('users/restaurant-profile', {
+                                                    restaurant: restaurant,
+                                                    email: user.email,
+                                                    canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                    comments: obj
+
+                                                });
+                                            }
+                                        }
+                                        else{
+                                            mongoose.model('FBUser').findOne({
+                                                auth: userId
+                                            }, function (err, user) {
+                                                if (user) {
+                                                    itemn["name"] = user.name;
+                                                    obj.push(itemn);
+
+                                                    if(count==obj.length){
+                                                        res.render('users/restaurant-profile', {
+                                                            restaurant: restaurant,
+                                                            email: user.email,
+                                                            canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                            comments: obj
+
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+
+                                }
                             });
                         });
                     
@@ -642,16 +715,61 @@ router.route('/:id/edit')
 
 
 
-// post a new review for restaurant with req.id to the realation reviews
-// Inside req there are following attributes:
-// req.body.rating: the rating
-// req.body.comment: the comment string
-// After finish createing a new comment in reviews, update the average rating in Restaurant
-// Finally, redirect res to /users/:id --> You won't be able to see the comment yet, i did 
-// not implement that part yet --> You can implement it inline 394 but you have to change the
-// for loop in restaurant-profile.jade
 router.post('/:id/comment', function(req, res){
-    
+
+    if(!req.body.rating){
+        req.body.rating = 0;
+    }
+
+    mongoose.model('Review').create({
+        userId: req.session.userId,
+        restaurantId: req.id,
+        rating: req.body.rating,
+        comment: req.body.comment
+    }, function (err, doc) {
+        if (err) {
+            res.send("There was a problem adding the review to the Review relation.");
+        }
+        // comment and rating has been added
+    });
+
+    mongoose.model('Restaurant').find({
+    }, function (err, restaurants) {
+        if(restaurants) {
+
+            for(var i = 0; i < restaurants.length; i++){
+                findreview(restaurants[i].auth);}
+        }
+    });
+
+
+    function findreview (restId){
+
+        mongoose.model('Review').find({
+            restaurantId: restId
+        }, function (err, reviews) {
+            if (reviews) {
+
+                var avgrating = 0;
+                for (var j = 0; j < reviews.length; j++) {
+                    avgrating += parseInt(reviews[j].rating);
+                }
+                if(reviews.length)
+                    avgrating /= reviews.length;
+                avgrating = Math.round(avgrating*100)/100;
+                update(restId, avgrating);
+
+            }
+        });
+    }
+
+    function update(restId, rating){
+
+        mongoose.model('Restaurant').findOneAndUpdate({auth: restId}, {rating: rating}, function (err, dum) {});
+    }
+
+    res.redirect('back');
+
 });
 
  
