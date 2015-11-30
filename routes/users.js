@@ -132,8 +132,8 @@ router.route('/')
                                 errorMess += 'The location should not be empty. <br>';
                             }
 
-                            if (location.length > 30) {
-                                errorMess += 'The location should not be longer than 30 chars. <br>';
+                            if (location.length < 5 && location.length > 30) {
+                                errorMess += 'The restaurant address should be between 5 and 30 characters <br>';
                             }
                             accountType = ACCOUNT_TYPE[3];
                         }
@@ -716,8 +716,8 @@ router.route('/:id/edit')
                         return;
                     }
                     if(user == null) {
-                        console.log("NULL USER ERR!");
-                        res.send("NULL USER ERR");
+                        console.log("There is no such a user with id " + req.id + " in the database.");
+                        res.send("fail");
                     }
                     // If the user is an admin or regular user, then update the User table.
                     if (user.accountType == ACCOUNT_TYPE[1] || user.accountType == ACCOUNT_TYPE[2]) {
@@ -767,10 +767,26 @@ router.route('/:id/edit')
                     // If the user is a restaurant user
                     } else if (user.accountType == ACCOUNT_TYPE[3]) {
                         var newLocation = req.body.location;
-                        var newName = req.body.age;
-                        var newCuisine = req.body.newFavCuisine;
-                        console.log('update new Cuisine: ' + newCuisine);
-                        res.send("");
+                        var newName = req.body.name;
+                        var newCuisine = req.body['cuisine[]'];
+                        console.log('update new Cuisine: ' + req.body);
+                        mongoose.model('Restaurant').findOneAndUpdate({
+                            auth: user._id
+                        }, {
+                            name: newName,
+                            location: newLocation,
+                            cuisine: newCuisine
+                        }, function(err, oldRestaurant){
+                            if (err) {
+                                console.log(err);
+                                res.send("fail");
+                            }
+                            if (oldRestaurant) {
+                                res.send("success");
+                            } else {
+                                res.send("fail");
+                            }
+                        });
                     }
                 });
             // Hacker 

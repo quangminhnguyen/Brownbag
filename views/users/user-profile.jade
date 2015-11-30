@@ -33,6 +33,9 @@ block list
           p.inlinea
             | &nbsp #{accountType}
         if canEdit
-          a.btn.btn-success(href='/users/#{user.auth}/edit')
+          a.btn.btn-success(href='/users/#{user.auth}/edit' style='margin-right: 10px')
             i.glyphicon.glyphicon-pencil
             | &nbsp Edit
+          a.btn.btn-danger
+            i.glyphicon.glyphicon-trash
+            | &nbsp Remove
