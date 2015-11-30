@@ -9,7 +9,7 @@ var session = require('express-session');
 var mongoose = require('mongoose');
 var passport = require('passport');
 
-// Register the models */
+// Register the models 
 var db = require('./model/db');
 var user = require('./model/users');
 var picture = require('./model/avatars');

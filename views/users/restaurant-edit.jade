@@ -6,10 +6,10 @@ block list
     .col-md-3
       .display-block
         h4.text-center Update Restaurant Logo
-        form(action='', method='post', name='upload-rest-logo', enctype='application/x-www-form-urlencoded', role='form')
+        form(action='/users/#{restaurant.auth}/avatar', method='post', name='upload-rest-logo', enctype='multipart/form-data', role='form')
           .form-group
             img.img-rounded.img-responsive(alt='Restaurant Logo' src='/avatars/#{restaurant.avatar}')
-            input(type='file' accept='image/*')
+            input(type='file' accept='image/*' name='profilePicture')
           .form-group
             button.btn.btn-xs.btn-info.active#rest-new-logo-button(type='submit')
               i.glyphicon.glyphicon-upload

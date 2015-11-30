@@ -1,4 +1,5 @@
 var MAIL_VALID_REX = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;
+var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'VietNamese', 'Indian', 'FastFood', 'Others'];
 
 $("#signupform").submit(function (e) {
     e.preventDefault();
@@ -82,6 +83,32 @@ $("#signupform").submit(function (e) {
         form.submit();
     }
 });
+
+
+
+$('#user-update-prof-btn').click(function(){
+    var newAge = $('#user-age-update').val();
+    var newName = $('#user-name-update').val();
+    var newCuisine = [];
+    for (var i = 0; i < CUISINE.length; i ++){
+        if($('#c'+i).is(":checked")){
+            newCuisine.push(CUISINE[i]);
+        }
+    }
+    // alert($('#user-update-form').attr('action'))
+    $.ajax({
+        url: $('#user-update-form').attr('action'),
+        method: 'put',
+        data: {
+            age : newAge,
+            name : newName
+        },
+        success: function (data){
+            alert('In progress');
+        }
+    });
+});
+
 
 $('#user-radio').click(function() {
     $('.restaurant-section').hide();

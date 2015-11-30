@@ -6,10 +6,10 @@ block list
     .col-md-3
       .display-block
         h4.text-center Update Avatar
-        form(action='', method='post', name='upload-img', enctype='application/x-www-form-urlencoded', role='form')
+        form(action='/users/#{user.auth}/avatar', method='post', name='upload-img', enctype='multipart/form-data', role='form')
           .form-group
             img.img-rounded.img-responsive(alt='User Profile Image' src='/avatars/#{user.avatar}')
-            input(type='file' accept='image/*' name='userProfile')
+            input(type='file' accept='image/*' name='profilePicture')
           .form-group
             button.btn.btn-xs.btn-info.active#user-new-img-button(type='submit') 
               i.glyphicon.glyphicon-upload
@@ -17,7 +17,7 @@ block list
     .col-md-9
       .display-block
         h4.text-center Update Personal Information
-        form.form-horizontal(action='/users/#{user._id}/edit', method='put', name='update-user', enctype='application/x-www-form-urlencoded', role='form')
+        form.form-horizontal#user-update-form(action='/users/#{user._id}/edit', method='put', name='update-user', enctype='application/x-www-form-urlencoded', role='form')
           .form-group
             label.col-md-3.control-label Email
             .col-md-9
@@ -25,50 +25,50 @@ block list
           .form-group
             label.col-md-3.control-label Name
             .col-md-9
-              input.form-control(type='text', name='name' placeholder='Your Name', value='#{user.name}')
+              input.form-control#user-name-update(type='text', name='name' placeholder='Your Name', value='#{user.name}')
               .helper#user-name-edit-helper
           .form-group
             label.col-md-3.control-label Age
             .col-md-9
-              input.form-control(type='text', name='age' placeholder='Age', value='#{user.age}')
+              input.form-control#user-age-update(type='text', name='age' placeholder='Age', value='#{user.age}')
               .helper#user-age-edit-helper
           .form-group
             label.col-md-3.control-label Favorite Cuisines
             .col-md-9
               label.checkbox-inline
-                input(type='checkbox' name='Japanese' value='Japan') 
+                input#c0(type='checkbox' name='Japanese' value='Japan') 
                 | Japanese Food
               label.checkbox-inline
-                input(type='checkbox' name='Thai' value='Thai')
+                input#c1(type='checkbox' name='Thai' value='Thai')
                 | Thai Food
               label.checkbox-inline
-                input(type='checkbox' name='Chinese' value='China')
+                input#c2(type='checkbox' name='Chinese' value='China')
                 | Chinese Food
               label.checkbox-inline
-                input(type='checkbox' name='Korean' value='Korea')
+                input#c3(type='checkbox' name='Korean' value='Korea')
                 | Korean Food
               label.checkbox-inline
-                input(type='checkbox' name='Italian' value='Italy')
+                input#c4(type='checkbox' name='Italian' value='Italy')
                 | Italian Food
               label.checkbox-inline
-                input(type='checkbox' name='French' value='France')
+                input#c5(type='checkbox' name='French' value='France')
                 | French Food
               label.checkbox-inline
-                input(type='checkbox' name='VietNamese' value='VietNam')
+                input#c6(type='checkbox' name='VietNamese' value='VietNam')
                 | VietNamese Food
               label.checkbox-inline
-                input(type='checkbox' name='Indian' value='India')
+                input#c7(type='checkbox' name='Indian' value='India')
                 | Indian Food
               label.checkbox-inline
-                input(type='checkbox' name='FastFood' value='FastFood')
+                input#c8(type='checkbox' name='FastFood' value='FastFood')
                 | Fast Food
               label.checkbox-inline
-                input(type='checkbox' name='Others' value='Others')
+                input#c0(type='checkbox' name='Others' value='Others')
                 | Others
               .helper#user-checkbox-edit-helper
           .form-group
             .col-md-offset-3.col-md-9
-              button.btn.btn-info.active(type='submit')
+              .btn.btn-info.active#user-update-prof-btn
                 i.glyphicon.glyphicon-wrench
                 | &nbsp; Update Profile
   .row

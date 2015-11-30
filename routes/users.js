@@ -466,15 +466,11 @@ router.route('/:id')
 
                     // If this is a restaurant
                     if (accountType == ACCOUNT_TYPE[3]) {
-
+                        
                         // Find that restaurant in restaurant table.
                         mongoose.model('Restaurant').findOne({
                             auth: user._id
                         }, function (err, restaurant) {
-                            if (err) {
-                                console.log(err);
-                                return;
-                            }
                         
                             getAccountType(req.session.userId, function (err, requestAccountType) {
 
@@ -482,61 +478,56 @@ router.route('/:id')
                                 mongoose.model('Review').find({
                                     restaurantId: restaurant.auth
                                 }, function (err, reviews) {
-
-
-                                    if (reviews.length==0){
+                                    
+                                    console.log(reviews);
+                                    if (reviews.length == 0){
                                         res.render('users/restaurant-profile', {
                                             restaurant: restaurant,
                                             email: user.email,
                                             canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                             comments: []
-
                                         });
                                     }
                                     else {
                                         var counter = 0;
-
                                         for(var i = 0; i<reviews.length; i++){
                                             if(reviews[i].comment) {
                                                 counter++;
                                             }
                                         }
-
                                         for(var i = 0; i<reviews.length; i++){
                                             if(reviews[i].comment) {
                                                 item = {};
                                                 item["comment"] = reviews[i].comment;
                                                 item["rating"] = reviews[i].rating;
-
-                                                finduser(reviews[i].userId,item, counter)
-
+                                                finduser(reviews[i].userId,item, counter);
                                             }
                                         }
                                     }
-
                                 });
 
                                 function finduser(userId, itemn, count) {
-
                                     mongoose.model('User').findOne({
                                         auth: userId
                                     }, function (err, user) {
+                                        if (err) {
+                                            console.log(err);
+                                            return;
+                                        }
                                         if (user) {
                                             itemn["name"] = user.name;
                                             obj.push(itemn);
-
-
+                                            
                                             if(count==obj.length){
                                                 res.render('users/restaurant-profile', {
                                                     restaurant: restaurant,
                                                     email: user.email,
                                                     canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                     comments: obj
-
                                                 });
                                             }
                                         }
-                                        else{
+                                        else {
                                             mongoose.model('FBUser').findOne({
                                                 auth: userId
                                             }, function (err, user) {
@@ -557,7 +548,6 @@ router.route('/:id')
                                             });
                                         }
                                     });
-
                                 }
                             });
                         });
@@ -644,14 +634,14 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
 
 
 router.route('/:id/edit')
-    // get the edit page
+    // get the edit user or restaurant profile page
     .get(function (req, res) {
+        // 
         mongoose.model('Auth').findById(req.id, function (err, user) {
             if (err) {
                 console.log('GET Error: There was a problem retriveving: ' + err);
                 return;
             }
-
             // get account type of the request user
             getAccountType(req.session.userId, function (err, requestAccountType) {
 
@@ -667,7 +657,8 @@ router.route('/:id/edit')
                                 return;
                             }
                             res.render('users/restaurant-edit', {
-                                restaurant: restaurant
+                                restaurant: restaurant, 
+                                displayEmail: user.email
                             });
                         });
 
@@ -710,6 +701,36 @@ router.route('/:id/edit')
                 }
             });
         });
+    })
+
+    // update the user profile
+    .put(function (req, res) {
+        console.log('hoho');
+        res.send('here');
+//        getAccountType(req.session.userId, function (err, requestAccountType) {
+//            // admin or the user itself can edit.
+//            if (canEdit(req.session.userId, requestAccountType, req.id)) {
+//                var newName = req.body.name;
+//                var newAge = req.body.age;
+//                var newFavCuisine = ;
+//                mongoose.model('Auth').findById(req.id, function(err, user) {
+//                    if (err) {
+//                        console.log(err);
+//                        return;
+//                    }
+//                    mongoose.findOneAndUpdate({auth:user._id}, {name: newName, age: newAge}, function(err, oldUser) {
+//                        if (err) {
+//                            console.log(err);
+//                            res.send('fail');
+//                        }
+//                        res.send('success');
+//                    });
+//                });
+//            // Hacker 
+//            } else {
+//                res.send("You do not have permission to update this user account")
+//            }
+//        });
     });
 
 
@@ -763,7 +784,6 @@ router.post('/:id/comment', function(req, res){
     }
 
     function update(restId, rating){
-
         mongoose.model('Restaurant').findOneAndUpdate({auth: restId}, {rating: rating}, function (err, dum) {});
     }
 
@@ -772,43 +792,129 @@ router.post('/:id/comment', function(req, res){
 });
 
 
-
-router.put('/:id/avatar', function (req, res) {
+// /users/:id/avatar User update new avatar 
+router.post('/:id/avatar', function (req, res, next) {
+    console.log('avatar1');
     var form = new formidable.IncomingForm();
+    // Get the files in the form
     form.parse(req, function (err, fields, files) {
+        if (err) {
+            console.log(err);
+            return;
+        }
         var pic = files.profilePicture;
+        console.log('avatar2', pic, fields);
+
+        // Check if the file size is > 0
         if (pic.size > 0) {
-            mongoose.model('Auth').findById(req.id, function (err, user) {
-                if (err) {
-                    console.log('PUT Error, there was problem retrieving: ' + err);
-                    return;
-                }
-                getAccountType(req.session.userId, function (err, requestAccountType) {
-                    if (canEdit(req.session.userId, requestAccountType, req.id)) {
-                        // Restaurant user
-                        if (user.accountType == ACCOUNT_TYPE[3]) {
+            console.log('avatar3');
 
-                            mongoose.findByIdAndUpdate('Restaurant').findOne(user._id, {
-                                avatar: pic }, function (err, restaurant) {
-                                if (err) {
-                                    console.log(err);
-                                    return;
-                                }
+            // Read the file
+            fs.readFile(pic.path, function (err, data) {
+                console.log('avatar4');
+                if (err) throw err;
 
-                                // Find and remove the document
-                                mongoose.model('Avatar').findByIdAndRemove(restaurant.avatar, function(err, doc, result){
-                                    if (err) {
-                                        console.log(err);
-                                        return;
-                                    }
-                                });
-                            });
-                        // Facebook or normal user
-                        } else {
-                        }
+                // Create image object
+                var img = {
+                    data: data,
+                    contentType: pic.type
+                };
+
+                // Find the target user in Auth
+                mongoose.model('Auth').findById(req.id, function (err, user) {
+                    console.log('avatar5');
+                    if (err) {
+                        console.log('PUT Error, there was problem retrieving: ' + err);
+                        return;
                     }
+
+                    // check if the requester has permission to update the target user.
+                    getAccountType(req.session.userId, function (err, requestAccountType) {
+                        console.log('avatar6');
+
+                        // If the requester has permission
+                        if (canEdit(req.session.userId, requestAccountType, req.id)) {
+
+                            mongoose.model('Avatar').create({
+                                img: img
+                            }, function (err, picture) {
+                                console.log('avatar7');
+                                // Restaurant user
+                                if (user.accountType == ACCOUNT_TYPE[3]) {
+
+                                    // If is a restaurant, then find and update the avatar for that user in Restaurant relation.
+                                    mongoose.model('Restaurant').findOneAndUpdate({
+                                        auth: user._id
+                                    }, {
+                                        avatar: picture._id
+                                    }, function (err, restaurant) {
+                                        if (err) {
+                                            console.log(err);
+                                            return;
+                                        }
+                                        console.log('avatar8');
+                                        console.log(restaurant.avatar);
+                                        console.log(picture._id);
+
+                                        // Find and remove the document
+                                        mongoose.model('Avatar').findByIdAndRemove(restaurant.avatar, function (err, doc, result) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+                                            }
+                                            console.log('avatar 9');
+                                            console.log(doc.avatar);
+                                            res.redirect('back');
+                                        });
+                                    });
+                                    // Facebook or normal user
+                                } else {
+                                    //res.send("I know you are facebook or normal user");
+                                    mongoose.model('User').findOneAndUpdate({
+                                        auth: user._id
+                                    }, {
+                                        avatar: picture._id
+                                    }, function (err, oldRegUser) {
+                                        if (err) {
+                                            console.log(err);
+                                            return;
+                                        }
+                                        mongoose.model('FBUser').findOneAndUpdate({
+                                            auth: user._id
+                                        }, {
+                                            avatar: picture._id
+                                        }, function (err, oldFbUser) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+                                            }
+                                            var target;
+                                            if (oldRegUser == null && oldFbUser != null) {
+                                                target = oldFbUser;
+                                            } else if (oldRegUser != null && oldFbUser == null) {
+                                                target = oldRegUser;
+                                            } else {
+                                                console.log("NO TARGET FOUND!");
+                                                return;
+                                            }
+                                            console.log(target);
+                                            mongoose.model('Avatar').findByIdAndRemove(target.avatar, function (err, doc, result) {
+                                                if (err) {
+                                                    console.log(err);
+                                                    return;
+                                                }
+                                                res.redirect('back');
+                                            });
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    });
                 });
             });
+        } else {
+            res.redirect('back');
         }
     });
 });

@@ -59,7 +59,7 @@ block list
         br
         input#btn-signup.btn.btn-info(type='submit', value='Submit your review')
       each comment, i in comments
-        .comment
+        .display-block
           p= comment.name + ' rated ' + comment.rating + ' stars'
           p= comment.comment
 
