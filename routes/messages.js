@@ -68,6 +68,7 @@ router.post('/sendMessage', function(req, res) {
     if (err) {
       res.send("There was a problem adding the MESSAGE to the database.");
     }
+    res.redirect('back')
   };
 
   mongoose.model('Message').create({
