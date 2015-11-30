@@ -757,7 +757,7 @@ router.post('/:id/comment', function(req, res){
     }, function (err, restaurants) {
         if(restaurants) {
 
-            for(var i = 0; i < restaurants.length; i++){
+            for(var i = 0; i < restaurants.length; i++) {
                 findreview(restaurants[i].auth);}
         }
     });
@@ -790,6 +790,7 @@ router.post('/:id/comment', function(req, res){
     res.redirect('back');
 
 });
+
 
 
 // /users/:id/avatar User update new avatar 
@@ -919,6 +920,7 @@ router.post('/:id/avatar', function (req, res, next) {
     });
 });
     
+
 
 
 //// get the individual user by Mongo ID
