@@ -1,5 +1,5 @@
 var MAIL_VALID_REX = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;
-var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'VietNamese', 'Indian', 'FastFood', 'Others'];
+var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'VietNamese', 'Indian', 'FastFood', 'Others']
 
 $("#signupform").submit(function (e) {
     e.preventDefault();
@@ -90,21 +90,29 @@ $('#user-update-prof-btn').click(function(){
     var newAge = $('#user-age-update').val();
     var newName = $('#user-name-update').val();
     var newCuisine = [];
-    for (var i = 0; i < CUISINE.length; i ++){
-        if($('#c'+i).is(":checked")){
+    for (var i = 0; i < CUISINE.length; i++){
+        if($('#c'+i).is(":checked")) {
             newCuisine.push(CUISINE[i]);
         }
     }
     // alert($('#user-update-form').attr('action'))
+    //alert(newCuisine);
     $.ajax({
         url: $('#user-update-form').attr('action'),
         method: 'put',
         data: {
-            age : newAge,
-            name : newName
+            age: newAge,
+            name: newName,
+            cuisine: newCuisine
         },
-        success: function (data){
-            alert('In progress');
+        success: function (data) {
+            // alert(data);
+            if (data == 'success') {
+                $('#success-or-not').text("Sucessfully update the user profile.");
+                setTimeout(function(){$('#success-or-not').text("");}, 2000);
+            } else {
+                $('#success-or-not').text(data);
+            }
         }
     });
 });
