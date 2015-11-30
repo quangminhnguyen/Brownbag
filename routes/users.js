@@ -331,8 +331,6 @@ router.get('/admin', function (req, res) {
 });
 
 
-
-
 // Redirect the browser.
 router.get('/myprofile', function (req, res) {
     var userId = req.session.userId;
@@ -367,94 +365,121 @@ router.param('id', function (req, res, next, id) {
 });
 
 
-
 // "/users/:id"  
 router.route('/:id')
-    // Display user profile by their id in Auth relation
-    .get(function (req, res) {
-        mongoose.model('Auth').findById(req.id, function (err, user) {
-            if (err) {
-                console.log('GET Error: There was a problem retrieving: ' + err);
-            } else {
-                // Look up the account type of the target user and decide which page to render.
-                getAccountType(req.id, function (err, accountType) {
+  // Display user profile by their id in Auth relation
+  .get(function (req, res) {
+    mongoose.model('Auth').findById(req.id, function (err, user) {
+      if (err) {
+          console.log('GET Error: There was a problem retrieving: ' + err);
+      } else {
+        // Look up the account type of the target user and decide which page to render.
+        getAccountType(req.id, function (err, accountType) {
 
-                    // If this is a restaurant
-                    if (accountType == ACCOUNT_TYPE[3]) {
 
-                        // Find that restaurant in restaurant table.
-                        mongoose.model('Restaurant').findOne({
-                            auth: user._id
-                        }, function (err, restaurant) {
-                            if (err) {
-                                console.log(err);
-                                return;
-                            }
-                        
-                            getAccountType(req.session.userId, function (err, requestAccountType) {
-                            
-                            /* TODO: Search through the reviews table to get all reviews object of this restaurant
-                            and send list of these objects to the front end. */
-                                res.render('users/restaurant-profile', {
-                                    restaurant: restaurant,
-                                    email: user.email,
-                                    canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                    comments: [] // insert the review object here
-                                });
-                            });
-                        });
-                    
-                    // If this is a regular user, admin or facebook user.
-                    } else {
-                        mongoose.model('FBUser').findOne({
-                            auth: user._id
-                        }, function (err, fbUser) {
-                            if (err) {
-                                console.log(err);
-                                return;
-                            }
-                            mongoose.model('User').findOne({
-                                auth: user._id
-                            }, function (err, normalUser) {
-                                if (err) {
-                                    console.log(err);
-                                    return;
-                                }
+          var messagesCallback = function (err, msgs) {
+            var currentUserEmail = req.session.currentUser.email;
+            var temp = {}
+            for (var msg in msgs) {
+              var message = msgs[msg];
+              if (message.fromId != currentUserEmail) {
+                temp[message.fromId] = true;
 
-                                var displayUser;
-                                if (fbUser == null && normalUser != null) {
-                                    displayUser = normalUser;
-                                } else if (fbUser != null && normalUser == null) {
-                                    displayUser = fbUser;
-                                } else {
-                                    console.log(err);
-                                    return;
-                                }
-
-                                getAccountType(req.session.userId, function (err, requestAccountType) {
-                                    res.render('users/user-profile', {
-                                        user: displayUser,
-                                        accountType: accountType,
-                                        email: user.email,
-                                        canEdit: canEdit(req.session.userId, requestAccountType, req.id)
-                                    });
-                                });
-                            });
-                        });
-                    }
-                });
+              } else if (message.toId != currentUserEmail) {
+                temp[message.toId] = true;
+              }
             }
+            var uniqueRecipients = [];
+            for (var recipient in temp) {
+              uniqueRecipients.push(recipient);
+            }
+
+
+            
+          };
+
+
+          var messages  = mongoose.model('Message');
+          messages.find({
+            $or : [ {fromId: sender._id, toId: recipientId}, {fromId: recipientId, toId: sender._id} ]
+          })
+          .exec(messagesCallback);
+
+
+
+
+
+          // If this is a restaurant
+          if (accountType == ACCOUNT_TYPE[3]) {
+
+              // Find that restaurant in restaurant table.
+              mongoose.model('Restaurant').findOne({
+                  auth: user._id
+              }, function (err, restaurant) {
+                  if (err) {
+                      console.log(err);
+                      return;
+                  }
+              
+                  getAccountType(req.session.userId, function (err, requestAccountType) {
+                  
+                  /* TODO: Search through the reviews table to get all reviews object of this restaurant
+                  and send list of these objects to the front end. */
+                      res.render('users/restaurant-profile', {
+                          restaurant: restaurant,
+                          email: user.email,
+                          canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                          comments: [] // insert the review object here
+                      });
+                  });
+              });
+          
+          // If this is a regular user, admin or facebook user.
+          } else {
+              mongoose.model('FBUser').findOne({
+                  auth: user._id
+              }, function (err, fbUser) {
+                  if (err) {
+                      console.log(err);
+                      return;
+                  }
+                  mongoose.model('User').findOne({
+                      auth: user._id
+                  }, function (err, normalUser) {
+                      if (err) {
+                          console.log(err);
+                          return;
+                      }
+
+                      var displayUser;
+                      if (fbUser == null && normalUser != null) {
+                          displayUser = normalUser;
+                      } else if (fbUser != null && normalUser == null) {
+                          displayUser = fbUser;
+                      } else {
+                          console.log(err);
+                          return;
+                      }
+
+                      getAccountType(req.session.userId, function (err, requestAccountType) {
+                          res.render('users/user-profile', {
+                              user: displayUser,
+                              accountType: accountType,
+                              email: user.email,
+                              canEdit: canEdit(req.session.userId, requestAccountType, req.id)
+                          });
+                      });
+                  });
+              });
+          }
+
+
+
+
         });
+      }
     });
-
-router.get('/:id/conversations'), function (req, res) {
-
-  // get all messages with currentUser 
-  // compile list of unique user ids along with names?
-  // return list
-
-}
-
+  });
 
 
 // get AccountType of user with Auth._id.
