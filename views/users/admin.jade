@@ -21,3 +21,13 @@ block list
             a(href='/users/#{user.auth}')= user.name
         td
             a(href='/users/#{user.auth}')= user.accountType
+  form(method='GET')
+    label(for = 'userType') Show Users Who Are:
+      select(name='userType')
+        option(value='')
+          |All
+        option
+          |Customers
+        option
+          |Restaurants
+    input(type='submit',value='Filter')

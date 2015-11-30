@@ -9,7 +9,7 @@ var session = require('express-session');
 var mongoose = require('mongoose');
 var passport = require('passport');
 
-// Register the models */
+// Register the models 
 var db = require('./model/db');
 var user = require('./model/users');
 var picture = require('./model/avatars');
@@ -71,6 +71,7 @@ app.use(function(req, res, next) {
         console.log(err);
         return;
     }
+    console.log("Setting current user: " + user);
     res.locals.currentUser = user;
     
     // check if current user is an admin

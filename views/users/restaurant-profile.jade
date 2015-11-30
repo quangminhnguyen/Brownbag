@@ -2,7 +2,7 @@ extends ../layout
 
 block list
     img#restaurant-picture(src="/avatars/#{restaurant.avatar}")
-    .display-profile
+    .display-block
       div
         label.inlinea
           strong Restaurant Name:
@@ -32,11 +32,36 @@ block list
         a.btn.btn-success(href='/users/#{restaurant.auth}/edit')
           i.glyphicon.glyphicon-pencil
           | &nbsp Edit
-    .display-comment
-      h5 Customer feedbacks
+    .display-block
+      h5 Customer feedback's
+      br
+      form.rating(action='/users/#{restaurant.auth}/comment', method='POST')
+        span
+          input#str5(type='radio', name='rating', value='5')
+          label(for='str5')
+        span
+          input#str4(type='radio', name='rating', value='4')
+          label(for='str4')
+        span
+          input#str3(type='radio', name='rating', value='3')
+          label(for='str3')
+        span
+          input#str2(type='radio', name='rating', value='2')
+          label(for='str2')
+        span
+          input#str1(type='radio', name='rating', value='1' required='true')
+          label(for='str1')
+          br
+        p Rate
+        br
+        p Enter comment below (optional)
+        input.form-control#input-location(type='text', name='comment', placeholder='Comment...')
+        br
+        input#btn-signup.btn.btn-info(type='submit', value='Submit your review')
       each comment, i in comments
-        .comment
-          p= 'From ' + i
-          p= comment
+        .display-block
+          p= comment.name + ' rated ' + comment.rating + ' stars'
+          p= comment.comment
     .restaurant-conversations
-      include ./conversations-partial.jade
+        include ./conversations-partial.jade
+

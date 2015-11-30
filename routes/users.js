@@ -252,7 +252,7 @@ function hashPassword(password, cb) {
 // "/users/main" Displaying list of restaurants in the main page of the user
 // 4 cases, i did case 1 as an example
 router.get('/main', function (req, res) {
-    // Case 1: No query at all, just display all of the restaurant.
+    // This will be changed to recommended
     if(!req.query.search && !req.query.rating && !req.query.cuisine) {
         mongoose.model('Restaurant').find({}, function (err, restaurants) {
             if (err) {
@@ -264,35 +264,57 @@ router.get('/main', function (req, res) {
             });
         });
 
-    // Case 2: has "search" as the query (i.e. /main?search=something)
-    // the user type something into the search box in the main page ... it can
-    // be a cuisine, "part" of a restaurant name because they cannot remember
-    // its full name, or location ... the search string can be anything.
-    // Your task is to search through the Restaurant like i did in case 1, and list
-    // all "related" restaurants.
-    } else if (req.query.search) {
-    
-    // Case 3: has "cuisine" as the query  (i.e. /main?cuisine=somecuisine)
-    // the user select a cuisine by selecting a checkbox in the front page
-    // your job is to again search through the restaurants in the db, and 
-    // gets the list of restaurants that has that cuisine.
-    } else if (req.query.cuisine) {
-    
-    
-    // Case 4: has "rating" as the query (i.e. /main?rating=anumberfrom1to5)
-    // similar to case3, this time the user want to filter all of the restaurant 
-    // that has average rating higher than or equal to a number from 1 to 5.
-    } else if (req.query.rating) {
+    // Case 2
+    } else if (req.query.cuisine && !req.query.rating) {
         
+        mongoose.model('Restaurant').find({cuisine : { "$in" : [req.query.cuisine]}}, function (err, restaurants) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            res.render('users/main', {
+                restaurants: restaurants
+            });
+        });
+    
     }
     
-    // Assume won't have search, cuisine, rating all at the same time.
+    //Case 3
+    else if (req.query.cuisine && req.query.rating) {
+        console.log('Searching for:'+ req.query.cuisine + ' and:' + parseFloat(req.query.rating));
+        mongoose.model('Restaurant').find({'cuisine' : req.query.cuisine, 'rating' : { $gte: parseFloat(req.query.rating) }}, function (err, restaurants) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            res.render('users/main', {
+                restaurants: restaurants
+            });
+
+        });
+    
+    }
+    
+    //Case 4
+    else if (!req.query.cuisine && req.query.rating) {
+        console.log('Searching for:' + parseFloat(req.query.rating));
+        mongoose.model('Restaurant').find({'rating' : { $gte: parseFloat(req.query.rating) }}, function (err, restaurants) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            res.render('users/main', {
+                restaurants: restaurants
+            });
+        });
+    }
 });
 
 
 // "/users/admin" 
 router.get('/admin', function (req, res) {
-    mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
+    if(!req.query.userType){
+        mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
         if (err) {
             console.log(err);
             return;
@@ -329,6 +351,69 @@ router.get('/admin', function (req, res) {
             });
         });
     });
+    }
+    else if(req.query.userType=='Customers')
+    {
+        mongoose.model('User').find({}, function (err, allRegUsers) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            mongoose.model('FBUser').find({}, function (err, allFBUsers) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                var allUsers = allRegUsers.concat(allFBUsers);
+                // console.log('allUsers: ' + allUsers);
+                mongoose.model('Auth').find({}, function (err, auth) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    for (var i = 0; i < auth.length; i++) {
+                        for (var k = 0; k < allUsers.length; k++) {
+                            if (auth[i]._id.equals(allUsers[k].auth)) {
+                                allUsers[k]['accountType'] = auth[i].accountType;
+                                console.log('account type: ' + allUsers[k]['accountType']);
+                            }
+                        }
+                    }
+                    res.render('users/admin', {
+                        users: allUsers
+                    });
+                });
+            });
+        });
+    }
+    else if(req.query.userType=='Restaurants')
+    {
+            mongoose.model('Restaurant').find({}, function (err, allUsers) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                // console.log('allUsers: ' + allUsers);
+                mongoose.model('Auth').find({}, function (err, auth) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    for (var i = 0; i < auth.length; i++) {
+                        for (var k = 0; k < allUsers.length; k++) {
+                            if (auth[i]._id.equals(allUsers[k].auth)) {
+                                allUsers[k]['accountType'] = auth[i].accountType;
+                                console.log('account type: ' + allUsers[k]['accountType']);
+                            }
+                        }
+                    }
+                    res.render('users/admin', {
+                        users: allUsers
+                    });
+                });
+            });
+    }
+    
 });
 
 
@@ -378,33 +463,96 @@ router.route('/:id')
                 getAccountType(req.id, function (err, accountType) {
 
                     var authCallback = function (err, allAuths) {
-
+                        
                         // If this is a restaurant
                         if (accountType == ACCOUNT_TYPE[3]) {
-
+                            
                             // Find that restaurant in restaurant table.
                             mongoose.model('Restaurant').findOne({
                                 auth: user._id
                             }, function (err, restaurant) {
-                                if (err) {
-                                    console.log(err);
-                                    return;
-                                }
-
+                            
                                 getAccountType(req.session.userId, function (err, requestAccountType) {
 
-                                    /* TODO: Search through the reviews table to get all reviews object of this restaurant
-                                     and send list of these objects to the front end. */
-                                    res.render('users/restaurant-profile', {
-                                        restaurant: restaurant,
-                                        email: user.email,
-                                        canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                        comments: [] // insert the review object here
+                                    var obj = [];
+                                    mongoose.model('Review').find({
+                                        restaurantId: restaurant.auth
+                                    }, function (err, reviews) {
+
+                                        var counter = 0;
+                                        for(var i = 0; i<reviews.length; i++){
+                                            if(reviews[i].comment) {
+                                                counter++;
+                                            }
+                                        }
+
+                                        if (counter == 0){
+                                            res.render('users/restaurant-profile', {
+                                                restaurant: restaurant,
+                                                email: user.email,
+                                                canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                comments: []
+                                            });
+                                        }
+
+                                        for(var i = 0; i<reviews.length; i++){
+                                            if(reviews[i].comment) {
+                                                item = {};
+                                                item["comment"] = reviews[i].comment;
+                                                item["rating"] = reviews[i].rating;
+                                                finduser(reviews[i].userId,item, counter);
+                                            }
+                                        }
+
                                     });
+
+                                    function finduser(userId, itemn, count) {
+                                        mongoose.model('User').findOne({
+                                            auth: userId
+                                        }, function (err, user) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+                                            }
+                                            if (user) {
+                                                itemn["name"] = user.name;
+                                                obj.push(itemn);
+                                                
+                                                if(count==obj.length){
+                                                    res.render('users/restaurant-profile', {
+                                                        restaurant: restaurant,
+                                                        email: user.email,
+                                                        canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                        comments: obj
+                                                    });
+                                                }
+                                            }
+                                            else {
+                                                mongoose.model('FBUser').findOne({
+                                                    auth: userId
+                                                }, function (err, user) {
+                                                    if (user) {
+                                                        itemn["name"] = user.name;
+                                                        obj.push(itemn);
+
+                                                        if(count==obj.length){
+                                                            res.render('users/restaurant-profile', {
+                                                                restaurant: restaurant,
+                                                                email: user.email,
+                                                                canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                                comments: obj
+
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
                                 });
                             });
-
-                            // If this is a regular user, admin or facebook user.
+                        
+                        // If this is a regular user, admin or facebook user.
                         } else {
                             mongoose.model('FBUser').findOne({
                                 auth: user._id
@@ -414,40 +562,40 @@ router.route('/:id')
                                     return;
                                 }
                                 mongoose.model('User').findOne({
-                                    auth: user._id
-                                }, function (err, normalUser) {
-                                    if (err) {
-                                        console.log(err);
-                                        return;
-                                    }
+                                        auth: user._id
+                                    }, function (err, normalUser) {
+                                        if (err) {
+                                            console.log(err);
+                                            return;
+                                        }
 
-                                    var displayUser;
-                                    if (fbUser == null && normalUser != null) {
-                                        displayUser = normalUser;
-                                    } else if (fbUser != null && normalUser == null) {
-                                        displayUser = fbUser;
-                                    } else {
-                                        console.log(err);
-                                        return;
-                                    }
+                                        var displayUser;
+                                        if (fbUser == null && normalUser != null) {
+                                            displayUser = normalUser;
+                                        } else if (fbUser != null && normalUser == null) {
+                                            displayUser = fbUser;
+                                        } else {
+                                            console.log(err);
+                                            return;
+                                        }
 
-                                    getAccountType(req.session.userId, function (err, requestAccountType) {
-                                        res.render('users/user-profile', {
-                                            user: displayUser,
-                                            accountType: accountType,
-                                            email: user.email,
-                                            canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                            auths: allAuths
+                                        getAccountType(req.session.userId, function (err, requestAccountType) {
+                                            res.render('users/user-profile', {
+                                                user: displayUser,
+                                                accountType: accountType,
+                                                email: user.email,
+                                                canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                auths: allAuths
+                                            });
                                         });
                                     });
                                 });
-                            });
-                        }
 
+                        }
                     };
+                    var currentUserEmail = res.locals.currentUser.email;
 
                     var messagesCallback = function (err, msgs) {
-                        var currentUserEmail = req.session.currentUser.email;
                         var temp = {};
                         for (var msg in msgs) {
                             var message = msgs[msg];
@@ -472,8 +620,9 @@ router.route('/:id')
 
 
                     var messages = mongoose.model('Message');
+
                     messages.find({
-                            $or: [{fromId: sender._id, toId: recipientId}, {fromId: recipientId, toId: sender._id}]
+                            $or: [{fromId: currentUserEmail}, {toId: currentUserEmail}]
                         })
                         .exec(messagesCallback);
                 });
@@ -511,14 +660,14 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
 
 
 router.route('/:id/edit')
-    // get the edit page
+    // get the edit user or restaurant profile page
     .get(function (req, res) {
+        // 
         mongoose.model('Auth').findById(req.id, function (err, user) {
             if (err) {
                 console.log('GET Error: There was a problem retriveving: ' + err);
                 return;
             }
-
             // get account type of the request user
             getAccountType(req.session.userId, function (err, requestAccountType) {
 
@@ -534,7 +683,8 @@ router.route('/:id/edit')
                                 return;
                             }
                             res.render('users/restaurant-edit', {
-                                restaurant: restaurant
+                                restaurant: restaurant, 
+                                displayEmail: user.email
                             });
                         });
 
@@ -559,14 +709,15 @@ router.route('/:id/edit')
                                 if (fbUser == null && normalUser != null) {
                                     displayUser = normalUser;
                                 } else if (fbUser != null && normalUser == null) {
-                                    displayUser = fbuser;
+                                    displayUser = fbUser;
                                 } else {
                                     console.log(err);
                                     return;
                                 }
 
                                 res.render('users/user-edit', {
-                                    user: displayUser
+                                    user: displayUser,
+                                    displayEmail: user.email
                                 });
                             });
                         });
@@ -576,23 +727,225 @@ router.route('/:id/edit')
                 }
             });
         });
+    })
+
+    // update the user profile
+    .put(function (req, res) {
+        console.log('hoho');
+        res.send('here');
+//        getAccountType(req.session.userId, function (err, requestAccountType) {
+//            // admin or the user itself can edit.
+//            if (canEdit(req.session.userId, requestAccountType, req.id)) {
+//                var newName = req.body.name;
+//                var newAge = req.body.age;
+//                var newFavCuisine = ;
+//                mongoose.model('Auth').findById(req.id, function(err, user) {
+//                    if (err) {
+//                        console.log(err);
+//                        return;
+//                    }
+//                    mongoose.findOneAndUpdate({auth:user._id}, {name: newName, age: newAge}, function(err, oldUser) {
+//                        if (err) {
+//                            console.log(err);
+//                            res.send('fail');
+//                        }
+//                        res.send('success');
+//                    });
+//                });
+//            // Hacker 
+//            } else {
+//                res.send("You do not have permission to update this user account")
+//            }
+//        });
     });
 
 
 
-// post a new review for restaurant with req.id to the realation reviews
-// Inside req there are following attributes:
-// req.body.rating: the rating
-// req.body.comment: the comment string
-// After finish createing a new comment in reviews, update the average rating in Restaurant
-// Finally, redirect res to /users/:id --> You won't be able to see the comment yet, i did 
-// not implement that part yet --> You can implement it inline 394 but you have to change the
-// for loop in restaurant-profile.jade
 router.post('/:id/comment', function(req, res){
-    
+
+    if(!req.body.rating){
+        req.body.rating = 0;
+    }
+
+    mongoose.model('Review').create({
+        userId: req.session.userId,
+        restaurantId: req.id,
+        rating: req.body.rating,
+        comment: req.body.comment
+    }, function (err, doc) {
+        if (err) {
+            res.send("There was a problem adding the review to the Review relation.");
+        }
+        // comment and rating has been added
+    });
+
+    mongoose.model('Restaurant').find({
+    }, function (err, restaurants) {
+        if(restaurants) {
+
+            for(var i = 0; i < restaurants.length; i++){
+                findreview(restaurants[i].auth);}
+        }
+    });
+
+
+    function findreview (restId){
+
+        mongoose.model('Review').find({
+            restaurantId: restId
+        }, function (err, reviews) {
+            if (reviews) {
+
+                var avgrating = 0;
+                for (var j = 0; j < reviews.length; j++) {
+                    avgrating += parseInt(reviews[j].rating);
+                }
+                if(reviews.length)
+                    avgrating /= reviews.length;
+                avgrating = Math.round(avgrating*100)/100;
+                update(restId, avgrating);
+
+            }
+        });
+    }
+
+    function update(restId, rating){
+        mongoose.model('Restaurant').findOneAndUpdate({auth: restId}, {rating: rating}, function (err, dum) {});
+    }
+
+    res.redirect('back');
+
 });
 
- 
+
+// /users/:id/avatar User update new avatar 
+router.post('/:id/avatar', function (req, res, next) {
+    console.log('avatar1');
+    var form = new formidable.IncomingForm();
+    // Get the files in the form
+    form.parse(req, function (err, fields, files) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        var pic = files.profilePicture;
+        console.log('avatar2', pic, fields);
+
+        // Check if the file size is > 0
+        if (pic.size > 0) {
+            console.log('avatar3');
+
+            // Read the file
+            fs.readFile(pic.path, function (err, data) {
+                console.log('avatar4');
+                if (err) throw err;
+
+                // Create image object
+                var img = {
+                    data: data,
+                    contentType: pic.type
+                };
+
+                // Find the target user in Auth
+                mongoose.model('Auth').findById(req.id, function (err, user) {
+                    console.log('avatar5');
+                    if (err) {
+                        console.log('PUT Error, there was problem retrieving: ' + err);
+                        return;
+                    }
+
+                    // check if the requester has permission to update the target user.
+                    getAccountType(req.session.userId, function (err, requestAccountType) {
+                        console.log('avatar6');
+
+                        // If the requester has permission
+                        if (canEdit(req.session.userId, requestAccountType, req.id)) {
+
+                            mongoose.model('Avatar').create({
+                                img: img
+                            }, function (err, picture) {
+                                console.log('avatar7');
+                                // Restaurant user
+                                if (user.accountType == ACCOUNT_TYPE[3]) {
+
+                                    // If is a restaurant, then find and update the avatar for that user in Restaurant relation.
+                                    mongoose.model('Restaurant').findOneAndUpdate({
+                                        auth: user._id
+                                    }, {
+                                        avatar: picture._id
+                                    }, function (err, restaurant) {
+                                        if (err) {
+                                            console.log(err);
+                                            return;
+                                        }
+                                        console.log('avatar8');
+                                        console.log(restaurant.avatar);
+                                        console.log(picture._id);
+
+                                        // Find and remove the document
+                                        mongoose.model('Avatar').findByIdAndRemove(restaurant.avatar, function (err, doc, result) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+                                            }
+                                            console.log('avatar 9');
+                                            console.log(doc.avatar);
+                                            res.redirect('back');
+                                        });
+                                    });
+                                    // Facebook or normal user
+                                } else {
+                                    //res.send("I know you are facebook or normal user");
+                                    mongoose.model('User').findOneAndUpdate({
+                                        auth: user._id
+                                    }, {
+                                        avatar: picture._id
+                                    }, function (err, oldRegUser) {
+                                        if (err) {
+                                            console.log(err);
+                                            return;
+                                        }
+                                        mongoose.model('FBUser').findOneAndUpdate({
+                                            auth: user._id
+                                        }, {
+                                            avatar: picture._id
+                                        }, function (err, oldFbUser) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+                                            }
+                                            var target;
+                                            if (oldRegUser == null && oldFbUser != null) {
+                                                target = oldFbUser;
+                                            } else if (oldRegUser != null && oldFbUser == null) {
+                                                target = oldRegUser;
+                                            } else {
+                                                console.log("NO TARGET FOUND!");
+                                                return;
+                                            }
+                                            console.log(target);
+                                            mongoose.model('Avatar').findByIdAndRemove(target.avatar, function (err, doc, result) {
+                                                if (err) {
+                                                    console.log(err);
+                                                    return;
+                                                }
+                                                res.redirect('back');
+                                            });
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        } else {
+            res.redirect('back');
+        }
+    });
+});
+    
+
 
 //// get the individual user by Mongo ID
 //router.get('/:id/edit', function (req, res) {
