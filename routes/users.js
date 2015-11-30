@@ -478,9 +478,15 @@ router.route('/:id')
                                 mongoose.model('Review').find({
                                     restaurantId: restaurant.auth
                                 }, function (err, reviews) {
-                                    
-                                    console.log(reviews);
-                                    if (reviews.length == 0){
+
+                                    var counter = 0;
+                                    for(var i = 0; i<reviews.length; i++){
+                                        if(reviews[i].comment) {
+                                            counter++;
+                                        }
+                                    }
+
+                                    if (counter == 0){
                                         res.render('users/restaurant-profile', {
                                             restaurant: restaurant,
                                             email: user.email,
@@ -488,22 +494,16 @@ router.route('/:id')
                                             comments: []
                                         });
                                     }
-                                    else {
-                                        var counter = 0;
-                                        for(var i = 0; i<reviews.length; i++){
-                                            if(reviews[i].comment) {
-                                                counter++;
-                                            }
-                                        }
-                                        for(var i = 0; i<reviews.length; i++){
-                                            if(reviews[i].comment) {
-                                                item = {};
-                                                item["comment"] = reviews[i].comment;
-                                                item["rating"] = reviews[i].rating;
-                                                finduser(reviews[i].userId,item, counter);
-                                            }
+
+                                    for(var i = 0; i<reviews.length; i++){
+                                        if(reviews[i].comment) {
+                                            item = {};
+                                            item["comment"] = reviews[i].comment;
+                                            item["rating"] = reviews[i].rating;
+                                            finduser(reviews[i].userId,item, counter);
                                         }
                                     }
+
                                 });
 
                                 function finduser(userId, itemn, count) {
