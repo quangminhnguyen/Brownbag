@@ -729,34 +729,81 @@ router.route('/:id/edit')
         });
     })
 
-    // update the user profile
+    // update the user profile, this is an AJAX CALL !
     .put(function (req, res) {
-        console.log('hoho');
-        res.send('here');
-//        getAccountType(req.session.userId, function (err, requestAccountType) {
-//            // admin or the user itself can edit.
-//            if (canEdit(req.session.userId, requestAccountType, req.id)) {
-//                var newName = req.body.name;
-//                var newAge = req.body.age;
-//                var newFavCuisine = ;
-//                mongoose.model('Auth').findById(req.id, function(err, user) {
-//                    if (err) {
-//                        console.log(err);
-//                        return;
-//                    }
-//                    mongoose.findOneAndUpdate({auth:user._id}, {name: newName, age: newAge}, function(err, oldUser) {
-//                        if (err) {
-//                            console.log(err);
-//                            res.send('fail');
-//                        }
-//                        res.send('success');
-//                    });
-//                });
-//            // Hacker 
-//            } else {
-//                res.send("You do not have permission to update this user account")
-//            }
-//        });
+        // Get the account type of the current user. 
+        getAccountType(req.session.userId, function (err, requestAccountType) {
+            // Only admin or the user itself can edit.
+            if (canEdit(req.session.userId, requestAccountType, req.id)) {
+
+                mongoose.model('Auth').findById(req.id, function (err, user) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    if(user == null) {
+                        console.log("NULL USER ERR!");
+                        res.send("NULL USER ERR");
+                    }
+                    // If the user is an admin or regular user, then update the User table.
+                    if (user.accountType == ACCOUNT_TYPE[1] || user.accountType == ACCOUNT_TYPE[2]) {
+                        var newName = req.body.name;
+                        var newAge = req.body.age;
+                        var newFavCuisine = req.body['cuisine[]'];
+                        mongoose.model('User').findOneAndUpdate({
+                            auth: user._id
+                        }, {
+                            name: newName,
+                            age: newAge,
+                            preferredCuisine: newFavCuisine
+                        }, function (err, oldUser) {
+                            if (err) {
+                                console.log(err);
+                                res.send("fail");
+                            }
+                            if (oldUser) {
+                                res.send("success");
+                            } else {
+                                res.send("fail");
+                            }
+                        });
+                    // If the user is a facebook user, then update FBUser table.
+                    } else if (user.accountType == ACCOUNT_TYPE[0]) {
+                        var newName = req.body.name;
+                        var newAge = req.body.age;
+                        var newFavCuisine = req.body['cuisine[]'];
+                        console.log(req.body);
+                        mongoose.model('FBUser').findOneAndUpdate({
+                            auth: user._id
+                        }, {
+                            name: newName,
+                            age: newAge,
+                            preferredCuisine: newFavCuisine
+                        }, function (err, oldFbUser) {
+                            if (err) {
+                                console.log(err);
+                                res.send("fail");
+                            }
+                            if (oldFbUser) {
+                                res.send("success");
+                            } else {
+                                res.send("fail");
+                            }
+                        });
+                    // If the user is a restaurant user
+                    } else if (user.accountType == ACCOUNT_TYPE[3]) {
+                        var newLocation = req.body.location;
+                        var newName = req.body.age;
+                        var newCuisine = req.body.newFavCuisine;
+                        console.log('update new Cuisine: ' + newCuisine);
+                        res.send("");
+                    }
+                });
+            // Hacker 
+            } else {
+                res.send("You do not have permission to update this user account")
+            }
+        });
     });
 
 
@@ -783,7 +830,7 @@ router.post('/:id/comment', function(req, res){
     }, function (err, restaurants) {
         if(restaurants) {
 
-            for(var i = 0; i < restaurants.length; i++){
+            for(var i = 0; i < restaurants.length; i++) {
                 findreview(restaurants[i].auth);}
         }
     });
@@ -816,6 +863,7 @@ router.post('/:id/comment', function(req, res){
     res.redirect('back');
 
 });
+
 
 
 // /users/:id/avatar User update new avatar 
@@ -945,6 +993,7 @@ router.post('/:id/avatar', function (req, res, next) {
     });
 });
     
+
 
 
 //// get the individual user by Mongo ID

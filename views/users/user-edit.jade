@@ -17,7 +17,7 @@ block list
     .col-md-9
       .display-block
         h4.text-center Update Personal Information
-        form.form-horizontal#user-update-form(action='/users/#{user._id}/edit', method='put', name='update-user', enctype='application/x-www-form-urlencoded', role='form')
+        form.form-horizontal#user-update-form(action='/users/#{user.auth}/edit', method='put', name='update-user', enctype='application/x-www-form-urlencoded', role='form')
           .form-group
             label.col-md-3.control-label Email
             .col-md-9
@@ -63,7 +63,7 @@ block list
                 input#c8(type='checkbox' name='FastFood' value='FastFood')
                 | Fast Food
               label.checkbox-inline
-                input#c0(type='checkbox' name='Others' value='Others')
+                input#c9(type='checkbox' name='Others' value='Others')
                 | Others
               .helper#user-checkbox-edit-helper
           .form-group
@@ -71,6 +71,9 @@ block list
               .btn.btn-info.active#user-update-prof-btn
                 i.glyphicon.glyphicon-wrench
                 | &nbsp; Update Profile
+          .form-group
+            .col-md-offset-3.col-md-9
+              .success-mess#success-or-not
   .row
     .col-md-offset-3.col-md-9
       .display-block
