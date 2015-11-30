@@ -1,2 +1,6 @@
 //- includes/head.jade
 h1 INCLUDED
+if auths
+  each auth, i in auths
+    .display-block
+      p= auth.name
