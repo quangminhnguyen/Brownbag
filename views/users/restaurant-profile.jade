@@ -29,10 +29,10 @@ block list
         p.inlinea
           | &nbsp #{email}
       if canEdit
-        .btn.btn-success(href='/users/#{restaurant.auth}/edit' style='margin-right: 10px')
+        a.btn.btn-success(href='/users/#{restaurant.auth}/edit' style='margin-right: 10px')
           i.glyphicon.glyphicon-pencil
           | &nbsp Edit
-        .btn.btn-danger
+        a.btn.btn-danger
           i.glyphicon.glyphicon-trash
           | &nbsp Remove
     .display-block
