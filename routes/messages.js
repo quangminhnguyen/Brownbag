@@ -60,8 +60,8 @@ var router = express.Router();
 
 // sends message to recipient
 router.post('/sendMessage', function(req, res) {
-  var sender = res.locals.currentUser; 
-  var recipientId  = req.body.recipient;
+  var sender = res.locals.currentUser.email; 
+  var recipientEmail  = req.body.recipient; // should be the email
   var message = req.body.message; 
   
   var createCallback = function (err, message) {
@@ -71,15 +71,15 @@ router.post('/sendMessage', function(req, res) {
   };
 
   mongoose.model('Message').create({
-    fromId: sender._id,
-    toIds: recipientId,
+    fromId: sender,
+    toIds: recipientEmail,
     message: message   
     }, createCallback); 
 });
 
 router.get('/conversation/:id', function(req, res) {
-  var sender = res.locals.currentUser; 
-  var recipientId  = req.body.recipient; 
+  var sender = res.locals.currentUser.email; 
+  var recipientEmail  = req.body.recipient; 
 
   var messagesCallback = function (err, msgs) {
     if (err) {
@@ -98,7 +98,7 @@ router.get('/conversation/:id', function(req, res) {
   var messages  = mongoose.model('Message');
 
   messages.find({
-      $or : [ {fromId: sender._id, toId: recipientId}, {fromId: recipientId, toId: sender._id} ]
+      $or : [ {fromId: sender, toId: recipientEmail}, {fromId: recipientEmail, toId: sender} ]
     })
     .limit(10)
     .sort({ timestamp: -1 }) // -1 decsending order

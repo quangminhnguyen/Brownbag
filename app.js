@@ -71,6 +71,7 @@ app.use(function(req, res, next) {
         console.log(err);
         return;
     }
+    console.log("Setting current user: " + user);
     res.locals.currentUser = user;
     
     // check if current user is an admin
