@@ -281,7 +281,7 @@ router.get('/main', function (req, res) {
     //Case 3
     else if (req.query.cuisine && req.query.rating) {
         console.log('Searching for:'+ req.query.cuisine + ' and:' + parseFloat(req.query.rating));
-        mongoose.model('Restaurant').find({'cuisine' : req.query.cuisine, 'rating' : { $gt: parseFloat(req.query.rating) }}, function (err, restaurants) {
+        mongoose.model('Restaurant').find({'cuisine' : req.query.cuisine, 'rating' : { $gte: parseFloat(req.query.rating) }}, function (err, restaurants) {
             if (err) {
                 console.log(err);
                 return;
@@ -297,7 +297,7 @@ router.get('/main', function (req, res) {
     //Case 4
     else if (!req.query.cuisine && req.query.rating) {
         console.log('Searching for:' + parseFloat(req.query.rating));
-        mongoose.model('Restaurant').find({'rating' : { $gt: parseFloat(req.query.rating) }}, function (err, restaurants) {
+        mongoose.model('Restaurant').find({'rating' : { $gte: parseFloat(req.query.rating) }}, function (err, restaurants) {
             if (err) {
                 console.log(err);
                 return;
@@ -478,9 +478,15 @@ router.route('/:id')
                                 mongoose.model('Review').find({
                                     restaurantId: restaurant.auth
                                 }, function (err, reviews) {
-                                    
-                                    console.log(reviews);
-                                    if (reviews.length == 0){
+
+                                    var counter = 0;
+                                    for(var i = 0; i<reviews.length; i++){
+                                        if(reviews[i].comment) {
+                                            counter++;
+                                        }
+                                    }
+
+                                    if (counter == 0){
                                         res.render('users/restaurant-profile', {
                                             restaurant: restaurant,
                                             email: user.email,
@@ -488,22 +494,16 @@ router.route('/:id')
                                             comments: []
                                         });
                                     }
-                                    else {
-                                        var counter = 0;
-                                        for(var i = 0; i<reviews.length; i++){
-                                            if(reviews[i].comment) {
-                                                counter++;
-                                            }
-                                        }
-                                        for(var i = 0; i<reviews.length; i++){
-                                            if(reviews[i].comment) {
-                                                item = {};
-                                                item["comment"] = reviews[i].comment;
-                                                item["rating"] = reviews[i].rating;
-                                                finduser(reviews[i].userId,item, counter);
-                                            }
+
+                                    for(var i = 0; i<reviews.length; i++){
+                                        if(reviews[i].comment) {
+                                            item = {};
+                                            item["comment"] = reviews[i].comment;
+                                            item["rating"] = reviews[i].rating;
+                                            finduser(reviews[i].userId,item, counter);
                                         }
                                     }
+
                                 });
 
                                 function finduser(userId, itemn, count) {
