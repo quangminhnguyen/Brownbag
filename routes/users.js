@@ -491,7 +491,8 @@ router.route('/:id')
                                                 restaurant: restaurant,
                                                 email: user.email,
                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                                comments: []
+                                                comments: [],
+                                                auths: allAuths
                                             });
                                         }
 
@@ -523,7 +524,9 @@ router.route('/:id')
                                                         restaurant: restaurant,
                                                         email: user.email,
                                                         canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                                        comments: obj
+                                                        comments: obj,
+                                                        auths: allAuths
+
                                                     });
                                                 }
                                             }
@@ -540,7 +543,9 @@ router.route('/:id')
                                                                 restaurant: restaurant,
                                                                 email: user.email,
                                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                                                comments: obj
+                                                                comments: obj,
+                                                                auths: allAuths
+
 
                                                             });
                                                         }

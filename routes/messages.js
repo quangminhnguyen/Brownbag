@@ -72,7 +72,7 @@ router.post('/sendMessage', function(req, res) {
 
   mongoose.model('Message').create({
     fromId: sender,
-    toIds: recipientEmail,
+    toId: recipientEmail,
     message: message   
     }, createCallback); 
 });
@@ -105,3 +105,6 @@ router.get('/conversation/:id', function(req, res) {
     .select({ message: 1, timestamp: 1 })
     .exec(messagesCallback);
 });
+
+
+module.exports = router;

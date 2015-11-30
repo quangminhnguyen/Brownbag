@@ -25,6 +25,7 @@ require('./configuration/passport')(passport);
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var avatars = require('./routes/avatars');
+var messages = require('./routes/messages');
 
 var app = express();
 
@@ -95,6 +96,7 @@ app.use(function(req, res, next) {
 });
 
 app.use('/avatars', avatars);
+app.use('/messages', messages);
 app.use('/', routes);
 
 
