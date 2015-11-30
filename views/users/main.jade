@@ -21,3 +21,57 @@ block list
           a(href='/users/#{restaurant.auth}')= restaurant.name
         td
           a(href='/users/#{restaurant.auth}')= restaurant.cuisine
+  form(method='GET')
+    label(for = 'cuisine') I feel like eating:
+      select(name='cuisine')
+        option(value='')
+          |All
+        option(class='dropdown-header', disabled)
+          |Most popular
+        option
+          |Italian
+        option
+          |French
+        option
+          |Japanese
+        option(class='dropdown-header', disabled)
+          |Other cuisines
+        option
+          |Chinese
+        option
+          |Thai
+        option
+          |Korean
+        option
+          |VietNamese
+        option
+          |Indian
+        option
+          |FastFood
+        option
+          |Others
+    label(for = 'rating') Rating should be at least: 
+      select(name='rating')
+        option(value='')
+          |Select
+        option(value='0.0')
+          |All
+        option(class='dropdown-header',disabled)
+          |Recommended
+        option
+          |5.0
+        option
+          |4.5
+        option
+          |4.0
+        option(class='dropdown-header', disabled)
+          |Not recommended
+        option
+          |3.5
+        option
+          |3.0
+        option
+          |2.5
+        option
+          |2.0
+    input(type='submit',value='Search')

@@ -251,7 +251,7 @@ function hashPassword(password, cb) {
 // "/users/main" Displaying list of restaurants in the main page of the user
 // 4 cases, i did case 1 as an example
 router.get('/main', function (req, res) {
-    // Case 1: No query at all, just display all of the restaurant.
+    // This will be changed to recommended
     if(!req.query.search && !req.query.rating && !req.query.cuisine) {
         mongoose.model('Restaurant').find({}, function (err, restaurants) {
             if (err) {
@@ -263,35 +263,58 @@ router.get('/main', function (req, res) {
             });
         });
 
-    // Case 2: has "search" as the query (i.e. /main?search=something)
-    // the user type something into the search box in the main page ... it can
-    // be a cuisine, "part" of a restaurant name because they cannot remember
-    // its full name, or location ... the search string can be anything.
-    // Your task is to search through the Restaurant like i did in case 1, and list
-    // all "related" restaurants.
-    } else if (req.query.search) {
-    
-    // Case 3: has "cuisine" as the query  (i.e. /main?cuisine=somecuisine)
-    // the user select a cuisine by selecting a checkbox in the front page
-    // your job is to again search through the restaurants in the db, and 
-    // gets the list of restaurants that has that cuisine.
-    } else if (req.query.cuisine) {
-    
-    
-    // Case 4: has "rating" as the query (i.e. /main?rating=anumberfrom1to5)
-    // similar to case3, this time the user want to filter all of the restaurant 
-    // that has average rating higher than or equal to a number from 1 to 5.
-    } else if (req.query.rating) {
+    // Case 2
+    } else if (req.query.cuisine && !req.query.rating) {
         
-    }
+        mongoose.model('Restaurant').find({cuisine : { "$in" : [req.query.cuisine]}}, function (err, restaurants) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            res.render('users/main', {
+                restaurants: restaurants
+            });
+        });
     
-    // Assume won't have search, cuisine, rating all at the same time.
+    }
+    //Case 3
+    else if (req.query.cuisine && req.query.rating) {
+        console.log('Searching for:'+ req.query.cuisine + ' and:' + parseFloat(req.query.rating));
+        mongoose.model('Restaurant').find({'cuisine' : req.query.cuisine, 'rating' : { $gt: parseFloat(req.query.rating) }}, function (err, restaurants) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            res.render('users/main', {
+                restaurants: restaurants
+            });
+
+        });
+    
+    }
+    //Case 4
+    else if (!req.query.cuisine && req.query.rating) {
+        console.log('Searching for:' + parseFloat(req.query.rating));
+        mongoose.model('Restaurant').find({'rating' : { $gt: parseFloat(req.query.rating) }}, function (err, restaurants) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            res.render('users/main', {
+                restaurants: restaurants
+            });
+
+        });
+    
+    }
+
 });
 
 
 // "/users/admin" 
 router.get('/admin', function (req, res) {
-    mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
+    if(!req.query.userType){
+        mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
         if (err) {
             console.log(err);
             return;
@@ -328,6 +351,69 @@ router.get('/admin', function (req, res) {
             });
         });
     });
+    }
+    else if(req.query.userType=='Customers')
+    {
+        mongoose.model('User').find({}, function (err, allRegUsers) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            mongoose.model('FBUser').find({}, function (err, allFBUsers) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                var allUsers = allRegUsers.concat(allFBUsers);
+                // console.log('allUsers: ' + allUsers);
+                mongoose.model('Auth').find({}, function (err, auth) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    for (var i = 0; i < auth.length; i++) {
+                        for (var k = 0; k < allUsers.length; k++) {
+                            if (auth[i]._id.equals(allUsers[k].auth)) {
+                                allUsers[k]['accountType'] = auth[i].accountType;
+                                console.log('account type: ' + allUsers[k]['accountType']);
+                            }
+                        }
+                    }
+                    res.render('users/admin', {
+                        users: allUsers
+                    });
+                });
+            });
+        });
+    }
+    else if(req.query.userType=='Restaurants')
+    {
+            mongoose.model('Restaurant').find({}, function (err, allUsers) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                // console.log('allUsers: ' + allUsers);
+                mongoose.model('Auth').find({}, function (err, auth) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    for (var i = 0; i < auth.length; i++) {
+                        for (var k = 0; k < allUsers.length; k++) {
+                            if (auth[i]._id.equals(allUsers[k].auth)) {
+                                allUsers[k]['accountType'] = auth[i].accountType;
+                                console.log('account type: ' + allUsers[k]['accountType']);
+                            }
+                        }
+                    }
+                    res.render('users/admin', {
+                        users: allUsers
+                    });
+                });
+            });
+    }
+    
 });
 
 
