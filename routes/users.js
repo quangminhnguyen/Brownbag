@@ -277,6 +277,7 @@ router.get('/main', function (req, res) {
         });
     
     }
+    
     //Case 3
     else if (req.query.cuisine && req.query.rating) {
         console.log('Searching for:'+ req.query.cuisine + ' and:' + parseFloat(req.query.rating));
@@ -292,6 +293,7 @@ router.get('/main', function (req, res) {
         });
     
     }
+    
     //Case 4
     else if (!req.query.cuisine && req.query.rating) {
         console.log('Searching for:' + parseFloat(req.query.rating));
@@ -303,11 +305,8 @@ router.get('/main', function (req, res) {
             res.render('users/main', {
                 restaurants: restaurants
             });
-
         });
-    
     }
-
 });
 
 
@@ -654,7 +653,49 @@ router.post('/:id/comment', function(req, res){
     
 });
 
- 
+
+
+router.put('/:id/avatar', function (req, res) {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        var pic = files.profilePicture;
+        if (pic.size > 0) {
+            mongoose.model('Auth').findById(req.id, function (err, user) {
+                if (err) {
+                    console.log('PUT Error, there was problem retrieving: ' + err);
+                    return;
+                }
+                getAccountType(req.session.userId, function (err, requestAccountType) {
+                    if (canEdit(req.session.userId, requestAccountType, req.id)) {
+                        // Restaurant user
+                        if (user.accountType == ACCOUNT_TYPE[3]) {
+
+                            mongoose.findByIdAndUpdate('Restaurant').findOne(user._id, {
+                                avatar: pic }, function (err, restaurant) {
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+
+                                // Find and remove the document
+                                mongoose.model('Avatar').findByIdAndRemove(restaurant.avatar, function(err, doc, result){
+                                    if (err) {
+                                        console.log(err);
+                                        return;
+                                    }
+                                });
+                            });
+                        // Facebook or normal user
+                        } else {
+                        }
+                    }
+                });
+            });
+        }
+    });
+});
+    
+
 
 //// get the individual user by Mongo ID
 //router.get('/:id/edit', function (req, res) {

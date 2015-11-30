@@ -9,7 +9,7 @@ block list
         form(action='', method='post', name='upload-img', enctype='application/x-www-form-urlencoded', role='form')
           .form-group
             img.img-rounded.img-responsive(alt='User Profile Image' src='/avatars/#{user.avatar}')
-            input(type='file' accept='image/*')
+            input(type='file' accept='image/*' name='userProfile')
           .form-group
             button.btn.btn-xs.btn-info.active#user-new-img-button(type='submit') 
               i.glyphicon.glyphicon-upload
