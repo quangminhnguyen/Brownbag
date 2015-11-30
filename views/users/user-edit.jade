@@ -1,4 +1,98 @@
 extends ../layout
 
 block list
-  h3.text-center User Edit Page for #{user.name}
+  h2.text-center Edit User Profile
+  .row
+    .col-md-3
+      .display-block
+        h4.text-center Update Avatar
+        form(action='', method='post', name='upload-img', enctype='application/x-www-form-urlencoded', role='form')
+          .form-group
+            img.img-rounded.img-responsive(alt='User Profile Image' src='/avatars/#{user.avatar}')
+            input(type='file' accept='image/*')
+          .form-group
+            button.btn.btn-xs.btn-info.active#user-new-img-button(type='submit') 
+              i.glyphicon.glyphicon-upload
+              | &nbsp; Upload
+    .col-md-9
+      .display-block
+        h4.text-center Update Personal Information
+        form.form-horizontal(action='/users/#{user._id}/edit', method='put', name='update-user', enctype='application/x-www-form-urlencoded', role='form')
+          .form-group
+            label.col-md-3.control-label Email
+            .col-md-9
+              input.form-control(disabled='disabled', type='email', value='#{displayEmail}', name='email')
+          .form-group
+            label.col-md-3.control-label Name
+            .col-md-9
+              input.form-control(type='text', name='name' placeholder='Your Name', value='#{user.name}')
+              .helper#user-name-edit-helper
+          .form-group
+            label.col-md-3.control-label Age
+            .col-md-9
+              input.form-control(type='text', name='age' placeholder='Age', value='#{user.age}')
+              .helper#user-age-edit-helper
+          .form-group
+            label.col-md-3.control-label Favorite Cuisines
+            .col-md-9
+              label.checkbox-inline
+                input(type='checkbox' name='Japanese' value='Japan') 
+                | Japanese Food
+              label.checkbox-inline
+                input(type='checkbox' name='Thai' value='Thai')
+                | Thai Food
+              label.checkbox-inline
+                input(type='checkbox' name='Chinese' value='China')
+                | Chinese Food
+              label.checkbox-inline
+                input(type='checkbox' name='Korean' value='Korea')
+                | Korean Food
+              label.checkbox-inline
+                input(type='checkbox' name='Italian' value='Italy')
+                | Italian Food
+              label.checkbox-inline
+                input(type='checkbox' name='French' value='France')
+                | French Food
+              label.checkbox-inline
+                input(type='checkbox' name='VietNamese' value='VietNam')
+                | VietNamese Food
+              label.checkbox-inline
+                input(type='checkbox' name='Indian' value='India')
+                | Indian Food
+              label.checkbox-inline
+                input(type='checkbox' name='FastFood' value='FastFood')
+                | Fast Food
+              label.checkbox-inline
+                input(type='checkbox' name='Others' value='Others')
+                | Others
+              .helper#user-checkbox-edit-helper
+          .form-group
+            .col-md-offset-3.col-md-9
+              button.btn.btn-info.active(type='submit')
+                i.glyphicon.glyphicon-wrench
+                | &nbsp; Update Profile
+  .row
+    .col-md-offset-3.col-md-9
+      .display-block
+        h4.text-center Update Password
+        form.form-horizontal(action='/users/#{user._id}/updatePassword', method='post', name='update_user_password', enctype='application/x-www-form-urlencoded')
+          .form-group
+            label.col-md-3.control-label Current password
+            .col-md-9
+              input.form-control#edit-old-pass(type='password', name='old-password')
+              .helper#user-old-pass-helper
+          .form-group
+            label.col-md-3.control-label New Password
+            .col-md-9
+              input.form-control#edit-new(type='password', name='new-password')
+              .helper#user-new-pass-helper
+          .form-group
+            label.col-md-3.control-label Confirm New Password
+            .col-md-9
+              input.form-control#edit-confirm-new(type='password' name='confirm-new-password')
+              .helper#user-confirm-pass-helper
+          .form-group
+            .col-md-offset-3.col-md-10
+              button.btn.btn-info.active(type='submit')
+                i.glyphicon.glyphicon-wrench
+                | &nbsp; Update password

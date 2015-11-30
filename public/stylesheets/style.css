@@ -76,10 +76,12 @@ h4 {
     height: 120px;
 }
 
+/*
 #username {
   color: #26412a;
   font-weight: bold;
 }
+*/
 
 .heading {
   margin: 16px 0px;
@@ -90,7 +92,7 @@ h4 {
     display: inline-block;
 }
 
-.display-profile, .display-comment, .comment {
+.display-block {
     border: 2px solid;
     border-color: grey;
     padding: 10px;
@@ -103,6 +105,7 @@ h4 {
     color: indianred;
     font-style: italic;
 }
+
 
 #username {
     color: #ffd;
