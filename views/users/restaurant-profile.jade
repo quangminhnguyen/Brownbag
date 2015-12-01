@@ -36,31 +36,32 @@ block list
           i.glyphicon.glyphicon-trash
           | &nbsp Remove
     .display-block
-      h5 Customer feedback's
-      br
-      form.rating(action='/users/#{restaurant.auth}/comment', method='POST')
-        span
-          input#str5(type='radio', name='rating', value='5')
-          label(for='str5')
-        span
-          input#str4(type='radio', name='rating', value='4')
-          label(for='str4')
-        span
-          input#str3(type='radio', name='rating', value='3')
-          label(for='str3')
-        span
-          input#str2(type='radio', name='rating', value='2')
-          label(for='str2')
-        span
-          input#str1(type='radio', name='rating', value='1' required='true')
-          label(for='str1')
+      if canRate
+        h5 Customer feedback's
+        br
+        form.rating(action='/users/#{restaurant.auth}/comment', method='POST')
+          span
+            input#str5(type='radio', name='rating', value='5')
+            label(for='str5')
+          span
+            input#str4(type='radio', name='rating', value='4')
+            label(for='str4')
+          span
+            input#str3(type='radio', name='rating', value='3')
+            label(for='str3')
+          span
+            input#str2(type='radio', name='rating', value='2')
+            label(for='str2')
+          span
+            input#str1(type='radio', name='rating', value='1' required='true')
+            label(for='str1')
+            br
+          p Rate
           br
-        p Rate
-        br
-        p Enter comment below (optional)
-        input.form-control#input-location(type='text', name='comment', placeholder='Comment...')
-        br
-        input#btn-signup.btn.btn-info(type='submit', value='Submit your review')
+          p Enter comment below (optional)
+          input.form-control#input-location(type='text', name='comment', placeholder='Comment...')
+          br
+          input#btn-signup.btn.btn-info(type='submit', value='Submit your review')
       each comment, i in comments
         .display-block
           p= comment.name + ' rated ' + comment.rating + ' stars'

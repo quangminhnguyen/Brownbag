@@ -511,6 +511,7 @@ router.route('/:id')
                                                 restaurant: restaurant,
                                                 email: viewedUser.email,
                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                canRate: canRate(requestAccountType),
                                                 comments: [],
                                                 auths: allAuths,
                                                 recommended: recommended
@@ -544,6 +545,7 @@ router.route('/:id')
                                                         restaurant: restaurant,
                                                         email: viewedUser.email,
                                                         canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                        canRate: canRate(requestAccountType),
                                                         comments: obj,
                                                         auths: allAuths,
                                                         recommended: recommended
@@ -563,6 +565,7 @@ router.route('/:id')
                                                                 restaurant: restaurant,
                                                                 email: viewedUser.email,
                                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                                canRate: canRate(requestAccountType),
                                                                 comments: obj,
                                                                 auths: allAuths,
                                                                 recommended: recommended
@@ -676,6 +679,17 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
     }
     return false;
 }
+
+function canRate(signedInAccountType) {
+
+    // if the request user is a user or fb user.
+    if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]) {
+        return true;
+    }
+    return false;
+}
+
+
 
 
 
