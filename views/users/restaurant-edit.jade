@@ -17,7 +17,7 @@ block list
     .col-md-9
       .display-block
         h4.text-center Update Restaurant Information
-        form.form-horizontal(action='/users/#{restaurant.auth}/edit', method='put', name='update-restaurant', enctype='application/x-www-form-urlencoded', role = 'form')
+        form.form-horizontal#rest-update-form(action='/users/#{restaurant.auth}/edit', method='put', name='update-restaurant', enctype='application/x-www-form-urlencoded', role = 'form')
           .form-group
             label.col-md-3.control-label Email
             .col-md-9
@@ -25,50 +25,51 @@ block list
           .form-group
             label.col-md-3.control-label Restaurant Name
             .col-md-9
-              input.form-control(type='text', name='name', value='#{restaurant.name}', placeholder='Name of the restaurant')
+              input.form-control#rest-name-update(type='text', name='name', value='#{restaurant.name}', placeholder='Name of the restaurant')
               .helper#rest-name-edit-helper
           .form-group
             label.col-md-3.control-label Restaurant Location
             .col-md-9
-              input.form-control(type='text', name='location', value='#{restaurant.location}', placeholder='Location of the restaurant.')
+              input.form-control#rest-loc-update(type='text', name='location', value='#{restaurant.location}', placeholder='Location of the restaurant.')
               .helper#rest-loc-edit-helper
           .form-group
             label.col-md-3.control-label Restaurant Cuisines
             .col-md-9
               label.checkbox-inline
-                input(type='checkbox' name='Japanese' value='Japan') 
+                input#r0(type='checkbox' name='Japanese' value='Japan') 
                 | Japanese Food
               label.checkbox-inline
-                input(type='checkbox' name='Thai' value='Thai')
+                input#r1(type='checkbox' name='Thai' value='Thai')
                 | Thai Food
               label.checkbox-inline
-                input(type='checkbox' name='Chinese' value='China')
+                input#r2(type='checkbox' name='Chinese' value='China')
                 | Chinese Food
               label.checkbox-inline
-                input(type='checkbox' name='Korean' value='Korea')
+                input#r3(type='checkbox' name='Korean' value='Korea')
                 | Korean Food
               label.checkbox-inline
-                input(type='checkbox' name='Italian' value='Italy')
+                input#r4(type='checkbox' name='Italian' value='Italy')
                 | Italian Food
               label.checkbox-inline
-                input(type='checkbox' name='French' value='France')
+                input#r5(type='checkbox' name='French' value='France')
                 | French Food
               label.checkbox-inline
-                input(type='checkbox' name='VietNamese' value='VietNam')
+                input#r6(type='checkbox' name='VietNamese' value='VietNam')
                 | VietNamese Food
               label.checkbox-inline
-                input(type='checkbox' name='Indian' value='India')
+                input#r7(type='checkbox' name='Indian' value='India')
                 | Indian Food
               label.checkbox-inline
-                input(type='checkbox' name='FastFood' value='FastFood')
+                input#r8(type='checkbox' name='FastFood' value='FastFood')
                 | Fast Food
               label.checkbox-inline
-                input(type='checkbox' name='Others' value='Others')
+                input#r9(type='checkbox' name='Others' value='Others')
                 | Others
               .helper#rest-checkbox-edit-helper
+          .col-md-offset-3.col-md-9.success-mess#rest-success-or-not
           .form-group
             .col-md-offset-3.col-md-9
-              button.btn.btn-info.active(type='submit')
+              .btn.btn-info.active#rest-update-prof-btn
                 i.glyphicon.glyphicon-wrench
                 | &nbsp; Update Profile
   .row

@@ -62,10 +62,13 @@ var router = express.Router();
 router.post('/sendMessage', function(req, res) {
   var sender = res.locals.currentUser.email; 
   var recipientEmail  = req.body.recipient; // should be the email
+  console.log("sender" + sender);
+  console.log("receiver" + recipientEmail);
   var message = req.body.message; 
   
   var createCallback = function (err, message) {
     if (err) {
+      console.log(err);
       res.send("There was a problem adding the MESSAGE to the database.");
     }
     res.redirect('back')
