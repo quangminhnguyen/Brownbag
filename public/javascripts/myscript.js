@@ -6,7 +6,6 @@ $("#signupform").submit(function (e) {
     var form = this;
     var ready = true;
 
-
     if (MAIL_VALID_REX.test($('#input-email').val()) == true) {
         $('#email-helper').text('');
         ready = true && ready;

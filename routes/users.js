@@ -726,6 +726,7 @@ router.route('/:id/edit')
         });
     })
 
+
 // update the user profile, this is an AJAX CALL !
 .put(function (req, res) {
     // Get the account type of the current user. 
