@@ -17,7 +17,11 @@ block list
     .col-md-9
       .display-block
         h4.text-center Update Personal Information
-        form.form-horizontal#user-update-form(action='/users/#{user.auth}/edit', method='put', name='update-user', enctype='application/x-www-form-urlencoded', role='form')
+        form.form-horizontal#user-update-form(action='/users/#{user.auth}/edit', method='put', name='update-user', role='form')
+          .form-group
+            label.col-md-3.control-label Account Type
+            .col-md-9
+              input.form-control(disabled='disabled', type='text', value='#{accountType}', name='account')           
           .form-group
             label.col-md-3.control-label Email
             .col-md-9
@@ -36,65 +40,68 @@ block list
             label.col-md-3.control-label Favorite Cuisines
             .col-md-9
               label.checkbox-inline
-                input#c0(type='checkbox' name='Japanese' value='Japan') 
+                input#c0(type='checkbox' name='Japanese' value='Japan' checked=cbl[0]) 
                 | Japanese Food
               label.checkbox-inline
-                input#c1(type='checkbox' name='Thai' value='Thai')
+                input#c1(type='checkbox' name='Thai' value='Thai' checked=cbl[1])
                 | Thai Food
               label.checkbox-inline
-                input#c2(type='checkbox' name='Chinese' value='China')
+                input#c2(type='checkbox' name='Chinese' value='China' checked=cbl[2])
                 | Chinese Food
               label.checkbox-inline
-                input#c3(type='checkbox' name='Korean' value='Korea')
+                input#c3(type='checkbox' name='Korean' value='Korea' checked=cbl[3])
                 | Korean Food
               label.checkbox-inline
-                input#c4(type='checkbox' name='Italian' value='Italy')
+                input#c4(type='checkbox' name='Italian' value='Italy' checked=cbl[4])
                 | Italian Food
               label.checkbox-inline
-                input#c5(type='checkbox' name='French' value='France')
+                input#c5(type='checkbox' name='French' value='France' checked=cbl[5])
                 | French Food
               label.checkbox-inline
-                input#c6(type='checkbox' name='VietNamese' value='VietNam')
+                input#c6(type='checkbox' name='VietNamese' value='VietNam' checked=cbl[6])
                 | VietNamese Food
               label.checkbox-inline
-                input#c7(type='checkbox' name='Indian' value='India')
+                input#c7(type='checkbox' name='Indian' value='India' checked=cbl[7])
                 | Indian Food
               label.checkbox-inline
-                input#c8(type='checkbox' name='FastFood' value='FastFood')
+                input#c8(type='checkbox' name='FastFood' value='FastFood' checked=cbl[8])
                 | Fast Food
               label.checkbox-inline
-                input#c9(type='checkbox' name='Others' value='Others')
+                input#c9(type='checkbox' name='Others' value='Others' checked=cbl[9])
                 | Others
               .helper#user-checkbox-edit-helper
-          .col-md-offset-3.col-md-9.success-mess#user-success-or-not
+          .col-md-offset-3.col-md-9.success-mess#user-profile-success
+          .col-md-offset-3.col-md-9.helper#user-profile-fail
           .form-group
             .col-md-offset-3.col-md-9
               .btn.btn-info.active#user-update-prof-btn
                 i.glyphicon.glyphicon-wrench
                 | &nbsp; Update Profile
-
-  .row
-    .col-md-offset-3.col-md-9
-      .display-block
-        h4.text-center Update Password
-        form.form-horizontal(action='/users/#{user._id}/updatePassword', method='post', name='update_user_password', enctype='application/x-www-form-urlencoded')
-          .form-group
-            label.col-md-3.control-label Current password
-            .col-md-9
-              input.form-control#edit-old-pass(type='password', name='old-password')
-              .helper#user-old-pass-helper
-          .form-group
-            label.col-md-3.control-label New Password
-            .col-md-9
-              input.form-control#edit-new(type='password', name='new-password')
-              .helper#user-new-pass-helper
-          .form-group
-            label.col-md-3.control-label Confirm New Password
-            .col-md-9
-              input.form-control#edit-confirm-new(type='password' name='confirm-new-password')
-              .helper#user-confirm-pass-helper
-          .form-group
-            .col-md-offset-3.col-md-10
-              button.btn.btn-info.active(type='submit')
-                i.glyphicon.glyphicon-wrench
-                | &nbsp; Update password
+  if canUpdatePassword
+    .row
+      .col-md-offset-3.col-md-9
+        .display-block
+          h4.text-center Update Password
+          form.form-horizontal#user-update-pass-form(action='/users/#{user.auth}/password', method='put', name='update_user_password', role='form')
+            .form-group
+              label.col-md-3.control-label Current password
+              .col-md-9
+                input.form-control#user-edit-old-pass(type='password', name='old-password', placeholder="Current Password")
+                .helper#user-old-pass-helper
+            .form-group
+              label.col-md-3.control-label New Password
+              .col-md-9
+                input.form-control#user-edit-new-pass(type='password', name='new-password', placeholder="New Password")
+                .helper#user-new-pass-helper
+            .form-group
+              label.col-md-3.control-label Confirm New Password
+              .col-md-9
+                input.form-control#user-edit-confirm-pass(type='password' name='confirm-new-password', placeholder="Confirm Password")
+                .helper#user-confirm-pass-helper
+            .col-md-offset-3.col-md-9.success-mess#user-pass-success
+            .col-md-offset-3.col-md-9.helper#user-pass-fail
+            .form-group
+              .col-md-offset-3.col-md-10
+                .btn.btn-info.active#user-update-pass-btn
+                  i.glyphicon.glyphicon-wrench
+                  | &nbsp; Update password

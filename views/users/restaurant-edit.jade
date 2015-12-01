@@ -19,6 +19,10 @@ block list
         h4.text-center Update Restaurant Information
         form.form-horizontal#rest-update-form(action='/users/#{restaurant.auth}/edit', method='put', name='update-restaurant', enctype='application/x-www-form-urlencoded', role = 'form')
           .form-group
+            label.col-md-3.control-label Account Type
+            .col-md-9
+              input.form-control(disabled='disabled', type='text', value='#{accountType}', name='account')        
+          .form-group
             label.col-md-3.control-label Email
             .col-md-9
               input.form-control(disabled='disabled', type='email', value='#{displayEmail}', name='email')
@@ -36,65 +40,68 @@ block list
             label.col-md-3.control-label Restaurant Cuisines
             .col-md-9
               label.checkbox-inline
-                input#r0(type='checkbox' name='Japanese' value='Japan') 
+                input#r0(type='checkbox' name='Japanese' value='Japan' checked=cbl[0]) 
                 | Japanese Food
               label.checkbox-inline
-                input#r1(type='checkbox' name='Thai' value='Thai')
+                input#r1(type='checkbox' name='Thai' value='Thai' checked=cbl[1])
                 | Thai Food
               label.checkbox-inline
-                input#r2(type='checkbox' name='Chinese' value='China')
+                input#r2(type='checkbox' name='Chinese' value='China' checked=cbl[2])
                 | Chinese Food
               label.checkbox-inline
-                input#r3(type='checkbox' name='Korean' value='Korea')
+                input#r3(type='checkbox' name='Korean' value='Korea' checked=cbl[3])
                 | Korean Food
               label.checkbox-inline
-                input#r4(type='checkbox' name='Italian' value='Italy')
+                input#r4(type='checkbox' name='Italian' value='Italy' checked=cbl[4])
                 | Italian Food
               label.checkbox-inline
-                input#r5(type='checkbox' name='French' value='France')
+                input#r5(type='checkbox' name='French' value='France' checked=cbl[5])
                 | French Food
               label.checkbox-inline
-                input#r6(type='checkbox' name='VietNamese' value='VietNam')
+                input#r6(type='checkbox' name='VietNamese' value='VietNam' checked=cbl[6])
                 | VietNamese Food
               label.checkbox-inline
-                input#r7(type='checkbox' name='Indian' value='India')
+                input#r7(type='checkbox' name='Indian' value='India' checked=cbl[7])
                 | Indian Food
               label.checkbox-inline
-                input#r8(type='checkbox' name='FastFood' value='FastFood')
+                input#r8(type='checkbox' name='FastFood' value='FastFood' checked=cbl[8])
                 | Fast Food
               label.checkbox-inline
-                input#r9(type='checkbox' name='Others' value='Others')
+                input#r9(type='checkbox' name='Others' value='Others' checked=cbl[9])
                 | Others
               .helper#rest-checkbox-edit-helper
-          .col-md-offset-3.col-md-9.success-mess#rest-success-or-not
+          .col-md-offset-3.col-md-9.success-mess#rest-profile-success
+          .col-md-offset-3.col-md-9.helper#rest-profile-fail
           .form-group
             .col-md-offset-3.col-md-9
               .btn.btn-info.active#rest-update-prof-btn
                 i.glyphicon.glyphicon-wrench
                 | &nbsp; Update Profile
-  .row
-    .col-md-offset-3.col-md-9
-      .display-block
-        h4.text-center Update Password
-        form.form-horizontal(action='/users/#{restaurant.auth}/updatePassword', method='post', name='update_restaurant_password', enctype='application/x-www-form-urlencoded')
-          .form-group
-            label.col-md-3.control-label Current password
-            .col-md-9
-              input.form-control(type='password', name='old-password')
-              .helper#rest-old-pass-helper
-          .form-group
-            label.col-md-3.control-label New Password 
-            .col-md-9
-              input.form-control(type='password', name='new-password')
-              .helper#rest-new-pass-helper
-          .form-group
-            label.col-md-3.control-label Confirm New Password
-            .col-md-9
-              input.form-control(type='password' name='confirm-new-password')
-              .helper#rest-confirm-pass-helper
-          .form-group
-            .col-md-offset-3.col-md-10
-              button.btn.btn-info.active(type='submit')
-                i.glyphicon.glyphicon-wrench
-                | &nbsp; Update password
-            
+  if canUpdatePassword
+    .row
+      .col-md-offset-3.col-md-9
+        .display-block
+          h4.text-center Update Password
+          form.form-horizontal#rest-update-pass-form(action='/users/#{restaurant.auth}/password', method='put', name='update_restaurant_password', role='form')
+            .form-group
+              label.col-md-3.control-label Current password
+              .col-md-9
+                input.form-control#rest-edit-old-pass(type='password', name='old-password', placeholder='Current Password')
+                .helper#rest-old-pass-helper
+            .form-group
+              label.col-md-3.control-label New Password 
+              .col-md-9
+                input.form-control#rest-edit-new-pass(type='password', name='new-password' placeholder='New Password')
+                .helper#rest-new-pass-helper
+            .form-group
+              label.col-md-3.control-label Confirm New Password
+              .col-md-9
+                input.form-control#rest-edit-confirm-pass(type='password' name='confirm-new-password' placeholder='Confirm Password')
+                .helper#rest-confirm-pass-helper
+            .col-md-offset-3.col-md-9.success-mess#rest-pass-success
+            .col-md-offset-3.col-md-9.helper#rest-pass-fail
+            .form-group
+              .col-md-offset-3.col-md-10
+                .btn.btn-info.active#rest-update-pass-btn
+                  i.glyphicon.glyphicon-wrench
+                  | &nbsp; Update password

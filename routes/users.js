@@ -701,6 +701,10 @@ router.route('/:id/edit')
                 console.log('GET Error: There was a problem retriveving: ' + err);
                 return;
             }
+            
+            // Only the user can update their own password, execept for fb user who don't have password!
+            var canUpdatePassword = (user.accountType != ACCOUNT_TYPE[0]) && (req.id == req.session.userId);
+            console.log(req.id == req.session.userId)
             // get account type of the request user
             getAccountType(req.session.userId, function (err, requestAccountType) {
 
@@ -715,9 +719,23 @@ router.route('/:id/edit')
                                 console.log(err);
                                 return;
                             }
+                            
+                            // Get a list of checked box for the cuisines.
+                            var listOfCheckedBox = [];
+                            for (var i = 0; i < CUISINE.length; i ++) {
+                                if(restaurant.cuisine.indexOf(CUISINE[i]) != -1) {
+                                    listOfCheckedBox.push(true);
+                                } else {
+                                    listOfCheckedBox.push(false);
+                                }
+                            }
+                            console.log(listOfCheckedBox);
                             res.render('users/restaurant-edit', {
                                 restaurant: restaurant,
-                                displayEmail: user.email
+                                displayEmail: user.email,
+                                canUpdatePassword: canUpdatePassword,
+                                cbl: listOfCheckedBox,
+                                accountType: user.accountType
                             });
                         });
 
@@ -737,7 +755,8 @@ router.route('/:id/edit')
                                     console.log(err);
                                     return;
                                 }
-
+                                
+                                // Check to see if the user is in fbUser table or in User table.
                                 var displayUser;
                                 if (fbUser == null && normalUser != null) {
                                     displayUser = normalUser;
@@ -747,10 +766,22 @@ router.route('/:id/edit')
                                     console.log(err);
                                     return;
                                 }
-
+                                
+                                // Get a list of checked box for the cuisine.
+                                var listOfCheckedBox = [];
+                                for (var i = 0; i < CUISINE.length; i ++) {
+                                    if(displayUser.preferredCuisine.indexOf(CUISINE[i]) != -1) {
+                                        listOfCheckedBox.push(true);
+                                    } else {
+                                        listOfCheckedBox.push(false);
+                                    }
+                                }
                                 res.render('users/user-edit', {
                                     user: displayUser,
-                                    displayEmail: user.email
+                                    displayEmail: user.email,
+                                    canUpdatePassword: canUpdatePassword,
+                                    cbl: listOfCheckedBox,
+                                    accountType: user.accountType
                                 });
                             });
                         });
@@ -761,8 +792,6 @@ router.route('/:id/edit')
             });
         });
     })
-
-
 // update the user profile, this is an AJAX CALL !
 .put(function (req, res) {
     // Get the account type of the current user. 
@@ -1139,47 +1168,77 @@ router.post('/:id/avatar', function (req, res, next) {
 
 // AJAX call to update the password.
 router.put('/:id/password', function (req, res) {
+    console.log('req.id: ' + req.id);
+    console.log('req.session.urserId' + req.session.userId);
     var password = req.body.password;
     var newPassword = req.body.newPassword;
     var confirmPassword = req.body.confirmPassword;
+    var errorMess = '';
 
-    // This happens in case the user doesn't use the user interface.
+    // Server side validation for users who don't use the user interface.
     if (req.id != req.session.userId) {
-        res.send('You are not allow to update this user password');
-        return;
+        errorMess += 'You cannot update someone else password.<br>';
     }
 
-    // Server password validation for user who don't use the interface.
+    // Check the password length.
     if (!newPassword || newPassword.length < 5 || newPassword > 12) {
-        res.send("Password length should be between 5 and 12 characters.");
-        return;
+        errorMess += "Password length should be between 5 and 12 characters.<br>";
     }
 
-    // Check if the newPassword match with the confirmPassword
+    // Check if the newPassword match with the confirmPassword.
     if (newPassword != confirmPassword) {
-        res.send("Unmatched Confirm Password");
-        return;
+        errorMess += "Unmatched Confirm Password.<br>";
     }
 
-    mongoose.model('Auth').findById(req.id, function (err, user) {
-        user.comparePassword(password, function (err, isMatch) {
-            // Check if the old password match with what record in db.
-            if (!isMatch) {
-                res.send("Invalid Old Password");
+    if (errorMess != "") {
+        res.send(errorMess);
+        return;
+    }
+    
+    // Get account type of the requester, facebook user doesn't have the password to edit.
+    getAccountType(req.session.userId, function (err, requestAccountType) {
+        
+        // If the requester is a facebook user acc, then they don't have the password to update.
+        if (requestAccountType == ACCOUNT_TYPE[0]) {
+            res.send('fail');
+            return;
+        }
+        
+        // Get the password of the target user and check if it match with 
+        // the input password.
+        mongoose.model('Auth').findById(req.id, function (err, user) {
+            if (err) {
+                console.log(err);
                 return;
             }
-            
-            // Hasing the password.
-            hashPassword(newPassword, function (err, hashedPassword) {
-                // Update the password.
-                user.update({
-                    password: hashedPassword
-                }, function(err, userID) {
+            user.comparePassword(password, function (err, isMatch) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+
+                // Check if the old password match with what record in db.
+                if (!isMatch) {
+                    res.send("Invalid Old Password");
+                    return;
+                }
+
+                // Hasing the password.
+                hashPassword(newPassword, function (err, hashedPassword) {
                     if (err) {
                         console.log(err);
                         return;
                     }
-                    res.send('success');
+                    // Update the password.
+                    user.update({
+                        password: hashedPassword
+                    }, function (err, userID) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        res.send('success');
+                    });
                 });
             });
         });

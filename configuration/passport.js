@@ -50,7 +50,7 @@ var fs = require('fs');module.exports = function (passport) {
                                 res.send("There was a problem adding this user into the Auth relation");
                             } else {
                                 console.log(__dirname);
-                                var fileToRead = path.join(__dirname, '../') + '/public/images/avatar.jpg';
+                                var fileToRead = path.join(__dirname, '../') + '/public/images/facebook.png';
                                 fs.readFile(fileToRead, function (err, data) {
                                     if (err) throw err;
                                     var img = {
