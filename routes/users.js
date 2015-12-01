@@ -682,7 +682,7 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
 function canRate(signedInAccountType) {
 
     // if the request user is a user or fb user.
-    if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]) {
+    if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]||signedInAccountType == ACCOUNT_TYPE[2]) {
         return true;
     }
     return false;
