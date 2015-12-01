@@ -65,6 +65,10 @@ block list
         .display-block
           p= comment.name + ' rated ' + comment.rating + ' stars'
           p= comment.comment
+      each one, i in recommended
+        table
+          tr
+            a(href='/users/#{one.auth}')=one.name
     .restaurant-conversations
       if canEdit || currentUser.accountType == 'REGULAR USER' || currentUser.accountType == 'FACEBOOK USER'
         include ./conversations-partial.jade

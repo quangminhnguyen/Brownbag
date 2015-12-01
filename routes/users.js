@@ -487,6 +487,14 @@ router.route('/:id')
                                 getAccountType(req.session.userId, function (err, requestAccountType) {
 
                                     var obj = [];
+                                    var recommended = ["There is no restaurant with similar cuisine"];
+                                        mongoose.model('Restaurant').where('name').ne(restaurant.name).find({cuisine : { "$in" : restaurant.cuisine}}, function (err, result) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+                                            }
+                                            recommended = result;
+                                        });
                                     mongoose.model('Review').find({
                                         restaurantId: restaurant.auth
                                     }, function (err, reviews) {
@@ -504,7 +512,8 @@ router.route('/:id')
                                                 email: viewedUser.email,
                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                 comments: [],
-                                                auths: allAuths
+                                                auths: allAuths,
+                                                recommended: recommended
                                             });
                                         }
 
@@ -536,8 +545,8 @@ router.route('/:id')
                                                         email: viewedUser.email,
                                                         canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                         comments: obj,
-                                                        auths: allAuths
-
+                                                        auths: allAuths,
+                                                        recommended: recommended
                                                     });
                                                 }
                                             }
@@ -555,8 +564,8 @@ router.route('/:id')
                                                                 email: viewedUser.email,
                                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                                 comments: obj,
-                                                                auths: allAuths
-
+                                                                auths: allAuths,
+                                                                recommended: recommended
 
                                                             });
                                                         }
