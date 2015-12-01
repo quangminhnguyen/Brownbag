@@ -72,6 +72,9 @@ module.exports = function (passport) {
                                         newFBUser.name = profile.displayName;
                                         newFBUser.avatar = picture._id;
                                         newFBUser.auth = user._id;
+                                        if (profile._json.age_range) {
+                                            newFBUser.age = profile._json.age_range.min;
+                                        }
                                         fbUser.create(newFBUser, function (err, fbuser) {
                                             if (err) {
                                                 res.send("There was a problem adding this user into the fbUser relation")
