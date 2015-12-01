@@ -164,11 +164,18 @@ router.route('/')
                                 // Store hashed passwords.
                                 hashPassword(password, function (err, hashedPassword) {
 
+                                    var myname = "";
+                                    if (name != "") {
+                                        myname = name
+                                    } 
+                                    if (restName != "") {
+                                        myname = restName
+                                    }
                                     // Create new user.
                                     mongoose.model('Auth').create({
                                         email: email,
                                         password: hashedPassword,
-                                        name: name,
+                                        name: myname,
                                         accountType: accountType
                                     }, function (err, user) {
                                         if (err) {
