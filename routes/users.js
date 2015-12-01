@@ -568,7 +568,6 @@ router.route('/:id')
                                                                 comments: obj,
                                                                 auths: allAuths,
                                                                 recommended: recommended
-
                                                             });
                                                         }
                                                     }
@@ -841,12 +840,21 @@ router.route('/:id/edit')
                     }, function (err, oldUser) {
                         if (err) {
                             console.log(err);
-                            res.send("fail");
+                            return;
                         }
                         if (oldUser) {
-                            res.send("success");
+                            // Also update the name in Auth table
+                            user.update({
+                                name: newName
+                            }, function(err, userId){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.send('success');
+                            });
                         } else {
-                            res.send("fail");
+                            res.send('fail');
                         }
                     });
                     // If the user is a facebook user, then update FBUser table.
@@ -883,15 +891,24 @@ router.route('/:id/edit')
                     }, function (err, oldFbUser) {
                         if (err) {
                             console.log(err);
-                            res.send("fail");
+                            return;
                         }
                         if (oldFbUser) {
-                            res.send("success");
+                            // Also update the name in Auth table
+                            user.update({
+                                name: newName
+                            }, function(err, userId){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.send('success');
+                            });
                         } else {
                             res.send("fail");
                         }
                     });
-                    // If the user is a restaurant user
+                // If the user is a restaurant user
                 } else if (user.accountType == ACCOUNT_TYPE[3]) {
                     var newLocation = req.body.location;
                     var newName = req.body.name;
@@ -925,10 +942,19 @@ router.route('/:id/edit')
                     }, function (err, oldRestaurant) {
                         if (err) {
                             console.log(err);
-                            res.send("fail");
+                            return;
                         }
                         if (oldRestaurant) {
-                            res.send("success");
+                            // Also update the name in Auth table.
+                            user.update({
+                                name: newName
+                            }, function(err, userId){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.send('success');
+                            });
                         } else {
                             res.send("fail");
                         }
@@ -1135,37 +1161,6 @@ router.post('/:id/avatar', function (req, res, next) {
 
 
 
-
-
-
-//// get the individual user by Mongo ID
-//router.get('/:id/edit', function (req, res) {
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        if (err) {
-//            console.log('GET Error: There was a problem retrieving: ' + err);
-//        } else {
-//
-//            // Look up the logged-in user's role.
-//            getUserRole(req, function (err, role) {
-//                // See if the user is allowed to edit the target profile.
-//                if (canEdit(req.session.userId, role, user)) {
-//                    // Render the response.
-//                    res.format({
-//                        html: function () {
-//                            res.render('users/edit', {
-//                                title: 'User' + user._id,
-//                                "user": user,
-//                            });
-//                        }
-//                    });
-//                } else {
-//                    console.log("YOU DONT HAVE PERMISSION. GET OUT");
-//                }
-//            });
-//        }
-//    });
-//});
-
 // AJAX call to update the password.
 router.put('/:id/password', function (req, res) {
     console.log('req.id: ' + req.id);
@@ -1246,54 +1241,7 @@ router.put('/:id/password', function (req, res) {
 });
 
 
-//// put to update a user by ID
-//router.post('/:id/updatePassword', function (req, res) {
-//    var password = req.body.password;
-//    var newPassword = req.body.newPassword;
-//    var confirmPassword = req.body.confirmPassword;
-//
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        // Look up the logged-in user's role.
-//        getUserRole(req, function (err, role) {
-//            // See if the user is allowed to edit the target profile.
-//            if (canEdit(req.session.userId, role, user)) {
-//                console.log('user password before updating: ' + user.password);
-//                user.comparePassword(password, function (err, isMatch) {
-//                    if (isMatch) {
-//                        if (newPassword == confirmPassword) {
-//                            hashPassword(newPassword, function (err, hashedPassword) {
-//                                // Update user object.
-//                                user.update({
-//                                    password: hashedPassword
-//                                }, function (err, userID) {
-//                                    if (err) {
-//                                        req.session.alert = "Unable to update password";
-//                                        // Redirect the browser.
-//                                        res.redirect('back');
-//                                    } else {
-//                                        console.log('password updated to ' + newPassword);
-//                                        req.session.successAlert = "Password updated";
-//                                        // Redirect the browser.
-//                                        res.redirect('back');
-//                                    }
-//                                });
-//                            });
-//                        } else {
-//                            req.session.alert = "Passwords don't match";
-//                            // Redirect the browser.
-//                            res.redirect('back');
-//                        }
-//                    } else {
-//                        req.session.alert = 'Invalid password entered';
-//                        // Redirect the browser.
-//                        res.redirect('back');
-//                    }
-//                });
-//            }
-//        });
-//    });
-//});
-//
+
 //// delete a user by ID
 //router.delete('/:id/delete', function (req, res) {
 //    mongoose.model('User').findById(req.id, function (err, user) {

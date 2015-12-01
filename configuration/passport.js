@@ -5,7 +5,9 @@ var auth = require('../model/authentications');
 var mongoose = require('mongoose');
 var path = require('path');
 var ACCOUNT_TYPE = ['FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
-var fs = require('fs');module.exports = function (passport) {
+var fs = require('fs');
+
+module.exports = function (passport) {
 
     passport.serializeUser(function (user, done) {
         done(null, user._id);
@@ -43,6 +45,7 @@ var fs = require('fs');module.exports = function (passport) {
                         return done(null, user);
                     } else {
                         var newAuth = new auth();
+                        newAuth.name = profile.displayName;
                         newAuth.email = profile.emails[0].value;
                         newAuth.accountType = ACCOUNT_TYPE[0];
                         auth.create(newAuth, function (err, user) {
