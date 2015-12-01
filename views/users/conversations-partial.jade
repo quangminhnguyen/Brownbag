@@ -3,7 +3,7 @@
 - var found_message = 0
 if auths.length > 0
   each auth, i in auths
-    if (currentUser.accountType == 'RESTAURANT USER') || (auth.email == email)
+    if (currentUser.accountType == 'RESTAURANT USER') || (auth.email == email) || (currentUser.email == email)
       - found_message = 1
       .display-block
         a(href='/messages/conversation/#{auth.email} ') #{auth.name} 
