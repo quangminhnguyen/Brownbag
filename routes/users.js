@@ -86,7 +86,7 @@ router.route('/')
                             }
                         }
 
-                        // SERVER SIDE INPUT CHECK
+                        // Server side input validation for user who don't use the interface!
                         // validiate input mail format
                         if (MAIL_VALID_REX.test(email) == false) {
                             errorMess += "Invalid Email Address.<br>";
@@ -122,7 +122,7 @@ router.route('/')
                                 accountType = ACCOUNT_TYPE[1];
                             }
 
-                            // validation for restaurant
+                        // validation for restaurant
                         } else if (who == "owner") {
                             if (!restName || restName.length < 5 || restName.length > 25) {
                                 errorMess += 'The restaurant name should be between 5 and 25 characters in length. <br>';
@@ -138,7 +138,6 @@ router.route('/')
                             res.send(errorMess);
                             return;
                         }
-
 
                         // Use default image if none is specified.
                         var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
@@ -1094,6 +1093,8 @@ router.post('/:id/avatar', function (req, res, next) {
 
 
 
+
+
 //// get the individual user by Mongo ID
 //router.get('/:id/edit', function (req, res) {
 //    mongoose.model('User').findById(req.id, function (err, user) {
@@ -1121,43 +1122,57 @@ router.post('/:id/avatar', function (req, res, next) {
 //        }
 //    });
 //});
-//
-//// put to update a user by ID
-//router.put('/:id/edit', function (req, res) {
-//    var name = req.body.name;
-//    var description = req.body.description;
-//
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        // Look up the logged-in user's role.
-//        getUserRole(req, function (err, role) {
-//            // See if the user is allowed to edit the target profile.
-//            if (canEdit(req.session.userId, role, user)) {
-//                // update user
-//                // Update user object.
-//                user.update({
-//                    name: name,
-//                    description: description
-//                }, function (err, userID) {
-//                    if (err) {
-//                        res.send("There was a problem updating the information to the database: " + err);
-//                    } else {
-//                        // Render the response.
-//                        res.format({
-//                            html: function () {
-//                                // Redirect the browser.
-//                                res.redirect("/users/" + user._id);
-//                            },
-//                            json: function () {
-//                                res.json(users);
-//                            }
-//                        });
-//                    }
-//                });
-//            }
-//        });
-//    });
-//});
-//
+
+// AJAX call to update the password.
+router.put('/:id/password', function (req, res) {
+    var password = req.body.password;
+    var newPassword = req.body.newPassword;
+    var confirmPassword = req.body.confirmPassword;
+
+    // This happens in case the user doesn't use the user interface.
+    if (req.id != req.session.userId) {
+        res.send('You are not allow to update this user password');
+        return;
+    }
+
+    // Server password validation for user who don't use the interface.
+    if (!newPassword || newPassword.length < 5 || newPassword > 12) {
+        res.send("Password length should be between 5 and 12 characters.");
+        return;
+    }
+
+    // Check if the newPassword match with the confirmPassword
+    if (newPassword != confirmPassword) {
+        res.send("Unmatched Confirm Password");
+        return;
+    }
+
+    mongoose.model('Auth').findById(req.id, function (err, user) {
+        user.comparePassword(password, function (err, isMatch) {
+            // Check if the old password match with what record in db.
+            if (!isMatch) {
+                res.send("Invalid Old Password");
+                return;
+            }
+            
+            // Hasing the password.
+            hashPassword(newPassword, function (err, hashedPassword) {
+                // Update the password.
+                user.update({
+                    password: hashedPassword
+                }, function(err, userID) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    res.send('success');
+                });
+            });
+        });
+    });
+});
+
+
 //// put to update a user by ID
 //router.post('/:id/updatePassword', function (req, res) {
 //    var password = req.body.password;
