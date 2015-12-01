@@ -6,7 +6,11 @@ if auths.length > 0
     if (currentUser.accountType == 'RESTAURANT USER') || (auth.email == email) || (currentUser.email == email)
       - found_message = 1
       .display-block
-        a(href='/messages/conversation/#{auth.email} ') #{auth.name} 
+        if auth.name
+          a(href='/messages/conversation/#{auth.email} ') #{auth.name} 
+        else
+          a(href='/messages/conversation/#{auth.email} ') #{auth.email} 
+
 
 
 if currentUser.email != email

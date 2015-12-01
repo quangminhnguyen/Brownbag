@@ -13,6 +13,7 @@ router.post('/sendMessage', function(req, res) {
       console.log(err);
       res.send("There was a problem adding the MESSAGE to the database.");
     }
+    req.session.successAlert = "Message sent";
     res.redirect('back')
   };
 
