@@ -160,11 +160,18 @@ router.route('/')
                                 // Store hashed passwords.
                                 hashPassword(password, function (err, hashedPassword) {
 
+                                    var myname = "";
+                                    if (name != "") {
+                                        myname = name
+                                    } 
+                                    if (restName != "") {
+                                        myname = restName
+                                    }
                                     // Create new user.
                                     mongoose.model('Auth').create({
                                         email: email,
                                         password: hashedPassword,
-                                        name: name,
+                                        name: myname,
                                         accountType: accountType
                                     }, function (err, user) {
                                         if (err) {
@@ -460,7 +467,7 @@ router.param('id', function (req, res, next, id) {
 router.route('/:id')
     // Display user profile by their id in Auth relation
     .get(function (req, res) {
-        mongoose.model('Auth').findById(req.id, function (err, user) {
+        mongoose.model('Auth').findById(req.id, function (err, viewedUser) {
             if (err) {
                 console.log('GET Error: There was a problem retrieving: ' + err);
             } else {
@@ -468,15 +475,15 @@ router.route('/:id')
                 getAccountType(req.id, function (err, accountType) {
 
                     var authCallback = function (err, allAuths) {
-                        
+
                         // If this is a restaurant
                         if (accountType == ACCOUNT_TYPE[3]) {
-                            
+
                             // Find that restaurant in restaurant table.
                             mongoose.model('Restaurant').findOne({
-                                auth: user._id
+                                auth: viewedUser._id
                             }, function (err, restaurant) {
-                            
+
                                 getAccountType(req.session.userId, function (err, requestAccountType) {
 
                                     var obj = [];
@@ -492,22 +499,25 @@ router.route('/:id')
                                         restaurantId: restaurant.auth
                                     }, function (err, reviews) {
                                         var counter = 0;
-                                        for(var i = 0; i<reviews.length; i++){
+                                        var i;
+                                        for(i = 0; i<reviews.length; i++){
                                             if(reviews[i].comment) {
                                                 counter++;
                                             }
                                         }
+
                                         if (counter == 0){
                                             res.render('users/restaurant-profile', {
                                                 restaurant: restaurant,
-                                                email: user.email,
+                                                email: viewedUser.email,
                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                 comments: [],
+                                                auths: allAuths,
                                                 recommended: recommended
                                             });
                                         }
 
-                                        for(var i = 0; i<reviews.length; i++){
+                                        for(i = 0; i<reviews.length; i++){
                                             if(reviews[i].comment) {
                                                 item = {};
                                                 item["comment"] = reviews[i].comment;
@@ -517,42 +527,44 @@ router.route('/:id')
                                         }
 
                                     });
-                                    function finduser(userId, itemn, count) {
+                                    function finduser(reviewerUserId, itemn, count) {
                                         mongoose.model('User').findOne({
-                                            auth: userId
-                                        }, function (err, user) {
+                                            auth: reviewerUserId
+                                        }, function (err, reviewerUser) {
                                             if (err) {
                                                 console.log(err);
                                                 return;
                                             }
-                                            if (user) {
-                                                itemn["name"] = user.name;
+                                            if (reviewerUser) {
+                                                itemn["name"] = reviewerUser.name;
                                                 obj.push(itemn);
-                                                
+
                                                 if(count==obj.length){
                                                     res.render('users/restaurant-profile', {
                                                         restaurant: restaurant,
-                                                        email: user.email,
+                                                        email: viewedUser.email,
                                                         canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                         comments: obj,
+                                                        auths: allAuths,
                                                         recommended: recommended
                                                     });
                                                 }
                                             }
                                             else {
                                                 mongoose.model('FBUser').findOne({
-                                                    auth: userId
-                                                }, function (err, user) {
-                                                    if (user) {
-                                                        itemn["name"] = user.name;
+                                                    auth: reviewerUserId
+                                                }, function (err, reviewerFbUser) {
+                                                    if (reviewerFbUser) {
+                                                        itemn["name"] = reviewerFbUser.name;
                                                         obj.push(itemn);
 
                                                         if(count==obj.length){
                                                             res.render('users/restaurant-profile', {
                                                                 restaurant: restaurant,
-                                                                email: user.email,
+                                                                email: viewedUser.email,
                                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                                 comments: obj,
+                                                                auths: allAuths,
                                                                 recommended: recommended
 
                                                             });
@@ -564,18 +576,18 @@ router.route('/:id')
                                     }
                                 });
                             });
-                        
+
                         // If this is a regular user, admin or facebook user.
                         } else {
                             mongoose.model('FBUser').findOne({
-                                auth: user._id
+                                auth: viewedUser._id
                             }, function (err, fbUser) {
                                 if (err) {
                                     console.log(err);
                                     return;
                                 }
                                 mongoose.model('User').findOne({
-                                        auth: user._id
+                                        auth: viewedUser._id
                                     }, function (err, normalUser) {
                                         if (err) {
                                             console.log(err);
@@ -596,7 +608,7 @@ router.route('/:id')
                                             res.render('users/user-profile', {
                                                 user: displayUser,
                                                 accountType: accountType,
-                                                email: user.email,
+                                                email: viewedUser.email,
                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
                                                 auths: allAuths
                                             });
@@ -624,7 +636,7 @@ router.route('/:id')
 
                         var auths = mongoose.model('Auth');
                         auths.find({
-                                emails: {$in: uniqueRecipientEmails}
+                                email: {$in: uniqueRecipientEmails}
                             })
                             .exec(authCallback);
                     };
@@ -881,7 +893,7 @@ router.route('/:id/edit')
                     });
                 }
             });
-            // Hacker 
+            // Hacker
         } else {
             res.send("You do not have permission to update this user account")
         }
@@ -952,7 +964,7 @@ router.post('/:id/comment', function (req, res) {
 
 
 
-// /users/:id/avatar User update new avatar 
+// /users/:id/avatar User update new avatar
 router.post('/:id/avatar', function (req, res, next) {
     console.log('avatar1');
     var form = new formidable.IncomingForm();

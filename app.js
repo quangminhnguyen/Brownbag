@@ -25,6 +25,7 @@ require('./configuration/passport')(passport);
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var avatars = require('./routes/avatars');
+var messages = require('./routes/messages');
 
 var app = express();
 
@@ -62,7 +63,6 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', {
 
 // Set current user as signed in User
 app.use(function(req, res, next) {
-  console.log("req.session.userId: " + req.session.userId);
     
   // Find in relation Auth for the userID, req.session.userId is the id of the user 
   // that is online
@@ -71,7 +71,9 @@ app.use(function(req, res, next) {
         console.log(err);
         return;
     }
-    console.log("Setting current user: " + user);
+
+
+    // Setting current user
     res.locals.currentUser = user;
     
     // check if current user is an admin
@@ -95,6 +97,7 @@ app.use(function(req, res, next) {
 });
 
 app.use('/avatars', avatars);
+app.use('/messages', messages);
 app.use('/', routes);
 
 

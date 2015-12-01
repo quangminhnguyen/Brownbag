@@ -39,3 +39,6 @@ block list
           a.btn.btn-danger
             i.glyphicon.glyphicon-trash
             | &nbsp Remove
+      .restaurant-conversations
+        if canEdit
+          include ./conversations-partial.jade

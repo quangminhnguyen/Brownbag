@@ -8,10 +8,28 @@ block content
           Timestamp
         th.
           Message
-    - each msg, i in msgs
-      tr
-        td
-          a(href='/users/#{user._id}')= msg.timestamp
-        td
-          a(href='/users/#{user._id}')= msg.message
-        
+    if messages
+      each msg, i in messages
+        //- style for from
+        if msg.fromId == currentUser.email
+          tr
+            td.
+              #{msg.timestamp}
+            td.
+              #{msg.message}
+
+        //- style for recipient
+        if msg.fromId != currentUser.email
+          tr
+            td.
+              #{msg.timestamp}
+            td.
+              #{msg.message}
+  .display-block
+    h3 Send a message
+    br
+    form.send-message(action='/messages/sendMessage', method='POST')
+      input(type="hidden" name="recipient" value="#{email}")
+      input.form-control(type='text', name='message', placeholder='Enter message...')
+      br
+      input#btn-sendmessage.btn.btn-info(type='submit', value='Submit')

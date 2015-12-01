@@ -1,6 +1,19 @@
-//- includes/head.jade
-h1 INCLUDED
-if auths
+//- 'FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
+//- if currentUser.accountType == 'RESTAURANT USER' && canEdit 
+- var found_message = 0
+if auths.length > 0
   each auth, i in auths
-    .display-block
-      p= auth.name
+    if (currentUser.accountType == 'RESTAURANT USER') || (auth.email == email)
+      - found_message = 1
+      .display-block
+        a(href='/messages/conversation/#{auth.email} ') #{auth.name} 
+
+if found_message == 0 && (currentUser.accountType != 'RESTAURANT USER')
+  .display-block
+    h3 Send a message
+    br
+    form.send-message(action='/messages/sendMessage', method='POST')
+      input(type="hidden" name="recipient" value="#{email}")
+      input.form-control(type='text', name='message', placeholder='Enter message...')
+      br
+      input#btn-sendmessage.btn.btn-info(type='submit', value='Submit')
