@@ -475,7 +475,7 @@ router.route('/:id')
                 getAccountType(req.id, function (err, accountType) {
 
                     var authCallback = function (err, allAuths) {
-                        console.log("y r there no auths: ", allAuths);
+
                         // If this is a restaurant
                         if (accountType == ACCOUNT_TYPE[3]) {
 
@@ -497,7 +497,6 @@ router.route('/:id')
                                                 counter++;
                                             }
                                         }
-                                        console.log('User is ' + viewedUser + ' - ' + viewedUser.email);
 
                                         if (counter == 0){
                                             res.render('users/restaurant-profile', {
@@ -625,7 +624,6 @@ router.route('/:id')
                         for (var recipient in temp) {
                             uniqueRecipientEmails.push(recipient);
                         }
-                        console.log('found emails: ' + uniqueRecipientEmails)
 
                         var auths = mongoose.model('Auth');
                         auths.find({

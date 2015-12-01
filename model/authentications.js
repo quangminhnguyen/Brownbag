@@ -9,7 +9,7 @@ var authSchema = new mongoose.Schema({
 });
 
 authSchema.methods.comparePassword = function(candidatePassword, cb) {
-  console.log('comparing: ' + candidatePassword + '-' + this.password);
+
   // Use a hashed comparison.
   bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
       if (err) {

@@ -66,5 +66,5 @@ block list
           p= comment.name + ' rated ' + comment.rating + ' stars'
           p= comment.comment
     .restaurant-conversations
+      if canEdit || currentUser.accountType == 'REGULAR USER' || currentUser.accountType == 'FACEBOOK USER'
         include ./conversations-partial.jade
-
