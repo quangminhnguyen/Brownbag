@@ -16,7 +16,6 @@ router.post('/sendMessage', function(req, res) {
     req.session.successAlert = "Message sent";
     res.redirect('back')
   };
-
   mongoose.model('Message').create({
     fromId: sender,
     toId: recipientEmail,
@@ -30,18 +29,26 @@ router.get('/conversation/:email', function(req, res) {
 
 
   var messagesCallback = function (err, msgs) {
+    
     if (err) {
       res.send("There was a problem retrieving messages");
     }
-    console.log("messages received ", msgs);
-    res.format({
-      html: function(){
-        res.render('messages/show', {
-          title: 'Messages',
-          messages : msgs,
-          email: recipientEmail
-        });
+
+    mongoose.model('Auth').findOne({email: recipientEmail}, function (err, auth) {
+      if (err) {
+        console.log("error", err);
       }
+      res.format({
+        html: function(){
+          res.render('messages/show', {
+            title: 'Coversation with',
+            messages : msgs,
+            name: auth.name,
+            email: recipientEmail
+          });
+        }
+      });
+
     });
   };
 

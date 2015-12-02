@@ -2,36 +2,26 @@ extends ../layout
 block content
   .conversation
     h1.
-      #{title}
-    table.table.user-list.table-striped.table-bordered.table-hover
-      thead
-        tr
-          th.
-            Timestamp
-          th.
-            Message
-      if messages
-        each msg, i in messages
-          //- style for from
-          if msg.fromId == currentUser.email
-            tr
-              td.
-                #{msg.timestamp}
-              td.
-                #{msg.message}
-
-          //- style for recipient
-          if msg.fromId != currentUser.email
-            tr
-              td.
-                #{msg.timestamp}
-              td.
-                #{msg.message}
+      #{title} #{name}
     .display-block
-      h3 Send a message
-      br
-      form.send-message(action='/messages/sendMessage', method='POST')
-        input(type="hidden" name="recipient" value="#{email}")
-        input.form-control(type='text', name='message', placeholder='Enter message...')
-        br
-        input#btn-sendmessage.btn.btn-info(type='submit', value='Submit')
+      if messages
+        ul.messages
+          each msg, i in messages
+            li.clearfix
+              //- style for from
+              if msg.fromId == currentUser.email
+                .bubble.you
+                  |#{msg.message}
+                  p.
+                   sent at #{msg.timestamp}
+
+              //- style for recipient
+              if msg.fromId != currentUser.email
+                .bubble.me
+                  |#{msg.message} 
+                  p.
+                   sent at #{msg.timestamp}
+        form.send-message(action='/messages/sendMessage', method='POST')
+          input(type="hidden" name="recipient" value="#{email}")
+          input.form-control.message-box(type='text', name='message', placeholder='Enter message...')
+          input.btn-sendmessage.btn.btn-info(type='submit', value='Send', style="display:inline;")
