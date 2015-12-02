@@ -1,5 +1,4 @@
 #restaurant-picture {
-    width: 100%;
     max-height: 400px;
     border-radius: 5px;
     border: 2px solid;
@@ -93,9 +92,21 @@ h4 {
     display: inline-block;
 }
 
+.restaurant-details {
+    margin-top: 20px;
+}
+
 .display-block {
     border: 2px solid;
     border-color: grey;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.rating-block {
+    border: 2px solid;
+    border-color: lightgrey;
     padding: 10px;
     margin-top: 10px;
     border-radius: 5px;
@@ -119,7 +130,7 @@ h4 {
 }
 
 .rating {
-
+    margin-right: 0px;
     width:200px;
 }
 .rating span { float:right; position:relative; }
@@ -214,3 +225,24 @@ ul.messages {
     margin-right:10px;
     display: inline !important;
 }
+
+.view-convo {
+    text-align: center;
+}
+
+.img-recommended {
+    height:50px;
+    width : auto;
+    display: inline;
+}
+.recommended-name{
+    display: inline;
+}
+
+.btn-convo {
+    margin:auto;
+}
+.review {
+    display:inline;
+}
+

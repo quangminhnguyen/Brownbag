@@ -3,25 +3,25 @@ block content
   .conversation
     h1.
       #{title} #{name}
-    .display-block
-      if messages
-        ul.messages
-          each msg, i in messages
-            li.clearfix
-              //- style for from
-              if msg.fromId == currentUser.email
-                .bubble.you
-                  |#{msg.message}
-                  p.
-                   sent at #{msg.timestamp}
+    hr
+    if messages
+      ul.messages
+        each msg, i in messages
+          li.clearfix
+            //- style for from
+            if msg.fromId == currentUser.email
+              .bubble.you
+                |#{msg.message}
+                p.
+                 sent at #{msg.timestamp}
 
-              //- style for recipient
-              if msg.fromId != currentUser.email
-                .bubble.me
-                  |#{msg.message} 
-                  p.
-                   sent at #{msg.timestamp}
-        form.send-message(action='/messages/sendMessage', method='POST')
-          input(type="hidden" name="recipient" value="#{email}")
-          input.form-control.message-box(type='text', name='message', placeholder='Enter message...')
-          input.btn-sendmessage.btn.btn-info(type='submit', value='Send', style="display:inline;")
+            //- style for recipient
+            if msg.fromId != currentUser.email
+              .bubble.me
+                |#{msg.message} 
+                p.
+                 sent at #{msg.timestamp}
+      form.send-message(action='/messages/sendMessage', method='POST')
+        input(type="hidden" name="recipient" value="#{email}")
+        input.form-control.message-box(type='text', name='message', placeholder='Enter message...')
+        input.btn-sendmessage.btn.btn-info(type='submit', value='Send', style="display:inline;")

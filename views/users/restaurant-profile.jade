@@ -1,85 +1,94 @@
 extends ../layout
 
 block list
-    img#restaurant-picture(src="/avatars/#{restaurant.avatar}")
-    .display-block
-      div
-        label.inlinea
-          strong Restaurant Name:
-        p.inlinea 
-          | &nbsp #{restaurant.name}
-      div
-        label.inlinea
-          strong Address:
-        p.inlinea
-          | &nbsp #{restaurant.location}
-      div 
-        label.inlinea
-          strong Cuisines:
-        p.inlinea
-          | &nbsp #{restaurant.cuisine}
-      div
-        label.inline
-          strong Average rating:
-        p.inlinea
-          | &nbsp #{restaurant.rating} out of 5
-      div
-        label.inlinea
-          strong Email:
-        p.inlinea
-          | &nbsp #{email}
-      if canEdit
-        .inlinea
-          a.btn.btn-success(href='/users/#{restaurant.auth}/edit' style='margin-right: 10px')
-            i.glyphicon.glyphicon-pencil
-            | &nbsp Edit
-      if canDelete
-        .inlinea
-          form(action='/users/#{restaurant.auth}' method='post' enctype='application/x-www-form-urlencoded')
-            input(type='hidden' value='DELETE' name='_method')
-            button.btn.btn-danger.inlinea(type='submit')
-              i.glyphicon.glyphicon-trash
-              | &nbsp Remove
-    if canRate
-      .display-block
-        h5 Submit your feedback.
-        br
-        form.rating(action='/users/#{restaurant.auth}/comment', method='POST')
-          span
-            input#str5(type='radio', name='rating', value='5')
-            label(for='str5')
-          span
-            input#str4(type='radio', name='rating', value='4')
-            label(for='str4')
-          span
-            input#str3(type='radio', name='rating', value='3')
-            label(for='str3')
-          span
-            input#str2(type='radio', name='rating', value='2')
-            label(for='str2')
-          span
-            input#str1(type='radio', name='rating', value='1' required='true')
-            label(for='str1')
+    .row
+      .col-sm-3
+        img#restaurant-picture(src="/avatars/#{restaurant.avatar}")
+        .recommendations
+          if recommended.length > 0
+            h5 Recommended Restaurants
+            each one, i in recommended
+              img.img-circle.img-recommended(src="/avatars/#{one.avatar}")
+              p
+                a.recommended-name(href='/users/#{one.auth}')=one.name
+        hr
+        .restaurant-conversations
+          if canEdit || currentUser.accountType == 'REGULAR USER' || currentUser.accountType == 'FACEBOOK USER'
+            include ./conversations-partial.jade
+
+      .col-sm-9
+        .restaurant-details
+          div
+            label.inlinea
+              strong Restaurant Name:
+            p.inlinea 
+              | &nbsp #{restaurant.name}
+          div
+            label.inlinea
+              strong Address:
+            p.inlinea
+              | &nbsp #{restaurant.location}
+          div 
+            label.inlinea
+              strong Cuisines:
+            p.inlinea
+              | &nbsp #{restaurant.cuisine}
+          div
+            label.inline
+              strong Average rating:
+            p.inlinea
+              | &nbsp #{restaurant.rating} out of 5
+          div
+            label.inlinea
+              strong Email:
+            p.inlinea
+              | &nbsp #{email}
+          if canEdit
+            .inlinea
+              a.btn.btn-success(href='/users/#{restaurant.auth}/edit' style='margin-right: 10px')
+                i.glyphicon.glyphicon-pencil
+                | &nbsp Edit
+          if canDelete
+            .inlinea
+              form(action='/users/#{restaurant.auth}' method='post' enctype='application/x-www-form-urlencoded')
+                input(type='hidden' value='DELETE' name='_method')
+                button.btn.btn-danger.inlinea(type='submit')
+                  i.glyphicon.glyphicon-trash
+                  | &nbsp Remove
+        hr
+        .restaurant-rate
+          if canRate
+          
+            h5 Submit your feedback.
             br
-          p Rate
-          br
-          p Enter comment below (optional)
-          input.form-control#input-location(type='text', name='comment', placeholder='Comment...')
-          br
-          input#btn-signup.btn.btn-info(type='submit', value='Submit your review')
-    if comments.length > 0
-      .display-block
-        h5 User Feedback's
-        each comment, i in comments
-          .display-block
-            p= comment.name + ' rated ' + comment.rating + ' stars'
-            p= comment.comment
-    if recommended.length > 0
-       .display-block
-        h5 Recommend restaurant
-        each one, i in recommended
-          .display-block
-            a(href='/users/#{one.auth}')=one.name
-    .restaurant-conversations
-      if canEdit || currentUser.accountType == 'REGULAR USER' || currentUser.accountType == 'FACEBOOK USER'
-        include ./conversations-partial.jade
+            form.rating(action='/users/#{restaurant.auth}/comment', method='POST')
+              span
+                input#str5(type='radio', name='rating', value='5')
+                label(for='str5')
+              span
+                input#str4(type='radio', name='rating', value='4')
+                label(for='str4')
+              span
+                input#str3(type='radio', name='rating', value='3')
+                label(for='str3')
+              span
+                input#str2(type='radio', name='rating', value='2')
+                label(for='str2')
+              span
+                input#str1(type='radio', name='rating', value='1' required='true')
+                label(for='str1')
+                br
+              p Rate
+              br
+              p Enter comment below (optional)
+              input.form-control.review(type='text', name='comment', placeholder='Comment...')
+              br
+              input.btn.btn-info(type='submit', value='Submit your review', style="display:inline;")
+        hr
+        .restaurant-ratings
+          if comments.length > 0
+            h5 User Feedback
+            each comment, i in comments
+              .rating-block
+                p= comment.name + ' rated ' + comment.rating + ' stars'
+                p= comment.comment

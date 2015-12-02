@@ -1,25 +1,23 @@
-//- 'FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
-//- if currentUser.accountType == 'RESTAURANT USER' && canEdit 
 - var found_message = 0
 if auths.length > 0
   each auth, i in auths
     if (currentUser.accountType == 'RESTAURANT USER') || (auth.email == email) || (currentUser.email == email)
       - found_message = 1
-      .display-block
-        if auth.name
-          a(href='/messages/conversation/#{auth.email} ') #{auth.name} 
-        else
-          a(href='/messages/conversation/#{auth.email} ') #{auth.email} 
-
+      if auth.name
+        .view-convo
+          a.btn.btn-info.btn-convo(href='/messages/conversation/#{auth.email} ') View Conversation with &nbsp
+            if auth.name
+              |#{auth.name}
+            else
+              |#{auth.email}
 
 
 if currentUser.email != email
   if found_message == 0 && (currentUser.accountType != 'RESTAURANT USER')
-    .display-block
-      h3 Send a message
+    h3 Send a message
+    br
+    form.send-message(action='/messages/sendMessage', method='POST')
+      input(type="hidden" name="recipient" value="#{email}")
+      input.form-control(type='text', name='message', placeholder='Enter message...')
       br
-      form.send-message(action='/messages/sendMessage', method='POST')
-        input(type="hidden" name="recipient" value="#{email}")
-        input.form-control(type='text', name='message', placeholder='Enter message...')
-        br
-        input#btn-sendmessage.btn.btn-info(type='submit', value='Submit')
+      input#btn-sendmessage.btn.btn-info(type='submit', value='Submit')
