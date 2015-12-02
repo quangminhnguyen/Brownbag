@@ -1,12 +1,13 @@
 extends ../layout
 
 block list
-  h3.text-center User Profile
   .row
-    .col-md-3.text-center
+    .col-sm-3.text-center
       img.img-rounded.img-responsive#user-picture(src="/avatars/#{user.avatar}")
-    .col-md-9
-      .display-block
+      h3.text-center My Profile
+    .col-sm-9
+      .col-sm-8
+        .user-details
         div
           label.inlinea
             strong Display Name: 
@@ -44,6 +45,7 @@ block list
               button.btn.btn-danger(type='submit')
                 i.glyphicon.glyphicon-trash
                 | &nbsp Remove
-      .restaurant-conversations
-        if canEdit
-          include ./conversations-partial.jade
+      .col-sm-1
+        .restaurant-conversations
+          if canEdit
+            include ./conversations-partial.jade
