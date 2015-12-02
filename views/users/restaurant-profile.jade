@@ -22,7 +22,7 @@ block list
         label.inline
           strong Average rating:
         p.inlinea
-          | &nbsp #{restaurant.rating} / 5
+          | &nbsp #{restaurant.rating} out of 5
       div
         label.inlinea
           strong Email:
@@ -35,7 +35,7 @@ block list
             | &nbsp Edit
       if canDelete
         .inlinea
-          form(action='/users/#{user.auth}' method='post' enctype='application/x-www-form-urlencoded')
+          form(action='/users/#{restaurant.auth}' method='post' enctype='application/x-www-form-urlencoded')
             input(type='hidden' value='DELETE' name='_method')
             button.btn.btn-danger.inlinea(type='submit')
               i.glyphicon.glyphicon-trash
@@ -69,7 +69,7 @@ block list
           input#btn-signup.btn.btn-info(type='submit', value='Submit your review')
     if comments.length > 0
       .display-block
-        h5 Previous user feed back
+        h5 User Feedback's
         each comment, i in comments
           .display-block
             p= comment.name + ' rated ' + comment.rating + ' stars'

@@ -140,7 +140,12 @@ router.route('/')
                         }
 
                         // Use default image if none is specified.
-                        var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
+                        var fileToRead;
+                        if (who == 'user') {
+                            fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
+                        } else if (who = 'owner') {
+                            fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/restaurant.png');
+                        }
                         fs.readFile(fileToRead, function (err, data) {
                             if (err) throw err;
                             var img = {
@@ -252,7 +257,6 @@ function hashPassword(password, cb) {
 
 
 // "/users/main" Displaying list of restaurants in the main page of the user
-// 4 cases, i did case 1 as an example
 router.get('/main', function (req, res) {
     // This will be changed to recommended
     if (!req.query.search && !req.query.rating && !req.query.cuisine) {
@@ -326,14 +330,55 @@ router.get('/main', function (req, res) {
 });
 
 
-// "/users/admin" 
+// "/users/admin" Redirect user to the admin page, only if the user is an admin.
 router.get('/admin', function (req, res) {
-    if (!req.query.userType) {
-        mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
-            if (err) {
-                console.log(err);
-                return;
-            }
+    // Access Control: don't allow users to access to the admin page.
+    getAccountType(req.session.userId, function (err, accountType) {
+        // If is not an admin 
+        if (accountType != ACCOUNT_TYPE[2]) {
+            res.redirect('back');
+            return;
+        }
+        // Gets a specific list of users in the database 
+        if (!req.query.userType) {
+            mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                mongoose.model('User').find({}, function (err, allRegUsers) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    mongoose.model('FBUser').find({}, function (err, allFBUsers) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        var allUsers = allRestaurants.concat(allRegUsers, allFBUsers);
+                        // console.log('allUsers: ' + allUsers);
+                        mongoose.model('Auth').find({}, function (err, auth) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            for (var i = 0; i < auth.length; i++) {
+                                for (var k = 0; k < allUsers.length; k++) {
+                                    if (auth[i]._id.equals(allUsers[k].auth)) {
+                                        allUsers[k]['accountType'] = auth[i].accountType;
+                                        console.log('account type: ' + allUsers[k]['accountType']);
+                                    }
+                                }
+                            }
+                            res.render('users/admin', {
+                                users: allUsers
+                            });
+                        });
+                    });
+                });
+            });
+        } else if (req.query.userType == 'Customers') {
             mongoose.model('User').find({}, function (err, allRegUsers) {
                 if (err) {
                     console.log(err);
@@ -344,7 +389,7 @@ router.get('/admin', function (req, res) {
                         console.log(err);
                         return;
                     }
-                    var allUsers = allRestaurants.concat(allRegUsers, allFBUsers);
+                    var allUsers = allRegUsers.concat(allFBUsers);
                     // console.log('allUsers: ' + allUsers);
                     mongoose.model('Auth').find({}, function (err, auth) {
                         if (err) {
@@ -365,19 +410,12 @@ router.get('/admin', function (req, res) {
                     });
                 });
             });
-        });
-    } else if (req.query.userType == 'Customers') {
-        mongoose.model('User').find({}, function (err, allRegUsers) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            mongoose.model('FBUser').find({}, function (err, allFBUsers) {
+        } else if (req.query.userType == 'Restaurants') {
+            mongoose.model('Restaurant').find({}, function (err, allUsers) {
                 if (err) {
                     console.log(err);
                     return;
                 }
-                var allUsers = allRegUsers.concat(allFBUsers);
                 // console.log('allUsers: ' + allUsers);
                 mongoose.model('Auth').find({}, function (err, auth) {
                     if (err) {
@@ -397,34 +435,8 @@ router.get('/admin', function (req, res) {
                     });
                 });
             });
-        });
-    } else if (req.query.userType == 'Restaurants') {
-        mongoose.model('Restaurant').find({}, function (err, allUsers) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            // console.log('allUsers: ' + allUsers);
-            mongoose.model('Auth').find({}, function (err, auth) {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                for (var i = 0; i < auth.length; i++) {
-                    for (var k = 0; k < allUsers.length; k++) {
-                        if (auth[i]._id.equals(allUsers[k].auth)) {
-                            allUsers[k]['accountType'] = auth[i].accountType;
-                            console.log('account type: ' + allUsers[k]['accountType']);
-                        }
-                    }
-                }
-                res.render('users/admin', {
-                    users: allUsers
-                });
-            });
-        });
-    }
-
+        }
+    });
 });
 
 
@@ -680,13 +692,22 @@ router.route('/:id')
                             console.log(err);
                             return;
                         }
-
+                        
+                        // Delete the user avatar.
                         mongoose.model('Avatar').findByIdAndRemove(deletedRestaurant.avatar, function (err, deletedAvatar) {
                             if (err) {
                                 console.log(err);
                                 return;
                             }
-                            res.send('/users/admin');
+                            
+                            // Delete user comment.
+                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.redirect('/users/admin');
+                            });                            
                         });
                     });
                 // If the deleted user is a fbuser.
@@ -698,13 +719,20 @@ router.route('/:id')
                             console.log(err);
                             return;
                         }
-
+                        // Delete user avatar
                         mongoose.model('Avatar').findByIdAndRemove(deletedFBUser.avatar, function (err, deleteFBUser) {
                             if (err) {
                                 console.log(err);
                                 return;
                             }
-                            res.redirect('/users/admin');
+                            // Delete user comment.
+                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.redirect('/users/admin');
+                            });
                         });
                     });
                 // If the deleted user is a regular user or admin.
@@ -716,13 +744,21 @@ router.route('/:id')
                             console.log(err);
                             return;
                         }
-
+                        // Delete user avatar
                         mongoose.model('Avatar').findByIdAndRemove(deletedRegUser.avatar, function (err, deletedRegUser) {
                             if (err) {
                                 console.log(err);
                                 return;
                             }
-                            res.redirect('/users/admin');
+                            
+                            // Delete user comment
+                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.redirect('/users/admin');
+                            });
                         });
                     });
                 }
@@ -731,7 +767,7 @@ router.route('/:id')
     });
 
 
-// get AccountType of user with Auth._id.
+// Get AccountType of user with Auth._id.
 function getAccountType(id, callback) {
     mongoose.model('Auth').findById(id, function (err, user) {
         if (err || !user) {
@@ -744,7 +780,7 @@ function getAccountType(id, callback) {
     });
 }
 
-
+// check if the logged in user is allowed to edit
 function canEdit(signedInID, signedInAccountType, targetUserID) {
     // if the signed in user is also the target user
     if (signedInID == targetUserID) {
@@ -757,6 +793,7 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
     return false;
 }
 
+// check if the current user is allowed to make rating
 function canRate(signedInAccountType) {
     // if the request user is a user or fb user.
     if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]||signedInAccountType == ACCOUNT_TYPE[2]) {

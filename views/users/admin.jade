@@ -18,9 +18,9 @@ block list
           a(href='/users/#{user.auth}')
             img.responsive.img-circle.logo-small(src="/avatars/#{user.avatar}") 
         td
-            a(href='/users/#{user.auth}')= user.name
+          a(href='/users/#{user.auth}')= user.name
         td
-            a(href='/users/#{user.auth}')= user.accountType
+          p= user.accountType
   form(method='GET')
     label(for = 'userType') Show Users Who Are:
       select(name='userType')
