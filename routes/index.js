@@ -77,7 +77,6 @@ router.route('/login')
     });
 
 router.get('/signup', function (req, res, next) {
-    console.log("SIGN UP");
     res.render('signup');
 });
 

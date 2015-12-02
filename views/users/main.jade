@@ -20,7 +20,7 @@ block list
         td
           a(href='/users/#{restaurant.auth}')= restaurant.name
         td
-          a(href='/users/#{restaurant.auth}')= restaurant.cuisine
+          p=restaurant.cuisine
   form(method='GET')
     label(for = 'cuisine') I feel like eating:
       select(name='cuisine')

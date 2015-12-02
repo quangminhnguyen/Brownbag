@@ -5,7 +5,9 @@ var auth = require('../model/authentications');
 var mongoose = require('mongoose');
 var path = require('path');
 var ACCOUNT_TYPE = ['FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
-var fs = require('fs');module.exports = function (passport) {
+var fs = require('fs');
+
+module.exports = function (passport) {
 
     passport.serializeUser(function (user, done) {
         done(null, user._id);
@@ -43,6 +45,7 @@ var fs = require('fs');module.exports = function (passport) {
                         return done(null, user);
                     } else {
                         var newAuth = new auth();
+                        newAuth.name = profile.displayName;
                         newAuth.email = profile.emails[0].value;
                         newAuth.accountType = ACCOUNT_TYPE[0];
                         auth.create(newAuth, function (err, user) {
@@ -50,13 +53,13 @@ var fs = require('fs');module.exports = function (passport) {
                                 res.send("There was a problem adding this user into the Auth relation");
                             } else {
                                 console.log(__dirname);
-                                var fileToRead = path.join(__dirname, '../') + '/public/images/avatar.jpg';
+                                var fileToRead = path.join(__dirname, '../') + '/public/images/facebook.png';
                                 fs.readFile(fileToRead, function (err, data) {
                                     if (err) throw err;
                                     var img = {
                                         data: data,
                                         contentType: 'image/jpg'
-                                    }
+                                    };
                                     mongoose.model('Avatar').create({
                                         img: img
                                     }, function (err, picture) {
@@ -69,6 +72,9 @@ var fs = require('fs');module.exports = function (passport) {
                                         newFBUser.name = profile.displayName;
                                         newFBUser.avatar = picture._id;
                                         newFBUser.auth = user._id;
+                                        if (profile._json.age_range) {
+                                            newFBUser.age = profile._json.age_range.min;
+                                        }
                                         fbUser.create(newFBUser, function (err, fbuser) {
                                             if (err) {
                                                 res.send("There was a problem adding this user into the fbUser relation")

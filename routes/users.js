@@ -44,7 +44,7 @@ router.route('/')
                     if (accountType == ACCOUNT_TYPE[2]) {
                         res.redirect('users/admin');
                     } else {
-                        res.redirect('users/main')
+                        res.redirect('users/main');
                     }
                 });
             }
@@ -86,7 +86,7 @@ router.route('/')
                             }
                         }
 
-                        // SERVER SIDE INPUT CHECK
+                        // Server side input validation for user who don't use the interface!
                         // validiate input mail format
                         if (MAIL_VALID_REX.test(email) == false) {
                             errorMess += "Invalid Email Address.<br>";
@@ -122,7 +122,7 @@ router.route('/')
                                 accountType = ACCOUNT_TYPE[1];
                             }
 
-                            // validation for restaurant
+                        // validation for restaurant
                         } else if (who == "owner") {
                             if (!restName || restName.length < 5 || restName.length > 25) {
                                 errorMess += 'The restaurant name should be between 5 and 25 characters in length. <br>';
@@ -139,9 +139,13 @@ router.route('/')
                             return;
                         }
 
-
                         // Use default image if none is specified.
-                        var fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
+                        var fileToRead;
+                        if (who == 'user') {
+                            fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
+                        } else if (who = 'owner') {
+                            fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/restaurant.png');
+                        }
                         fs.readFile(fileToRead, function (err, data) {
                             if (err) throw err;
                             var img = {
@@ -253,7 +257,6 @@ function hashPassword(password, cb) {
 
 
 // "/users/main" Displaying list of restaurants in the main page of the user
-// 4 cases, i did case 1 as an example
 router.get('/main', function (req, res) {
     // This will be changed to recommended
     if (!req.query.search && !req.query.rating && !req.query.cuisine) {
@@ -327,14 +330,55 @@ router.get('/main', function (req, res) {
 });
 
 
-// "/users/admin" 
+// "/users/admin" Redirect user to the admin page, only if the user is an admin.
 router.get('/admin', function (req, res) {
-    if (!req.query.userType) {
-        mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
-            if (err) {
-                console.log(err);
-                return;
-            }
+    // Access Control: don't allow users to access to the admin page.
+    getAccountType(req.session.userId, function (err, accountType) {
+        // If is not an admin 
+        if (accountType != ACCOUNT_TYPE[2]) {
+            res.redirect('back');
+            return;
+        }
+        // Gets a specific list of users in the database 
+        if (!req.query.userType) {
+            mongoose.model('Restaurant').find({}, function (err, allRestaurants) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                mongoose.model('User').find({}, function (err, allRegUsers) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    mongoose.model('FBUser').find({}, function (err, allFBUsers) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        var allUsers = allRestaurants.concat(allRegUsers, allFBUsers);
+                        // console.log('allUsers: ' + allUsers);
+                        mongoose.model('Auth').find({}, function (err, auth) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            for (var i = 0; i < auth.length; i++) {
+                                for (var k = 0; k < allUsers.length; k++) {
+                                    if (auth[i]._id.equals(allUsers[k].auth)) {
+                                        allUsers[k]['accountType'] = auth[i].accountType;
+                                        console.log('account type: ' + allUsers[k]['accountType']);
+                                    }
+                                }
+                            }
+                            res.render('users/admin', {
+                                users: allUsers
+                            });
+                        });
+                    });
+                });
+            });
+        } else if (req.query.userType == 'Customers') {
             mongoose.model('User').find({}, function (err, allRegUsers) {
                 if (err) {
                     console.log(err);
@@ -345,7 +389,7 @@ router.get('/admin', function (req, res) {
                         console.log(err);
                         return;
                     }
-                    var allUsers = allRestaurants.concat(allRegUsers, allFBUsers);
+                    var allUsers = allRegUsers.concat(allFBUsers);
                     // console.log('allUsers: ' + allUsers);
                     mongoose.model('Auth').find({}, function (err, auth) {
                         if (err) {
@@ -366,19 +410,12 @@ router.get('/admin', function (req, res) {
                     });
                 });
             });
-        });
-    } else if (req.query.userType == 'Customers') {
-        mongoose.model('User').find({}, function (err, allRegUsers) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            mongoose.model('FBUser').find({}, function (err, allFBUsers) {
+        } else if (req.query.userType == 'Restaurants') {
+            mongoose.model('Restaurant').find({}, function (err, allUsers) {
                 if (err) {
                     console.log(err);
                     return;
                 }
-                var allUsers = allRegUsers.concat(allFBUsers);
                 // console.log('allUsers: ' + allUsers);
                 mongoose.model('Auth').find({}, function (err, auth) {
                     if (err) {
@@ -398,34 +435,8 @@ router.get('/admin', function (req, res) {
                     });
                 });
             });
-        });
-    } else if (req.query.userType == 'Restaurants') {
-        mongoose.model('Restaurant').find({}, function (err, allUsers) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            // console.log('allUsers: ' + allUsers);
-            mongoose.model('Auth').find({}, function (err, auth) {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                for (var i = 0; i < auth.length; i++) {
-                    for (var k = 0; k < allUsers.length; k++) {
-                        if (auth[i]._id.equals(allUsers[k].auth)) {
-                            allUsers[k]['accountType'] = auth[i].accountType;
-                            console.log('account type: ' + allUsers[k]['accountType']);
-                        }
-                    }
-                }
-                res.render('users/admin', {
-                    users: allUsers
-                });
-            });
-        });
-    }
-
+        }
+    });
 });
 
 
@@ -441,8 +452,7 @@ router.param('id', function (req, res, next, id) {
     //find the ID in the Database
     mongoose.model('Auth').findById(id, function (err, user) {
         //if it isn't found, we are going to repond with 404
-        if (err) {
-            console.log(id + ' was not found');
+        if (err || !user) {
             res.status(404)
             var err = new Error('Not Found');
             err.status = 404;
@@ -514,7 +524,8 @@ router.route('/:id')
                                                 canRate: canRate(requestAccountType),
                                                 comments: [],
                                                 auths: allAuths,
-                                                recommended: recommended
+                                                recommended: recommended,
+                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                             });
                                         }
 
@@ -548,7 +559,8 @@ router.route('/:id')
                                                         canRate: canRate(requestAccountType),
                                                         comments: obj,
                                                         auths: allAuths,
-                                                        recommended: recommended
+                                                        recommended: recommended,
+                                                        canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                                     });
                                                 }
                                             }
@@ -568,8 +580,8 @@ router.route('/:id')
                                                                 canRate: canRate(requestAccountType),
                                                                 comments: obj,
                                                                 auths: allAuths,
-                                                                recommended: recommended
-
+                                                                recommended: recommended,
+                                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                                             });
                                                         }
                                                     }
@@ -613,7 +625,8 @@ router.route('/:id')
                                                 accountType: accountType,
                                                 email: viewedUser.email,
                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                                auths: allAuths
+                                                auths: allAuths,
+                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                             });
                                         });
                                     });
@@ -651,13 +664,113 @@ router.route('/:id')
                 });
             }
         });
+    })
+    // Deleting a user from the database, performed only by the admin!
+    .delete(function (req, res) {
+        getAccountType(req.session.userId, function (err, accountType) {
+            // Only the admin can delete a user.
+            if (accountType != ACCOUNT_TYPE[2]) {
+                res.send("You don't have permission to delete this user.");
+                return;
+            }
+            // Preventing admin from deleting its our account.
+            if (accountType == ACCOUNT_TYPE[2] && req.session.userId == req.id) {
+                res.send("An Admin account cannot be deleted.");
+                return;
+            }
+            mongoose.model('Auth').findByIdAndRemove(req.id, function (err, deletedAuth) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                // If the deleted user is a restaurant.
+                if (deletedAuth.accountType == ACCOUNT_TYPE[3]) {
+                    mongoose.model('Restaurant').findOneAndRemove({
+                        auth: req.id
+                    }, function (err, deletedRestaurant) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        
+                        // Delete the user avatar.
+                        mongoose.model('Avatar').findByIdAndRemove(deletedRestaurant.avatar, function (err, deletedAvatar) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            
+                            // Delete user comment.
+                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.redirect('/users/admin');
+                            });                            
+                        });
+                    });
+                // If the deleted user is a fbuser.
+                } else if (deletedAuth.accountType == ACCOUNT_TYPE[0]) {
+                    mongoose.model('FBUser').findOneAndRemove({
+                        auth: req.id
+                    }, function (err, deletedFBUser) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        // Delete user avatar
+                        mongoose.model('Avatar').findByIdAndRemove(deletedFBUser.avatar, function (err, deleteFBUser) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            // Delete user comment.
+                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.redirect('/users/admin');
+                            });
+                        });
+                    });
+                // If the deleted user is a regular user or admin.
+                } else if ((deletedAuth.accountType == ACCOUNT_TYPE[1]) || (deletedAuth.accountType == ACCOUNT_TYPE[2])) {
+                    mongoose.model('User').findOneAndRemove({
+                        auth: req.id
+                    }, function (err, deletedRegUser) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        // Delete user avatar
+                        mongoose.model('Avatar').findByIdAndRemove(deletedRegUser.avatar, function (err, deletedRegUser) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            
+                            // Delete user comment
+                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.redirect('/users/admin');
+                            });
+                        });
+                    });
+                }
+            });
+        });
     });
 
 
-// get AccountType of user with Auth._id.
+// Get AccountType of user with Auth._id.
 function getAccountType(id, callback) {
     mongoose.model('Auth').findById(id, function (err, user) {
-        if (err) {
+        if (err || !user) {
             console.error(err);
             callback(err);
         } else {
@@ -667,7 +780,7 @@ function getAccountType(id, callback) {
     });
 }
 
-
+// check if the logged in user is allowed to edit
 function canEdit(signedInID, signedInAccountType, targetUserID) {
     // if the signed in user is also the target user
     if (signedInID == targetUserID) {
@@ -680,8 +793,8 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
     return false;
 }
 
+// check if the current user is allowed to make rating
 function canRate(signedInAccountType) {
-
     // if the request user is a user or fb user.
     if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]||signedInAccountType == ACCOUNT_TYPE[2]) {
         return true;
@@ -689,7 +802,18 @@ function canRate(signedInAccountType) {
     return false;
 }
 
-
+// Check if the requester has the permission to delete the target user.
+function canDelete(signedInId, signedInAccountType, targetUserID) {
+    // If the request user is not an admin then they are not allowed
+    if (signedInAccountType != ACCOUNT_TYPE[2]) {
+        return false;
+    }
+    // An admin cannot delete their own account too.
+    if (signedInId == targetUserID) {
+        return false;
+    }
+    return true;
+}
 
 
 
@@ -702,6 +826,10 @@ router.route('/:id/edit')
                 console.log('GET Error: There was a problem retriveving: ' + err);
                 return;
             }
+            
+            // Only the user can update their own password, execept for fb user who don't have password!
+            var canUpdatePassword = (user.accountType != ACCOUNT_TYPE[0]) && (req.id == req.session.userId);
+            console.log(req.id == req.session.userId)
             // get account type of the request user
             getAccountType(req.session.userId, function (err, requestAccountType) {
 
@@ -716,9 +844,23 @@ router.route('/:id/edit')
                                 console.log(err);
                                 return;
                             }
+                            
+                            // Get a list of checked box for the cuisines.
+                            var listOfCheckedBox = [];
+                            for (var i = 0; i < CUISINE.length; i ++) {
+                                if(restaurant.cuisine.indexOf(CUISINE[i]) != -1) {
+                                    listOfCheckedBox.push(true);
+                                } else {
+                                    listOfCheckedBox.push(false);
+                                }
+                            }
+                            console.log(listOfCheckedBox);
                             res.render('users/restaurant-edit', {
                                 restaurant: restaurant,
-                                displayEmail: user.email
+                                displayEmail: user.email,
+                                canUpdatePassword: canUpdatePassword,
+                                cbl: listOfCheckedBox,
+                                accountType: user.accountType
                             });
                         });
 
@@ -738,7 +880,8 @@ router.route('/:id/edit')
                                     console.log(err);
                                     return;
                                 }
-
+                                
+                                // Check to see if the user is in fbUser table or in User table.
                                 var displayUser;
                                 if (fbUser == null && normalUser != null) {
                                     displayUser = normalUser;
@@ -748,10 +891,22 @@ router.route('/:id/edit')
                                     console.log(err);
                                     return;
                                 }
-
+                                
+                                // Get a list of checked box for the cuisine.
+                                var listOfCheckedBox = [];
+                                for (var i = 0; i < CUISINE.length; i ++) {
+                                    if(displayUser.preferredCuisine.indexOf(CUISINE[i]) != -1) {
+                                        listOfCheckedBox.push(true);
+                                    } else {
+                                        listOfCheckedBox.push(false);
+                                    }
+                                }
                                 res.render('users/user-edit', {
                                     user: displayUser,
-                                    displayEmail: user.email
+                                    displayEmail: user.email,
+                                    canUpdatePassword: canUpdatePassword,
+                                    cbl: listOfCheckedBox,
+                                    accountType: user.accountType
                                 });
                             });
                         });
@@ -762,7 +917,6 @@ router.route('/:id/edit')
             });
         });
     })
-
 // update the user profile, this is an AJAX CALL !
 .put(function (req, res) {
     // Get the account type of the current user. 
@@ -812,12 +966,21 @@ router.route('/:id/edit')
                     }, function (err, oldUser) {
                         if (err) {
                             console.log(err);
-                            res.send("fail");
+                            return;
                         }
                         if (oldUser) {
-                            res.send("success");
+                            // Also update the name in Auth table
+                            user.update({
+                                name: newName
+                            }, function(err, userId){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.send('success');
+                            });
                         } else {
-                            res.send("fail");
+                            res.send('fail');
                         }
                     });
                     // If the user is a facebook user, then update FBUser table.
@@ -854,15 +1017,24 @@ router.route('/:id/edit')
                     }, function (err, oldFbUser) {
                         if (err) {
                             console.log(err);
-                            res.send("fail");
+                            return;
                         }
                         if (oldFbUser) {
-                            res.send("success");
+                            // Also update the name in Auth table
+                            user.update({
+                                name: newName
+                            }, function(err, userId){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.send('success');
+                            });
                         } else {
                             res.send("fail");
                         }
                     });
-                    // If the user is a restaurant user
+                // If the user is a restaurant user
                 } else if (user.accountType == ACCOUNT_TYPE[3]) {
                     var newLocation = req.body.location;
                     var newName = req.body.name;
@@ -896,10 +1068,19 @@ router.route('/:id/edit')
                     }, function (err, oldRestaurant) {
                         if (err) {
                             console.log(err);
-                            res.send("fail");
+                            return;
                         }
                         if (oldRestaurant) {
-                            res.send("success");
+                            // Also update the name in Auth table.
+                            user.update({
+                                name: newName
+                            }, function(err, userId){
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                res.send('success');
+                            });
                         } else {
                             res.send("fail");
                         }
@@ -1106,163 +1287,85 @@ router.post('/:id/avatar', function (req, res, next) {
 
 
 
+// AJAX call to update the password.
+router.put('/:id/password', function (req, res) {
+    console.log('req.id: ' + req.id);
+    console.log('req.session.urserId' + req.session.userId);
+    var password = req.body.password;
+    var newPassword = req.body.newPassword;
+    var confirmPassword = req.body.confirmPassword;
+    var errorMess = '';
 
-//// get the individual user by Mongo ID
-//router.get('/:id/edit', function (req, res) {
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        if (err) {
-//            console.log('GET Error: There was a problem retrieving: ' + err);
-//        } else {
-//
-//            // Look up the logged-in user's role.
-//            getUserRole(req, function (err, role) {
-//                // See if the user is allowed to edit the target profile.
-//                if (canEdit(req.session.userId, role, user)) {
-//                    // Render the response.
-//                    res.format({
-//                        html: function () {
-//                            res.render('users/edit', {
-//                                title: 'User' + user._id,
-//                                "user": user,
-//                            });
-//                        }
-//                    });
-//                } else {
-//                    console.log("YOU DONT HAVE PERMISSION. GET OUT");
-//                }
-//            });
-//        }
-//    });
-//});
-//
-//// put to update a user by ID
-//router.put('/:id/edit', function (req, res) {
-//    var name = req.body.name;
-//    var description = req.body.description;
-//
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        // Look up the logged-in user's role.
-//        getUserRole(req, function (err, role) {
-//            // See if the user is allowed to edit the target profile.
-//            if (canEdit(req.session.userId, role, user)) {
-//                // update user
-//                // Update user object.
-//                user.update({
-//                    name: name,
-//                    description: description
-//                }, function (err, userID) {
-//                    if (err) {
-//                        res.send("There was a problem updating the information to the database: " + err);
-//                    } else {
-//                        // Render the response.
-//                        res.format({
-//                            html: function () {
-//                                // Redirect the browser.
-//                                res.redirect("/users/" + user._id);
-//                            },
-//                            json: function () {
-//                                res.json(users);
-//                            }
-//                        });
-//                    }
-//                });
-//            }
-//        });
-//    });
-//});
-//
-//// put to update a user by ID
-//router.post('/:id/updatePassword', function (req, res) {
-//    var password = req.body.password;
-//    var newPassword = req.body.newPassword;
-//    var confirmPassword = req.body.confirmPassword;
-//
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        // Look up the logged-in user's role.
-//        getUserRole(req, function (err, role) {
-//            // See if the user is allowed to edit the target profile.
-//            if (canEdit(req.session.userId, role, user)) {
-//                console.log('user password before updating: ' + user.password);
-//                user.comparePassword(password, function (err, isMatch) {
-//                    if (isMatch) {
-//                        if (newPassword == confirmPassword) {
-//                            hashPassword(newPassword, function (err, hashedPassword) {
-//                                // Update user object.
-//                                user.update({
-//                                    password: hashedPassword
-//                                }, function (err, userID) {
-//                                    if (err) {
-//                                        req.session.alert = "Unable to update password";
-//                                        // Redirect the browser.
-//                                        res.redirect('back');
-//                                    } else {
-//                                        console.log('password updated to ' + newPassword);
-//                                        req.session.successAlert = "Password updated";
-//                                        // Redirect the browser.
-//                                        res.redirect('back');
-//                                    }
-//                                });
-//                            });
-//                        } else {
-//                            req.session.alert = "Passwords don't match";
-//                            // Redirect the browser.
-//                            res.redirect('back');
-//                        }
-//                    } else {
-//                        req.session.alert = 'Invalid password entered';
-//                        // Redirect the browser.
-//                        res.redirect('back');
-//                    }
-//                });
-//            }
-//        });
-//    });
-//});
-//
-//// delete a user by ID
-//router.delete('/:id/delete', function (req, res) {
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        if (err) {
-//            return console.error(err);
-//        } else {
-//            // Look up the logged-in user's role.
-//            getUserRole(req, function (err, role) {
-//                if (canDelete(req.session.userId, role, user)) {
-//                    //remove it from Mongo
-//                    user.remove(function (err, user) {
-//                        if (err) {
-//                            return console.error(err);
-//                        } else {
-//                            // returning success messages saying it was deleted
-//                            console.log('DELETE removing ID: ' + user._id);
-//                            // Render the response.
-//                            res.format({
-//                                html: function () {
-//                                    if (req.session.userId == user._id) {
-//                                        req.session.destroy(function (err) {});
-//                                        res.redirect("/");
-//                                    } else {
-//                                        // Redirect the browser.
-//                                        res.redirect("/users");
-//                                    }
-//                                },
-//                                json: function () {
-//                                    res.json({
-//                                        message: 'deleted',
-//                                        item: user
-//                                    });
-//                                }
-//                            });
-//                        }
-//                    });
-//                } else {
-//                    res.status(401);
-//                    res.send("Can't delete");
-//                }
-//            });
-//        }
-//    });
-//});
-// 
+    // Server side validation for users who don't use the user interface.
+    // Cannot update someoneelse password
+    if (req.id != req.session.userId) {
+        errorMess += 'You cannot update someone else password.<br>';
+    }
+
+    // Check the password length.
+    if (!newPassword || newPassword.length < 5 || newPassword > 12) {
+        errorMess += "Password length should be between 5 and 12 characters.<br>";
+    }
+
+    // Check if the newPassword match with the confirmPassword.
+    if (newPassword != confirmPassword) {
+        errorMess += "Unmatched Confirm Password.<br>";
+    }
+
+    if (errorMess != "") {
+        res.send(errorMess);
+        return;
+    }
+    
+    // Get account type of the requester, facebook user doesn't have the password to edit.
+    getAccountType(req.session.userId, function (err, requestAccountType) {
+        
+        // If the requester is a facebook user acc, then they don't have the password to update.
+        if (requestAccountType == ACCOUNT_TYPE[0]) {
+            res.send('fail');
+            return;
+        }
+        
+        // Get the password of the target user and check if it match with 
+        // the input password.
+        mongoose.model('Auth').findById(req.id, function (err, user) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            user.comparePassword(password, function (err, isMatch) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+
+                // Check if the old password match with what record in db.
+                if (!isMatch) {
+                    res.send("Invalid Old Password");
+                    return;
+                }
+
+                // Hasing the password.
+                hashPassword(newPassword, function (err, hashedPassword) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    // Update the password.
+                    user.update({
+                        password: hashedPassword
+                    }, function (err, userID) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        res.send('success');
+                    });
+                });
+            });
+        });
+    });
+});
+
 
 module.exports = router;
