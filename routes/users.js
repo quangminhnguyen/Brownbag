@@ -44,7 +44,7 @@ router.route('/')
                     if (accountType == ACCOUNT_TYPE[2]) {
                         res.redirect('users/admin');
                     } else {
-                        res.redirect('users/main')
+                        res.redirect('users/main');
                     }
                 });
             }
@@ -440,8 +440,7 @@ router.param('id', function (req, res, next, id) {
     //find the ID in the Database
     mongoose.model('Auth').findById(id, function (err, user) {
         //if it isn't found, we are going to repond with 404
-        if (err) {
-            console.log(id + ' was not found');
+        if (err || !user) {
             res.status(404)
             var err = new Error('Not Found');
             err.status = 404;
@@ -513,7 +512,8 @@ router.route('/:id')
                                                 canRate: canRate(requestAccountType),
                                                 comments: [],
                                                 auths: allAuths,
-                                                recommended: recommended
+                                                recommended: recommended,
+                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                             });
                                         }
 
@@ -547,7 +547,8 @@ router.route('/:id')
                                                         canRate: canRate(requestAccountType),
                                                         comments: obj,
                                                         auths: allAuths,
-                                                        recommended: recommended
+                                                        recommended: recommended,
+                                                        canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                                     });
                                                 }
                                             }
@@ -567,7 +568,8 @@ router.route('/:id')
                                                                 canRate: canRate(requestAccountType),
                                                                 comments: obj,
                                                                 auths: allAuths,
-                                                                recommended: recommended
+                                                                recommended: recommended,
+                                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                                             });
                                                         }
                                                     }
@@ -611,7 +613,8 @@ router.route('/:id')
                                                 accountType: accountType,
                                                 email: viewedUser.email,
                                                 canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                                auths: allAuths
+                                                auths: allAuths,
+                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                             });
                                         });
                                     });
@@ -649,13 +652,89 @@ router.route('/:id')
                 });
             }
         });
+    })
+    // Deleting a user from the database, performed only by the admin!
+    .delete(function (req, res) {
+        getAccountType(req.session.userId, function (err, accountType) {
+            // Only the admin can delete a user.
+            if (accountType != ACCOUNT_TYPE[2]) {
+                res.send("You don't have permission to delete this user.");
+                return;
+            }
+            // Preventing admin from deleting its our account.
+            if (accountType == ACCOUNT_TYPE[2] && req.session.userId == req.id) {
+                res.send("An Admin account cannot be deleted.");
+                return;
+            }
+            mongoose.model('Auth').findByIdAndRemove(req.id, function (err, deletedAuth) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                // If the deleted user is a restaurant.
+                if (deletedAuth.accountType == ACCOUNT_TYPE[3]) {
+                    mongoose.model('Restaurant').findOneAndRemove({
+                        auth: req.id
+                    }, function (err, deletedRestaurant) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+
+                        mongoose.model('Avatar').findByIdAndRemove(deletedRestaurant.avatar, function (err, deletedAvatar) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            res.send('/users/admin');
+                        });
+                    });
+                // If the deleted user is a fbuser.
+                } else if (deletedAuth.accountType == ACCOUNT_TYPE[0]) {
+                    mongoose.model('FBUser').findOneAndRemove({
+                        auth: req.id
+                    }, function (err, deletedFBUser) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+
+                        mongoose.model('Avatar').findByIdAndRemove(deletedFBUser.avatar, function (err, deleteFBUser) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            res.redirect('/users/admin');
+                        });
+                    });
+                // If the deleted user is a regular user or admin.
+                } else if ((deletedAuth.accountType == ACCOUNT_TYPE[1]) || (deletedAuth.accountType == ACCOUNT_TYPE[2])) {
+                    mongoose.model('User').findOneAndRemove({
+                        auth: req.id
+                    }, function (err, deletedRegUser) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+
+                        mongoose.model('Avatar').findByIdAndRemove(deletedRegUser.avatar, function (err, deletedRegUser) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            res.redirect('/users/admin');
+                        });
+                    });
+                }
+            });
+        });
     });
 
 
 // get AccountType of user with Auth._id.
 function getAccountType(id, callback) {
     mongoose.model('Auth').findById(id, function (err, user) {
-        if (err) {
+        if (err || !user) {
             console.error(err);
             callback(err);
         } else {
@@ -679,7 +758,6 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
 }
 
 function canRate(signedInAccountType) {
-
     // if the request user is a user or fb user.
     if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]||signedInAccountType == ACCOUNT_TYPE[2]) {
         return true;
@@ -687,7 +765,18 @@ function canRate(signedInAccountType) {
     return false;
 }
 
-
+// Check if the requester has the permission to delete the target user.
+function canDelete(signedInId, signedInAccountType, targetUserID) {
+    // If the request user is not an admin then they are not allowed
+    if (signedInAccountType != ACCOUNT_TYPE[2]) {
+        return false;
+    }
+    // An admin cannot delete their own account too.
+    if (signedInId == targetUserID) {
+        return false;
+    }
+    return true;
+}
 
 
 
@@ -1171,6 +1260,7 @@ router.put('/:id/password', function (req, res) {
     var errorMess = '';
 
     // Server side validation for users who don't use the user interface.
+    // Cannot update someoneelse password
     if (req.id != req.session.userId) {
         errorMess += 'You cannot update someone else password.<br>';
     }
@@ -1240,52 +1330,5 @@ router.put('/:id/password', function (req, res) {
     });
 });
 
-
-
-//// delete a user by ID
-//router.delete('/:id/delete', function (req, res) {
-//    mongoose.model('User').findById(req.id, function (err, user) {
-//        if (err) {
-//            return console.error(err);
-//        } else {
-//            // Look up the logged-in user's role.
-//            getUserRole(req, function (err, role) {
-//                if (canDelete(req.session.userId, role, user)) {
-//                    //remove it from Mongo
-//                    user.remove(function (err, user) {
-//                        if (err) {
-//                            return console.error(err);
-//                        } else {
-//                            // returning success messages saying it was deleted
-//                            console.log('DELETE removing ID: ' + user._id);
-//                            // Render the response.
-//                            res.format({
-//                                html: function () {
-//                                    if (req.session.userId == user._id) {
-//                                        req.session.destroy(function (err) {});
-//                                        res.redirect("/");
-//                                    } else {
-//                                        // Redirect the browser.
-//                                        res.redirect("/users");
-//                                    }
-//                                },
-//                                json: function () {
-//                                    res.json({
-//                                        message: 'deleted',
-//                                        item: user
-//                                    });
-//                                }
-//                            });
-//                        }
-//                    });
-//                } else {
-//                    res.status(401);
-//                    res.send("Can't delete");
-//                }
-//            });
-//        }
-//    });
-//});
-// 
 
 module.exports = router;

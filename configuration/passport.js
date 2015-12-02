@@ -59,7 +59,7 @@ module.exports = function (passport) {
                                     var img = {
                                         data: data,
                                         contentType: 'image/jpg'
-                                    }
+                                    };
                                     mongoose.model('Avatar').create({
                                         img: img
                                     }, function (err, picture) {

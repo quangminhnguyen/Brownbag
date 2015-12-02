@@ -29,15 +29,20 @@ block list
         p.inlinea
           | &nbsp #{email}
       if canEdit
-        a.btn.btn-success(href='/users/#{restaurant.auth}/edit' style='margin-right: 10px')
-          i.glyphicon.glyphicon-pencil
-          | &nbsp Edit
-        a.btn.btn-danger
-          i.glyphicon.glyphicon-trash
-          | &nbsp Remove
-    .display-block
-      if canRate
-        h5 Customer feedback's
+        .inlinea
+          a.btn.btn-success(href='/users/#{restaurant.auth}/edit' style='margin-right: 10px')
+            i.glyphicon.glyphicon-pencil
+            | &nbsp Edit
+      if canDelete
+        .inlinea
+          form(action='/users/#{user.auth}' method='post' enctype='application/x-www-form-urlencoded')
+            input(type='hidden' value='DELETE' name='_method')
+            button.btn.btn-danger.inlinea(type='submit')
+              i.glyphicon.glyphicon-trash
+              | &nbsp Remove
+    if canRate
+      .display-block
+        h5 Submit your feedback.
         br
         form.rating(action='/users/#{restaurant.auth}/comment', method='POST')
           span
@@ -62,13 +67,18 @@ block list
           input.form-control#input-location(type='text', name='comment', placeholder='Comment...')
           br
           input#btn-signup.btn.btn-info(type='submit', value='Submit your review')
-      each comment, i in comments
-        .display-block
-          p= comment.name + ' rated ' + comment.rating + ' stars'
-          p= comment.comment
-      each one, i in recommended
-        table
-          tr
+    if comments.length > 0
+      .display-block
+        h5 Previous user feed back
+        each comment, i in comments
+          .display-block
+            p= comment.name + ' rated ' + comment.rating + ' stars'
+            p= comment.comment
+    if recommended.length > 0
+       .display-block
+        h5 Recommend restaurant
+        each one, i in recommended
+          .display-block
             a(href='/users/#{one.auth}')=one.name
     .restaurant-conversations
       if canEdit || currentUser.accountType == 'REGULAR USER' || currentUser.accountType == 'FACEBOOK USER'
