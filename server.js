@@ -29,6 +29,16 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+
+/* Export for testing */
+exports.listen = function(port) {
+    server.listen(port);
+};
+
+exports.close = function() {
+    server.close();
+};
+
 /**
  * Normalize a port into a number, string, or false.
  */

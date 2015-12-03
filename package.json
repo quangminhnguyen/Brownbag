@@ -8,6 +8,7 @@
   "dependencies": {
     "bcrypt": "*",
     "body-parser": "^1.13.3",
+    "chai": "^3.4.1",
     "cookie-parser": "~1.3.5",
     "debug": "~2.2.0",
     "express": "~4.13.1",
@@ -16,12 +17,16 @@
     "fs": "*",
     "jade": "~1.11.0",
     "method-override": "^2.3.5",
+    "mocha": "^2.3.4",
     "mongoose": "^4.2.4",
     "morgan": "~1.6.1",
     "passport": "^0.3.2",
     "passport-facebook": "^2.0.0",
     "path": "*",
     "quickthumb": "*",
-    "serve-favicon": "~2.3.0"
+    "request": "^2.67.0",
+    "serve-favicon": "~2.3.0",
+    "should": "^7.1.1",
+    "supertest": "^1.1.0"
   }
 }
