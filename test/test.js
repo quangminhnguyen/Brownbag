@@ -270,8 +270,53 @@ describe('HTTP Server Test', function () {
                 });
             });
         });
-    });
 
+
+        it('Should be able to login again and redirect to users/main', function (done) {
+            request2
+                .post('/login')
+                .field('email', 'restaurant@mail.utoronto.ca')
+                .field('password', 'quahay')
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /main');
+                });
+        });
+
+
+        it('Should be direct to users/admin, if the logged in user is an admin', function (done) {
+            // create an admin user
+            createUser({
+                    type: 'user',
+                    email: 'smart@mail.utoronto.ca',
+                    name: 'startminh',
+                    age: '20',
+                    password: 'aaaaa',
+                    confirmPassword: 'aaaaa'
+                },
+                function (err, response) {
+                    // The first user is expected to be an admin and redirect to users/admin.
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to users/admin');
+                    // Log out
+                    request2
+                        .get('/logout')
+                        .end(function (err, response) {
+                            expect(response.statusCode).to.equal(302);
+                            expect(response.text).to.include('Redirecting to /');
+                            // Login again
+                            request2
+                                .post('/login')
+                                .field('mail', 'smart@mail.utoronto.ca')
+                                .field('password', 'aaaaa')
+                                .end(function (err, response) {
+                                    expect(response.statusCode).to.equal(302);
+                                    expect(response.text).to.include('Redirecting to users/admin')
+                                });
+                        });
+                });
+        });
+    });
 });
 
 
