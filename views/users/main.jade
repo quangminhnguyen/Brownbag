@@ -2,61 +2,67 @@ extends ../layout
 
 block list
   form(method='GET', class="restaurant-filter")
-    label(for = 'cuisine') I feel like eating: &nbsp
-      select(name='cuisine')
-        option(value='')
-          |All
-        option(class='dropdown-header', disabled)
-          |Most popular
-        option
-          |Italian
-        option
-          |French
-        option
-          |Japanese
-        option(class='dropdown-header', disabled)
-          |Other cuisines
-        option
-          |Chinese
-        option
-          |Thai
-        option
-          |Korean
-        option
-          |VietNamese
-        option
-          |Indian
-        option
-          |FastFood
-        option
-          |Others
-    label(for = 'rating') &nbsp Rating should be at least: &nbsp
-      select(name='rating')
-        option(value='')
-          |Select
-        option(value='0.0')
-          |All
-        option(class='dropdown-header',disabled)
-          |Recommended
-        option
-          |5.0
-        option
-          |4.5
-        option
-          |4.0
-        option(class='dropdown-header', disabled)
-          |Not recommended
-        option
-          |3.5
-        option
-          |3.0
-        option
-          |2.5
-        option
-          |2.0
-    input.btn.btn-info.btn-restaurant-filter(type='submit',value='Search')
+    .row
+      .col-sm-3
+        label(for = 'cuisine') Cuisine
+        select.form-control(name='cuisine')
+          option(value='')
+            |All
+          option(class='dropdown-header', disabled)
+            |Most popular
+          option
+            |Italian
+          option
+            |French
+          option
+            |Japanese
+          option(class='dropdown-header', disabled)
+            |Other cuisines
+          option
+            |Chinese
+          option
+            |Thai
+          option
+            |Korean
+          option
+            |VietNamese
+          option
+            |Indian
+          option
+            |FastFood
+          option
+            |Others
+      .col-sm-3
+        label(for = 'rating') Rating
+        select.form-control(name='rating')
+          option(value='')
+            |Select
+          option(value='0.0')
+            |All
+          option(class='dropdown-header',disabled)
+            |Recommended
+          option
+            |5.0
+          option
+            |4.5
+          option
+            |4.0
+          option(class='dropdown-header', disabled)
+            |Not recommended
+          option
+            |3.5
+          option
+            |3.0
+          option
+            |2.5
+          option
+            |2.0
+      .col-sm-2
+        label &nbsp;
+        .control-group
+          input.btn.btn-info.btn-restaurant-filter(type='submit',value='Search')
 
-
+  br
   table.table.user-list.table-striped.table-bordered.table-hover.text-center
     thead
       tr

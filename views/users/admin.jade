@@ -2,15 +2,22 @@ extends ../layout
 
 block list
   form(method='GET')
-    label(for = 'userType') Show Users Who Are: &nbsp
-      select(name='userType')
-        option(value='')
-          |All
-        option
-          |Customers
-        option
-          |Restaurants
-    input.btn.btn-info.btn-user-filter(type='submit',value='Filter')
+    .row
+      .col-sm-3
+        label(for = 'userType') View
+        select.form-control(name='userType')
+          option(value='')
+            |All
+          option
+            |Customers
+          option
+            |Restaurants
+      .col-sm-2
+        label &nbsp;
+        .control-group
+          input.btn.btn-info.btn-user-filter(type='submit',value='Filter')
+  br
+
   table.table.user-list.table-striped.table-bordered.table-hover.text-center
     thead
       tr
