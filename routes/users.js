@@ -1,3 +1,4 @@
+// Modules
 var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose'); //mongo connection
@@ -18,11 +19,13 @@ var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'Vi
 var ACCOUNT_TYPE = ['FACEBOOK USER', 'REGULAR USER', 'ADMIN USER', 'RESTAURANT USER'];
 var MAIL_VALID_REX = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;
 
+// App setting
 express().use(qt.static(__dirname + '/'));
 router.use(bodyParser.urlencoded({
     extended: true
 }));
 
+// Overide POST method by another method if request.
 router.use(methodOverride(function (req, res) {
     if (req.body && typeof req.body === 'object' && '_method' in req.body) {
         // look in urlencoded POST bodies and delete it
@@ -255,7 +258,7 @@ router.route('/')
         });
     });
 
-
+// Hashing the password.
 function hashPassword(password, cb) {
     bcrypt.genSalt(10, function (err, salt) {
         if (err) cb(err);
@@ -453,7 +456,7 @@ router.get('/admin', function (req, res) {
 });
 
 
-// Redirect the browser.
+// "/users/myprofile" - Redirect the browser to /users/:id where id is the user session.userId.
 router.get('/myprofile', function (req, res) {
     var userId = req.session.userId;
     res.redirect('/users/' + userId);
@@ -793,7 +796,7 @@ function getAccountType(id, callback) {
     });
 }
 
-// check if the logged in user is allowed to edit
+// Check if the logged in user is allowed to edit
 function canEdit(signedInID, signedInAccountType, targetUserID) {
     // if the signed in user is also the target user
     if (signedInID == targetUserID) {
@@ -806,7 +809,7 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
     return false;
 }
 
-// check if the current user is allowed to make rating
+// Check if the current user is allowed to make rating
 function canRate(signedInAccountType) {
     // if the request user is a user or fb user.
     if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]||signedInAccountType == ACCOUNT_TYPE[2]) {

@@ -76,10 +76,12 @@ router.route('/login')
         });
     });
 
+// Render sign up page.
 router.get('/signup', function (req, res, next) {
     res.render('signup');
 });
 
+// Destroy session and log the user out.
 router.get('/logout', function (req, res, next) {
     // Clear the user's session.
     req.session.destroy(function (err) {});
