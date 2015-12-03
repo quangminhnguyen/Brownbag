@@ -56,6 +56,7 @@ router.route('/')
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
             var email = fields.email;
+            console.log(fields);
             // Checking for duplicated email. 
             mongoose.model('Auth').count({
                 email: email
@@ -79,7 +80,7 @@ router.route('/')
                         var accountType = null;
                         var errorMess = '';
 
-
+                        
                         for (var key in fields) {
                             if (CUISINE.indexOf(key) != -1) {
                                 cuisine.push(key);
@@ -99,12 +100,13 @@ router.route('/')
                         if (cuisine.length == 0) {
                             errorMess += 'One of the cuisine must be selected. <br>';
                         }
-
+                        
+                        
                         // if first user, make that user admin
                         if (c < 1) {
                             role = ROLE_ADMIN;
                         }
-
+                    
                         // validation for user.
                         if (who == "user") {
 
@@ -133,24 +135,35 @@ router.route('/')
                             }
                             accountType = ACCOUNT_TYPE[3];
                         }
+                        
                         // if the errorMess is not empty
                         if (errorMess != '') {
-                            res.send(errorMess);
+                            res.status(400).send(errorMess);
                             return;
                         }
 
                         // Use default image if none is specified.
                         var fileToRead;
-                        if (who == 'user') {
-                            fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
-                        } else if (who = 'owner') {
-                            fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/restaurant.png');
+                        if (pic) {
+                            if (who == 'user') {
+                                fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/avatar.jpg');
+                            } else if (who = 'owner') {
+                                fileToRead = pic.size > 0 ? pic.path : (path.join(__dirname, '../') + 'public/images/restaurant.png');
+                            }
+                        } else {
+                            if (who == 'user') {
+                                fileToRead = path.join(__dirname, '../') + 'public/images/avatar.jpg';
+                            } else if (who = 'owner') {
+                                fileToRead = path.join(__dirname, '../') + 'public/images/restaurant.png';
+                            }
+                            
                         }
+                        
                         fs.readFile(fileToRead, function (err, data) {
                             if (err) throw err;
                             var img = {
                                 data: data,
-                                contentType: pic.type
+                                contentType: 'String'
                             };
 
                             // Save binary image.
