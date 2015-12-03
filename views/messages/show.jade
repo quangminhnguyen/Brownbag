@@ -13,14 +13,14 @@ block content
               .bubble.you
                 |#{msg.message}
                 p.
-                 sent at #{msg.timestamp}
+                 sent at #{msg.timestamp.toLocaleTimeString()} on #{msg.timestamp.toDateString()} 
 
             //- style for recipient
             if msg.fromId != currentUser.email
               .bubble.me
                 |#{msg.message} 
                 p.
-                 sent at #{msg.timestamp}
+                 sent at #{msg.timestamp.toLocaleTimeString()} on #{msg.timestamp.toDateString()} 
       form.send-message(action='/messages/sendMessage', method='POST')
         input(type="hidden" name="recipient" value="#{email}")
         input.form-control.message-box(type='text', name='message', placeholder='Enter message...')
