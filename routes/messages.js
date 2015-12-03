@@ -41,7 +41,7 @@ router.get('/conversation/:email', function(req, res) {
       res.format({
         html: function(){
           res.render('messages/show', {
-            title: 'Coversation with',
+            title: 'Conversation with',
             messages : msgs,
             name: auth.name,
             email: recipientEmail

@@ -1,5 +1,6 @@
 #restaurant-picture {
     max-height: 400px;
+    max-width: 100%;
     border-radius: 5px;
     border: 2px solid;
     border-color: grey;
@@ -7,6 +8,7 @@
 
 #user-picture {
     max-height: 400px;
+    max-width: 100%;
     border-radius: 5px;
     border: 2px solid;
     border-color: grey;
@@ -54,6 +56,7 @@ h4 {
 }
 
 .logo-small {
+    margin: 10px;
     width: 100px;
     height: 100px;
 }
@@ -64,13 +67,14 @@ h4 {
 }
 
 #loginbox {
-  border-left: solid #aaa;
+  border-left: solid lightgrey;
   padding-left: 10px;
 }
 
 .logo-small:hover {
     width: 120px;
     height: 120px;
+    margin: 0;
 }
 
 /*
@@ -220,7 +224,6 @@ ul.messages {
 }
 
 .view-convo {
-    text-align: center;
     margin-bottom: 5px;
 }
 
@@ -228,15 +231,41 @@ ul.messages {
     height:50px;
     width : auto;
     display: inline;
+    margin-right: 20px;
 }
 .recommended-name{
     display: inline;
 }
 
-.btn-convo {
-    margin:auto;
+.recommended-restaurant {
+    margin-bottom: 10px;
 }
+
+.sendmessage {
+    margin-bottom: 10px;
+}
+
 .review {
     display:inline;
 }
 
+.user-conversations {
+    text-align: right;
+}
+
+
+.btn-user-filter {
+    padding:0px;
+    height: 10px;
+    margin-left: 5px;
+}
+
+.btn-restaurant-filter {
+
+    padding:0px;
+    height: 10px;
+    margin-left: 5px;
+}
+.restaurant-filter {
+    margin-bottom: 10px;
+}

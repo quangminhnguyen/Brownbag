@@ -1,28 +1,8 @@
 extends ../layout
 
 block list
-  h1.
-    #{title}
-  table.table.user-list.table-striped.table-bordered.table-hover.text-center
-    thead
-      tr
-        th 
-          h4 Logo / Avatar
-        th 
-          h4 Restaurant Name
-        th 
-          h4 Cuisines
-    - each restaurant, i in restaurants
-      tr
-        td
-          a(href='/users/#{restaurant.auth}')
-            img.responsive.img-circle.logo-small(src="/avatars/#{restaurant.avatar}")
-        td
-          a(href='/users/#{restaurant.auth}')= restaurant.name
-        td
-          p=restaurant.cuisine
-  form(method='GET')
-    label(for = 'cuisine') I feel like eating:
+  form(method='GET', class="restaurant-filter")
+    label(for = 'cuisine') I feel like eating: &nbsp
       select(name='cuisine')
         option(value='')
           |All
@@ -50,7 +30,7 @@ block list
           |FastFood
         option
           |Others
-    label(for = 'rating') Rating should be at least: 
+    label(for = 'rating') &nbsp Rating should be at least: &nbsp
       select(name='rating')
         option(value='')
           |Select
@@ -74,4 +54,20 @@ block list
           |2.5
         option
           |2.0
-    input(type='submit',value='Search')
+    input.btn.btn-info.btn-restaurant-filter(type='submit',value='Search')
+
+
+  table.table.user-list.table-striped.table-bordered.table-hover.text-center
+    thead
+      tr
+        th(colspan="3")
+          h4 Restaurants
+    - each restaurant, i in restaurants
+      tr
+        td
+          a(href='/users/#{restaurant.auth}')
+            img.responsive.img-circle.logo-small(src="/avatars/#{restaurant.avatar}")
+        td
+          a(href='/users/#{restaurant.auth}')= restaurant.name
+        td
+          a(href='/users/#{restaurant.auth}')= restaurant.cuisine

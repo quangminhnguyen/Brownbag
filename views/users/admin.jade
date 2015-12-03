@@ -1,17 +1,21 @@
 extends ../layout
 
 block list
-  h1.
-    #{title}
+  form(method='GET')
+    label(for = 'userType') Show Users Who Are: &nbsp
+      select(name='userType')
+        option(value='')
+          |All
+        option
+          |Customers
+        option
+          |Restaurants
+    input.btn.btn-info.btn-user-filter(type='submit',value='Filter')
   table.table.user-list.table-striped.table-bordered.table-hover.text-center
     thead
       tr
-        th
-          h4 Avatar / Logo
-        th
-          h4 Display Name
-        th
-          h4 Account Type
+        th(colspan="3")
+          h4 Restaurants
     - each user, i in users
       tr
         td
@@ -20,14 +24,4 @@ block list
         td
           a(href='/users/#{user.auth}')= user.name
         td
-          p= user.accountType
-  form(method='GET')
-    label(for = 'userType') Show Users Who Are:
-      select(name='userType')
-        option(value='')
-          |All
-        option
-          |Customers
-        option
-          |Restaurants
-    input(type='submit',value='Filter')
+          a(href='/users/#{user.auth}')= user.accountType

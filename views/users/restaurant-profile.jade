@@ -8,8 +8,8 @@ block list
           if recommended.length > 0
             h5 Recommended Restaurants
             each one, i in recommended
-              img.img-circle.img-recommended(src="/avatars/#{one.avatar}")
-              p
+              .recommended-restaurant
+                img.img-circle.img-recommended(src="/avatars/#{one.avatar}")
                 a.recommended-name(href='/users/#{one.auth}')=one.name
         hr
         .restaurant-conversations
@@ -55,10 +55,10 @@ block list
                 button.btn.btn-danger.inlinea(type='submit')
                   i.glyphicon.glyphicon-trash
                   | &nbsp Remove
-        hr
+
         .restaurant-rate
           if canRate
-          
+            hr
             h5 Submit your feedback.
             br
             form.rating(action='/users/#{restaurant.auth}/comment', method='POST')
@@ -84,9 +84,9 @@ block list
               input.form-control.review(type='text', name='comment', placeholder='Comment...')
               br
               input.btn.btn-info(type='submit', value='Submit your review', style="display:inline;")
-        hr
         .restaurant-ratings
           if comments.length > 0
+            hr
             h5 User Feedback
             each comment, i in comments
               .rating-block

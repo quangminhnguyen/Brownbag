@@ -1,11 +1,12 @@
 - var found_message = 0
 if auths.length > 0
+  h5 Conversations
   each auth, i in auths
     if (currentUser.accountType == 'RESTAURANT USER') || (auth.email == email) || (currentUser.email == email)
       - found_message = 1
       if auth.name
         .view-convo
-          a.btn.btn-info.btn-convo(href='/messages/conversation/#{auth.email} ') View Conversation with &nbsp
+          a.btn.btn-info.btn-convo(href='/messages/conversation/#{auth.email} ')
             if auth.name
               |#{auth.name}
             else
@@ -14,10 +15,8 @@ if auths.length > 0
 
 if currentUser.email != email
   if found_message == 0 && (currentUser.accountType != 'RESTAURANT USER')
-    h3 Send a message
-    br
+    h5 Send a message
     form.send-message(action='/messages/sendMessage', method='POST')
       input(type="hidden" name="recipient" value="#{email}")
-      input.form-control(type='text', name='message', placeholder='Enter message...')
-      br
-      input#btn-sendmessage.btn.btn-info(type='submit', value='Submit')
+      input.form-control(class="sendmessage" type='text', name='message', placeholder='Enter message...')
+      input.btn-sendmessage.btn.btn-info(type='submit', value='Submit')
