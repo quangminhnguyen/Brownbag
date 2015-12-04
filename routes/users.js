@@ -518,9 +518,11 @@ router.route('/:id')
                                             }
                                             recommended = result;
                                         });
+                                    //Find all reviews associated with this restaurant
                                     mongoose.model('Review').find({
                                         restaurantId: restaurant.auth
                                     }, function (err, reviews) {
+
                                         var counter = 0;
                                         var i;
                                         for(i = 0; i<reviews.length; i++){
@@ -529,7 +531,7 @@ router.route('/:id')
                                             }
                                         }
 
-                                        if (counter == 0){
+                                        if (counter == 0){ //There is no comment in the database
                                             res.render('users/restaurant-profile', {
                                                 restaurant: restaurant,
                                                 email: viewedUser.email,
@@ -542,7 +544,7 @@ router.route('/:id')
                                             });
                                         }
 
-                                        for(i = 0; i<reviews.length; i++){
+                                        for(i = 0; i<reviews.length; i++){ // For each review, collect associated username and rating
                                             if(reviews[i].comment) {
                                                 item = {};
                                                 item["comment"] = reviews[i].comment;
@@ -552,6 +554,8 @@ router.route('/:id')
                                         }
 
                                     });
+
+                                    //Function which finds username from "User" and "FBUser" tables given user id
                                     function finduser(reviewerUserId, itemn, count) {
                                         mongoose.model('User').findOne({
                                             auth: reviewerUserId
@@ -564,7 +568,7 @@ router.route('/:id')
                                                 itemn["name"] = reviewerUser.name;
                                                 obj.push(itemn);
 
-                                                if(count==obj.length){
+                                                if(count==obj.length){ //All the comments have been collected, so render the restaurant page
                                                     res.render('users/restaurant-profile', {
                                                         restaurant: restaurant,
                                                         email: viewedUser.email,
@@ -577,7 +581,8 @@ router.route('/:id')
                                                     });
                                                 }
                                             }
-                                            else {
+                                            else { // If user is not found in the "User" table, it's probably in "FBUser" table
+
                                                 mongoose.model('FBUser').findOne({
                                                     auth: reviewerUserId
                                                 }, function (err, reviewerFbUser) {
@@ -585,7 +590,7 @@ router.route('/:id')
                                                         itemn["name"] = reviewerFbUser.name;
                                                         obj.push(itemn);
 
-                                                        if(count==obj.length){
+                                                        if(count==obj.length){ //All the comments have been collected, so render the restaurant page
                                                             res.render('users/restaurant-profile', {
                                                                 restaurant: restaurant,
                                                                 email: viewedUser.email,
@@ -686,7 +691,7 @@ router.route('/:id')
                 res.send("You don't have permission to delete this user.");
                 return;
             }
-            // Preventing admin from deleting its our account.
+            // Preventing admin from deleting its own account.
             if (accountType == ACCOUNT_TYPE[2] && req.session.userId == req.id) {
                 res.send("An Admin account cannot be deleted.");
                 return;
@@ -808,7 +813,7 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
 
 // check if the current user is allowed to make rating
 function canRate(signedInAccountType) {
-    // if the request user is a user or fb user.
+    // if the request user is a user or fb user or an admin.
     if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]||signedInAccountType == ACCOUNT_TYPE[2]) {
         return true;
     }
@@ -1108,13 +1113,14 @@ router.route('/:id/edit')
 });
 
 
-
+// Request handler for commenting
 router.post('/:id/comment', function (req, res) {
 
     if (!req.body.rating) {
         req.body.rating = 0;
     }
 
+    // Add rating and comment to database
     mongoose.model('Review').create({
         userId: req.session.userId,
         restaurantId: req.id,
@@ -1127,11 +1133,11 @@ router.post('/:id/comment', function (req, res) {
         // comment and rating has been added
     });
 
-    mongoose.model('Restaurant').find({}, function (err, restaurants) {
+    mongoose.model('Restaurant').find({}, function (err, restaurants) { // Find all the reaturants
         if (restaurants) {
 
             for (var i = 0; i < restaurants.length; i++) {
-                findreview(restaurants[i].auth);
+                findreview(restaurants[i].auth); // For each restaurant find the associated reviews so that average rating can be calculated
             }
         }
     });
@@ -1157,6 +1163,7 @@ router.post('/:id/comment', function (req, res) {
         });
     }
 
+    // Function that updates average rating of a restaurant given restaurant id
     function update(restId, rating) {
         mongoose.model('Restaurant').findOneAndUpdate({
             auth: restId
