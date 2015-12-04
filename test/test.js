@@ -1,14 +1,12 @@
 // Modules
 var http = require('http');
-var assert = require('assert');
-var request = require('request');
-var should = require('should');
+var request = require('request'); // Orginal request used in the first several test cases 
+var should = require('should'); // for assertion purpose.
 var expect = require('chai').expect;
 var mongoose = require('mongoose');
-var request2 = require('supertest')('http://127.0.0.1:3000');
-var superRequest = require('super-request')('http://127.0.0.1:3000'); //support redirection.
-var comb = require('comb');
-var methods = require('methods');
+var request2 = require('supertest')('http://127.0.0.1:3000'); // Supertest used in the remaining tests
+var superRequest = require('super-request')('http://127.0.0.1:3000'); // Support redirection.
+
 
 // Registered all of the model.
 var db = require('../model/db');
@@ -27,7 +25,6 @@ var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'Vi
 //var express = require('express');
 //var app = express();
 
-//var request2 = require('superagent');
 
 // testing the server.
 //var server = require('../server.js');
@@ -36,13 +33,14 @@ var PORT = 3000;
 var url = 'http://127.0.0.1:' + PORT;
 
 // Testing our http server.
-describe('HTTP Server Test', function () {
+describe('Project Brownbag Test', function () {
 
 
     // Retrieve login page.
     describe('Login Page', function () {
         it('Should get index page', function (done) {
             request(url, function (err, response, body) {
+                expect(response.request.uri.href).to.equal(url + '/');
                 expect(response.headers['content-type']).to.equal('text/html; charset=utf-8');
                 expect(response.statusCode).to.equal(200);
                 done();
@@ -230,7 +228,8 @@ describe('HTTP Server Test', function () {
                 restName: 'restname',
                 password: 'quahay',
                 confirmPassword: 'quahay',
-                location: 'khongb'
+                location: 'khongb',
+                cuisine: CUISINE[0]
             }, function (err, response) {
                 expect(response.statusCode).to.equal(302);
                 expect(response.text).to.include('Redirecting to /users/main');
@@ -262,7 +261,8 @@ describe('HTTP Server Test', function () {
                 restName: 'restname',
                 password: 'quahay',
                 confirmPassword: 'quahay',
-                location: 'khongb'
+                location: 'khongb',
+                cuisine: CUISINE[2]
             }, function (err, response) {
                 expect(response.statusCode).to.equal(302);
                 expect(response.text).to.include('Redirecting to /users/main');
@@ -337,68 +337,225 @@ describe('HTTP Server Test', function () {
 
 
     describe('Searching & Filtering in /users/admin', function () {
+        var agent = require('supertest').agent(url); // Superagent
 
-        it('Should display only restaurant', function (done) {
-            dropAllSchema();
-            createUser({
-                    type: 'user',
-                    email: 'admin1@mail.utoronto.ca',
-                    name: 'Chicken',
-                    age: '20',
-                    password: 'aaaaa',
-                    confirmPassword: 'aaaaa'
-                },
-                function (err, response) {
-                    // The first user is expected to be an admin and redirect to users/admin.
-                    expect(response.statusCode).to.equal(302);
-                    expect(response.text).to.include('Redirecting to /users/admin');
-                    //console.log(response.text);
-                    // logout
-                    request2
-                        .get('/logout')
-                        .end(function (err, response) {
-                            expect(response.statusCode).to.equal(302);
-                            expect(response.text).to.include('Redirecting to /');
-                            // console.log(response.text)
-                            superRequest
-                                .post('/login')
-                                .followAllRedirects(true) // Following the redirection.
-                                .form({
-                                    email: 'admin1@mail.utoronto.ca',
-                                    password: 'aaaaa'
-                                })
-                                .end(function (err, response) {
-                                    console.log(response.statusCode);
-                                    expect(response.request.uri.href).to.equal(url + '/users/admin');
-//                                    superRequest
-//                                        .get('/users/admin')
-//                                        .followAllRedirects(true)
-//                                        .qs({userType: 'Restaurants'})
-//                                        .end(function (err, response) {
-//                                            console.log(response.request.uri.href);
-//                                            console.log(response.body);
-//                                            done();
-//                                        });
-                                });
-                                
-                                .get('/users/admin')
-                                .qs({userType: 'Restaurant'})
-                                .end(function (err, respose) {
-                                    console.log('hi' + response.statusCode);
-                                    expect(respose.statusCode).to.contain('helo');
-                                    done();
-                                });
-                                //setTimeout(done(), 10000);
-                        });
+        after(function () {
+            agent
+                .get('/logout')
+                .end(function (err, response) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    return;
                 });
         });
 
-        it('Should display only users', function (done) {
-            done();
+        before(function () {
+            dropAllSchema();
+        });
+
+        it('Should insert an admin user to the database and redirect to /users/admin', function (done) {
+            agent
+                .post('/users')
+                .field('user', 'user')
+                .field('email', 'admin@mail.utoronto.ca')
+                .field('name', 'IamAdmin')
+                .field('age', '20')
+                .field('password', 'aaaaa')
+                .field('confirmPassword', 'aaaaa')
+                .field('Japanese', 'Japan')
+                .field('Korean', 'Korea')
+                .end(function (err, response) {
+                    if (err) {
+                        console.log(err);
+                        done(err);
+                    }
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/admin');
+                    done();
+                });
+        });
+
+        it('Should not be able to find the user if select to display only restaurant.', function (done) {
+            agent
+                .get('/users/admin')
+                .query('userType=Restaurants')
+                .end(function (err, response) {
+                    if (err) {
+                        console.log(err);
+                        done(err);
+                    }
+                    expect(response.statusCode).to.equal(200);
+                    expect(response.text).not.to.contain('IamAdmin');
+                    done();
+                });
+        });
+
+        it('Should be able to see the user again if select to display all.', function (done) {
+            agent
+                .get('/users/admin')
+                .end(function (err, response) {
+                    if (err) {
+                        console.log(err);
+                        done(err);
+                    }
+                    expect(response.statusCode).to.equal(200);
+                    expect(response.text).to.contain('IamAdmin');
+                    done();
+                });
+        });
+
+        it('Should also be able to see the user if select to display ', function (done) {
+            agent
+                .get('/users/admin')
+                .query('userType=Customers')
+                .end(function (err, response) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    expect(response.statusCode).to.equal(200);
+                    expect(response.text).to.contain('IamAdmin');
+                    done();
+                });
         });
     });
 
-    describe('Searching & Filtering in users/main', function () {});
+
+
+    describe('Searching & Filtering in users/main', function () {
+        var agent = require('supertest').agent(url); // Another agent!
+        
+        before(function(){
+            dropAllSchema();
+        });
+        
+        it('Should create Restaurant1', function (done) {
+            createRest({
+                type: 'owner',
+                email: 'restaurant1@mail.utoronto.ca',
+                restName: 'Restaurant1',
+                password: 'aaaaa',
+                confirmPassword: 'aaaaa',
+                location: 'khongb',
+                cuisine: CUISINE[0] // Japanese
+            }, function (err, response) {
+                expect(response.statusCode).to.equal(302);
+                expect(response.text).to.include('Redirecting to /users/main');
+                mongoose.model('Restaurant').findOne({
+                    name: 'Restaurant1'
+                }, function (err, rest) {
+                    expect(rest.name).to.equal('Restaurant1');
+                    done();
+                });
+            });
+        });
+
+        it('Should create Restaurant2', function (done) {
+            createRest({
+                type: 'owner',
+                email: 'restaurant2@mail.utoronto.ca',
+                restName: 'Restaurant2',
+                password: 'aaaaa',
+                confirmPassword: 'aaaaa',
+                location: 'khongb',
+                cuisine: CUISINE[1] // Thai
+            }, function (err, response) {
+                expect(response.statusCode).to.equal(302);
+                expect(response.text).to.include('Redirecting to /users/main');
+                mongoose.model('Restaurant').findOne({
+                    name: 'Restaurant2'
+                }, function (err, rest) {
+                    expect(rest.name).to.equal('Restaurant2');
+                    done();
+                });
+            });
+        });
+
+        it('Should create Restaurant3', function (done) {
+            createRest({
+                type: 'owner',
+                email: 'restaurant3@mail.utoronto.ca',
+                restName: 'Restaurant3',
+                password: 'aaaaa',
+                confirmPassword: 'aaaaa',
+                location: 'khongb',
+                cuisine: CUISINE[1] // Thai
+            }, function (err, response) {
+                expect(response.statusCode).to.equal(302);
+                expect(response.text).to.include('Redirecting to /users/main');
+                mongoose.model('Restaurant').findOne({
+                    name: 'Restaurant3'
+                }, function (err, rest) {
+                    expect(rest.name).to.equal('Restaurant3');
+                    done();
+                });
+            });
+        });
+
+        it('Should create a user to view the restaurant', function (done) {
+            agent
+                .post('/users')
+                .field('user', 'user')
+                .field('email', 'user@mail.utoronto.ca')
+                .field('name', 'IamUser')
+                .field('age', '50')
+                .field('password', 'aaaaa')
+                .field('confirmPassword', 'aaaaa')
+                .field('Japanese', 'Japan')
+                .field('Thai', 'Thailand')
+                .end(function (err, response) {
+                    if (err) {
+                        console.log(err);
+                        done(err);
+                    }
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/admin');
+                    mongoose.model('User').findOne({
+                        name: 'IamUser'
+                    }, function (err, user) {
+                        expect(user.name).to.equal('IamUser');
+                        done();
+                    });
+                });
+        });
+
+
+        it('Should display only the restaurant with Thai cuisine', function (done) {
+            agent
+                .get('/users/main')
+                .query('cuisine=Thai')
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(200);
+                    expect(response.text).not.to.include('Restaurant1'); // Restaurant1 doesn't have Thai as cuisine.
+                    expect(response.text).to.include('Restaurant2'); // Restaurant2 has Thai as cuisine.
+                    expect(response.text).to.include('Restaurant3'); // Restaurant3 has Thai as cuisine.
+                    done();
+                });
+        });
+    });
+    
+    
+    describe('Commenting & Rating', function(done) {
+        it('Should not post a comment without rating');
+        it('Should post a comment with rating');
+        it('Should be able to view the comment');
+    });
+    
+    describe('Messaging Between Users', function(done) {
+        it('Should create a message');
+    });
+    
+    describe('Admin Power', function(done) {
+        it('Should be able to edit profile of another user');
+        it('Should be able to delete another user');
+    });
+    
+    describe('Security Access control', function(done) {
+        it('Should not be able to access to the admin page, if is not an admin.')
+    });
+    
+    
+
 });
 
 
@@ -445,7 +602,7 @@ function createRest(rest, callback) {
         .field('confirmPassword', rest.confirmPassword)
         .field('location', rest.location)
         .field('restName', rest.restName)
-        .field('Japanese', 'Japan')
+        .field(rest.cuisine, rest.cuisine)
         .end(function (err, response) {
             if (err) {
                 console.log(err);
