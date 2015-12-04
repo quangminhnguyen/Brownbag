@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha test"
+    "test": "node_modules/mocha/bin/mocha test",
+    "start": "node server.js"
   },
   "dependencies": {
     "bcrypt": "*",
@@ -28,5 +29,18 @@
     "serve-favicon": "~2.3.0",
     "should": "^7.1.1",
     "supertest": "^1.1.0"
-  }
+  },
+  "description": "Restaurant Searching Web App",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/csc309a5/a5.git"
+  },
+  "author": "Sajjad Siddiqui",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/csc309a5/a5#readme"
 }
