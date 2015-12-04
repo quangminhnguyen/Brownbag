@@ -119,40 +119,65 @@ h4 {
     font-weight: bold;
 }
 
+@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+fieldset,
+label {
+    margin: 0;
+    padding: 0;
+}
+
+/****** Style Star Rating Widget *****/
+
 .rating {
-    margin-right: 0px;
-    width: 200px;
-}
-.rating span { float:right; position:relative; }
-
-.rating span input {
-    position:absolute;
-    top:0px;
-    left:0px;
-    opacity:0;
+    border: none;
+    float: left;
 }
 
-.rating span label {
-    display:inline-block;
-    width:30px;
-    height:30px;
-
-    color:#FFF;
-    background:#ccc;
-    font-size:30px;
-    margin-right:2px;
-    line-height:30px;
-    border-radius:50%;
-    -webkit-border-radius:60%;
+.rating > input {
+    display: none;
 }
 
-.rating span:hover ~ span label,
-.rating span:hover label,
-.rating span.checked label,
-.rating span.checked ~ span label {
-    background:#589660;
-    color:#FFF;
+.rating > label:before {
+    margin: 5px;
+    font-size: 1.7em;
+    font-family: FontAwesome;
+    display: inline-block;
+    content: "\f005";
 }
+
+.rating > .half:before {
+    content: "\f089";
+    position: absolute;
+}
+
+.rating > label {
+    color: #ddd;
+    float: right;
+}
+/***** CSS Magic to Highlight Stars on Hover *****/
+
+.rating > input:checked ~ label,
+    /* show gold star when clicked */
+
+.rating:not(:checked) > label:hover,
+    /* hover current star */
+
+.rating:not(:checked) > label:hover ~ label {
+    color: #FFD700;
+}
+/* hover previous stars in list */
+
+.rating > input:checked + label:hover,
+    /* hover current star when changing rating */
+
+.rating > input:checked ~ label:hover,
+.rating > label:hover ~ input:checked ~ label,
+    /* lighten current selection */
+
+.rating > input:checked ~ label:hover ~ label {
+    color: limegreen;
+}
+
 
 .conversation {
     width: 80%;
