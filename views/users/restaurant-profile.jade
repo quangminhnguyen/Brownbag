@@ -2,7 +2,7 @@ extends ../layout
 
 block list
     .row
-      .col-sm-3
+      .col-sm-4
         img#restaurant-picture(src="/avatars/#{restaurant.avatar}")
         .recommendations
           if recommended.length > 0
@@ -16,7 +16,7 @@ block list
           if canEdit || currentUser.accountType == 'REGULAR USER' || currentUser.accountType == 'FACEBOOK USER'
             include ./conversations-partial.jade
 
-      .col-sm-9
+      .col-sm-8
         .restaurant-details
           div
             label.inlinea
