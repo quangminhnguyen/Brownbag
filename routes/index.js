@@ -17,7 +17,7 @@ router.route('/login')
     .post(function (req, res) {
         var emailAdr = req.body.email;
         var pass = req.body.password;
-
+        console.log(req.body);
         // Find the user requested.
         mongoose.model('Auth').findOne({
             'email': emailAdr

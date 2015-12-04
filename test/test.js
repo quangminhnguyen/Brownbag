@@ -5,6 +5,10 @@ var request = require('request');
 var should = require('should');
 var expect = require('chai').expect;
 var mongoose = require('mongoose');
+var request2 = require('supertest')('http://127.0.0.1:3000');
+var superRequest = require('super-request')('http://127.0.0.1:3000'); //support redirection.
+var comb = require('comb');
+var methods = require('methods');
 
 // Registered all of the model.
 var db = require('../model/db');
@@ -22,7 +26,7 @@ var CUISINE = ['Japanese', 'Thai', 'Chinese', 'Korean', 'Italian', 'French', 'Vi
 
 //var express = require('express');
 //var app = express();
-var request2 = require('supertest')('http://127.0.0.1:3000');
+
 //var request2 = require('superagent');
 
 // testing the server.
@@ -167,7 +171,7 @@ describe('HTTP Server Test', function () {
                 .end(function (err, response) {
                     // redirect to user/admin page
                     expect(response.statusCode).to.equal(302);
-                    expect(response.text).to.include('Redirecting to users/admin');
+                    expect(response.text).to.include('Redirecting to /users/admin');
                     mongoose.model('Auth').findOne({
                         email: 'admin@mail.utoronto.ca'
                     }, function (err, user) {
@@ -192,7 +196,7 @@ describe('HTTP Server Test', function () {
                 function (err, response) {
                     // The first user is expected to be an admin and redirect to users/admin.
                     expect(response.statusCode).to.equal(302);
-                    expect(response.text).to.include('Redirecting to users/admin');
+                    expect(response.text).to.include('Redirecting to /users/admin');
                     createUser({
                         type: 'user',
                         email: 'random@mail.utoronto.ca',
@@ -203,7 +207,7 @@ describe('HTTP Server Test', function () {
                             // The second user is expected to be redirected to users/main
                     }, function (err, response) {
                         expect(response.statusCode).to.equal(302);
-                        expect(response.text).to.include('Redirecting to users/main');
+                        expect(response.text).to.include('Redirecting to /users/main');
                         // console.log(response.text);
                         mongoose.model('Auth').findOne({
                             email: 'random@mail.utoronto.ca'
@@ -229,7 +233,7 @@ describe('HTTP Server Test', function () {
                 location: 'khongb'
             }, function (err, response) {
                 expect(response.statusCode).to.equal(302);
-                expect(response.text).to.include('Redirecting to users/main');
+                expect(response.text).to.include('Redirecting to /users/main');
                 mongoose.model('Auth').findOne({
                     email: 'restaurant@mail.utoronto.ca'
                 }, function (err, user) {
@@ -242,7 +246,14 @@ describe('HTTP Server Test', function () {
     });
 
 
-    describe('Logout/ Login', function () {
+    describe('Logout / Login', function () {
+        // Logout after each test.
+        afterEach(function () {
+            request2
+                .get('/logout')
+                .end(function (err, response) {})
+        });
+
         it('Should log out', function (done) {
             dropAllSchema();
             createRest({
@@ -254,7 +265,7 @@ describe('HTTP Server Test', function () {
                 location: 'khongb'
             }, function (err, response) {
                 expect(response.statusCode).to.equal(302);
-                expect(response.text).to.include('Redirecting to users/main');
+                expect(response.text).to.include('Redirecting to /users/main');
                 mongoose.model('Auth').findOne({
                     email: 'restaurant@mail.utoronto.ca'
                 }, function (err, user) {
@@ -275,11 +286,14 @@ describe('HTTP Server Test', function () {
         it('Should be able to login again and redirect to users/main', function (done) {
             request2
                 .post('/login')
-                .field('email', 'restaurant@mail.utoronto.ca')
-                .field('password', 'quahay')
+                .send({
+                    email: 'restaurant@mail.utoronto.ca',
+                    password: 'quahay'
+                })
                 .end(function (err, response) {
                     expect(response.statusCode).to.equal(302);
-                    expect(response.text).to.include('Redirecting to /main');
+                    expect(response.text).to.include('Redirecting to /users/main');
+                    done();
                 });
         });
 
@@ -297,7 +311,7 @@ describe('HTTP Server Test', function () {
                 function (err, response) {
                     // The first user is expected to be an admin and redirect to users/admin.
                     expect(response.statusCode).to.equal(302);
-                    expect(response.text).to.include('Redirecting to users/admin');
+                    expect(response.text).to.include('Redirecting to /users/admin');
                     // Log out
                     request2
                         .get('/logout')
@@ -307,16 +321,84 @@ describe('HTTP Server Test', function () {
                             // Login again
                             request2
                                 .post('/login')
-                                .field('mail', 'smart@mail.utoronto.ca')
-                                .field('password', 'aaaaa')
+                                .send({
+                                    email: 'smart@mail.utoronto.ca',
+                                    password: 'aaaaa'
+                                })
                                 .end(function (err, response) {
                                     expect(response.statusCode).to.equal(302);
-                                    expect(response.text).to.include('Redirecting to users/admin')
+                                    expect(response.text).to.include('Redirecting to /users/admin');
+                                    done();
                                 });
                         });
                 });
         });
     });
+
+
+    describe('Searching & Filtering in /users/admin', function () {
+
+        it('Should display only restaurant', function (done) {
+            dropAllSchema();
+            createUser({
+                    type: 'user',
+                    email: 'admin1@mail.utoronto.ca',
+                    name: 'Chicken',
+                    age: '20',
+                    password: 'aaaaa',
+                    confirmPassword: 'aaaaa'
+                },
+                function (err, response) {
+                    // The first user is expected to be an admin and redirect to users/admin.
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/admin');
+                    //console.log(response.text);
+                    // logout
+                    request2
+                        .get('/logout')
+                        .end(function (err, response) {
+                            expect(response.statusCode).to.equal(302);
+                            expect(response.text).to.include('Redirecting to /');
+                            // console.log(response.text)
+                            superRequest
+                                .post('/login')
+                                .followAllRedirects(true) // Following the redirection.
+                                .form({
+                                    email: 'admin1@mail.utoronto.ca',
+                                    password: 'aaaaa'
+                                })
+                                .end(function (err, response) {
+                                    console.log(response.statusCode);
+                                    expect(response.request.uri.href).to.equal(url + '/users/admin');
+//                                    superRequest
+//                                        .get('/users/admin')
+//                                        .followAllRedirects(true)
+//                                        .qs({userType: 'Restaurants'})
+//                                        .end(function (err, response) {
+//                                            console.log(response.request.uri.href);
+//                                            console.log(response.body);
+//                                            done();
+//                                        });
+                                });
+                                
+                                .get('/users/admin')
+                                .qs({userType: 'Restaurant'})
+                                .end(function (err, respose) {
+                                    console.log('hi' + response.statusCode);
+                                    expect(respose.statusCode).to.contain('helo');
+                                    done();
+                                });
+                                //setTimeout(done(), 10000);
+                        });
+                });
+        });
+
+        it('Should display only users', function (done) {
+            done();
+        });
+    });
+
+    describe('Searching & Filtering in users/main', function () {});
 });
 
 
@@ -332,7 +414,7 @@ function dropAllSchema() {
 }
 
 
-// Creating a user for testing.
+// Creating a user for testing and don't follow the redirection.
 function createUser(user, callback) {
     request2
         .post('/users')
@@ -353,7 +435,7 @@ function createUser(user, callback) {
 }
 
 
-// Creating a restaurant.
+// Creating a restaurant and don't follow the redirection.
 function createRest(rest, callback) {
     request2
         .post('/users')

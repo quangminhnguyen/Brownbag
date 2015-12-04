@@ -59,7 +59,6 @@ router.route('/')
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
             var email = fields.email;
-            console.log(fields);
             // Checking for duplicated email. 
             mongoose.model('Auth').count({
                 email: email
@@ -216,9 +215,9 @@ router.route('/')
                                                     req.session.save(function (err) {});
                                                     req.session.alert = null;
                                                     if (role == ROLE_ADMIN) {
-                                                        res.redirect('users/admin')
+                                                        res.redirect('/users/admin')
                                                     } else {
-                                                        res.redirect('users/main')
+                                                        res.redirect('/users/main')
                                                     }
                                                 });
 
@@ -238,7 +237,7 @@ router.route('/')
                                                     req.session.userId = user._id;
                                                     req.session.save(function (err) {});
                                                     req.session.alert = null;
-                                                    res.redirect('users/main');
+                                                    res.redirect('/users/main');
                                                 });
                                             }
                                         }
@@ -352,6 +351,7 @@ router.get('/admin', function (req, res) {
     getAccountType(req.session.userId, function (err, accountType) {
         // If is not an admin 
         if (accountType != ACCOUNT_TYPE[2]) {
+            console.log('accounttype: ' + ACCOUNT_TYPE[2]);
             res.redirect('back');
             return;
         }
@@ -383,7 +383,7 @@ router.get('/admin', function (req, res) {
                                 for (var k = 0; k < allUsers.length; k++) {
                                     if (auth[i]._id.equals(allUsers[k].auth)) {
                                         allUsers[k]['accountType'] = auth[i].accountType;
-                                        console.log('account type: ' + allUsers[k]['accountType']);
+                                        // console.log('account type: ' + allUsers[k]['accountType']);
                                     }
                                 }
                             }
