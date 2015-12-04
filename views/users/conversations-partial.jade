@@ -19,4 +19,4 @@ if currentUser.email != email
     form.send-message(action='/messages/sendMessage', method='POST')
       input(type="hidden" name="recipient" value="#{email}")
       input.form-control(class="sendmessage" type='text', name='message', placeholder='Enter message...')
-      input.btn-sendmessage.btn.btn-info(type='submit', value='Submit')
+      input.btn-sendmessage.btn.btn-info(type='submit', value='Send')
