@@ -515,6 +515,7 @@ router.route('/:id')
 
                                     var obj = [];
                                     var recommended = ["There is no restaurant with similar cuisine"];
+<<<<<<< HEAD
                                     mongoose.model('Restaurant').where('name').ne(restaurant.name).find({cuisine : { "$in" : restaurant.cuisine}}, function (err, result) {
                                         if (err) {
                                             console.log(err);
@@ -522,11 +523,21 @@ router.route('/:id')
                                         }
                                         recommended = result;
                                     });
+=======
+                                        mongoose.model('Restaurant').where('name').ne(restaurant.name).find({cuisine : { "$in" : restaurant.cuisine}}, function (err, result) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+                                            }
+                                            recommended = result;
+                                        });
+>>>>>>> b682daf239c25e73dd01f1049cf75af4f15bf0ad
                                     //Find all reviews associated with this restaurant
                                     mongoose.model('Review').find({
                                         restaurantId: restaurant.auth
                                     }, function (err, reviews) {
                                         if (!err&&reviews){
+<<<<<<< HEAD
                                             var counter = 0;
                                             var i;
                                             for (i = 0; i < reviews.length; i++) {
@@ -546,6 +557,33 @@ router.route('/:id')
                                                     recommended: recommended,
                                                     canDelete: canDelete(req.session.userId, requestAccountType, req.id)
                                                 });
+=======
+                                        var counter = 0;
+                                        var i;
+                                        for (i = 0; i < reviews.length; i++) {
+                                            if (reviews[i].comment) {
+                                                counter++;
+                                            }
+                                        }
+
+                                        if (counter == 0) { //There is no comment in the database
+                                            res.render('users/restaurant-profile', {
+                                                restaurant: restaurant,
+                                                email: viewedUser.email,
+                                                canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                canRate: canRate(requestAccountType),
+                                                comments: [],
+                                                auths: allAuths,
+                                                recommended: recommended,
+                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
+                                            });
+                                        }
+                                        mongoose.model('User').find({
+                                        }, function (err, allUsers) {
+                                            if (err) {
+                                                console.log(err);
+                                                return;
+>>>>>>> b682daf239c25e73dd01f1049cf75af4f15bf0ad
                                             }
                                             mongoose.model('User').find({
                                             }, function (err, allUsers) {

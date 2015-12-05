@@ -575,20 +575,29 @@ describe('Project Brownbag Test', function () {
         });
         
         
-        it('Should transfer to the admin main page', function(done) {
+        it('Should transfer to a restaurant profile page', function(done) {
             agent
                 .get('/users/admin')
                 .end(function (err, response) {
-                    console.log(response);
                     expect(response.statusCode).to.equal(200);
-                    mongoose.model('Restaurant').findOne({name: 'Restaurant3'}, function(err, rest) {
+                    mongoose.model('Auth').findOne({email: 'restaurant3@mail.utoronto.ca'}, function(err, rest) {
                         expect(rest).not.to.equal(null);
-                        done();
+                        agent
+                            // access the restaurant profile page of Restaurant3
+                            .get('/users/' + rest._id)
+                            .end(function(err, response) {
+                                // The profile page should contain all info about restaurant3.
+                                expect(response.text).to.contain('restaurant3@mail.utoronto.ca'); // restaurant3 email.
+                                expect(response.text).to.contain('khongb') // its location
+                                done(); 
+                        });
                     });
             });
         });
         
-        it('Should post a comment with rating');
+        it('Should post a comment with rating', function (done) {
+            done();
+        });
         it('Should be able to view the comment');
     });
     
