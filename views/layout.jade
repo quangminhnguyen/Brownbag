@@ -16,7 +16,7 @@ html
           .col-sm-8.topnav-right
             if currentUser
               |Welcome     
-              a#username(href='/users/myprofile') #{currentUser.email}
+              a#username(href='/users/myprofile') #{currentUser.name}
               |! &nbsp | &nbsp
               if isCurrentUserAdmin
                 a(href='/users/main') User Main Page
