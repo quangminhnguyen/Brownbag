@@ -61,7 +61,7 @@ block list
             hr
             h5 Do you like this place? Let others know
             br
-            form.ratingg(action='/users/#{restaurant.auth}/comment', method='POST')
+            form.ratingg(action='/users/#{restaurant.auth}/comment', method='POST' novalidate)
               p Choose rating
               fieldset.rating
                 input#star5(type='radio', name='rating', value='5', required='true')
