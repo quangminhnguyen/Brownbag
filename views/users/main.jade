@@ -7,9 +7,9 @@ block list
         label(for = 'cuisine') Cuisine
         select.form-control(name='cuisine')
           option(value='')
-            | All cuisines
+            | Any cuisines
           option(class='dropdown-header', disabled)
-            | Most popular
+            | ---------   Most popular   ----------
           option
             | Italian
           option
@@ -17,7 +17,7 @@ block list
           option
             | Japanese
           option(class='dropdown-header', disabled)
-            | Other cuisines
+            | ---------  Other cuisines   ---------
           option
             | Chinese
           option
@@ -36,11 +36,11 @@ block list
         label(for = 'rating') Rating
         select.form-control(name='rating')
           option(value='')
-            | All restaurants
+            | Any restaurants
           option(value='0.0')
-            | All rated restaurants
+            | Any rated restaurants
           option(class='dropdown-header',disabled)
-            | Recommended
+            | ------------    Recommened    -------------
           option
             | 5.0
           option
@@ -48,7 +48,7 @@ block list
           option
             | 4.0
           option(class='dropdown-header', disabled)
-            | Not recommended
+            | ----------  Not Recommened  -----------
           option
             | 3.5
           option
