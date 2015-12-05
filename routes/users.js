@@ -285,7 +285,7 @@ router.get('/main', function (req, res) {
             });
         });
 
-        // Case 2
+        // Case 2: filter using the cuisine
     } else if (req.query.cuisine && !req.query.rating) {
 
         mongoose.model('Restaurant').find({
@@ -304,7 +304,7 @@ router.get('/main', function (req, res) {
 
     }
 
-    //Case 3
+    //Case 3: filter using the both cuisine && rating
     else if (req.query.cuisine && req.query.rating) {
         //console.log('Searching for:' + req.query.cuisine + ' and:' + parseFloat(req.query.rating));
         mongoose.model('Restaurant').find({
@@ -325,7 +325,7 @@ router.get('/main', function (req, res) {
 
     }
 
-    //Case 4
+    //Case 4: filter using only the rating.
     else if (!req.query.cuisine && req.query.rating) {
         //console.log('Searching for:' + parseFloat(req.query.rating));
         mongoose.model('Restaurant').find({
@@ -514,7 +514,11 @@ router.route('/:id')
 
                                     var obj = [];
                                     var recommended = ["There is no restaurant with similar cuisine"];
-                                    mongoose.model('Restaurant').where('name').ne(restaurant.name).find({cuisine : { "$in" : restaurant.cuisine}}, function (err, result) {
+                                    mongoose.model('Restaurant').where('name').ne(restaurant.name).find({
+                                        cuisine: {
+                                            "$in": restaurant.cuisine
+                                        }
+                                    }, function (err, result) {
                                         if (err) {
                                             console.log(err);
                                             return;
@@ -527,7 +531,7 @@ router.route('/:id')
                                     mongoose.model('Review').find({
                                         restaurantId: restaurant.auth
                                     }, function (err, reviews) {
-                                        if (!err&&reviews){
+                                        if (!err && reviews) {
 
                                             var counter = 0;
                                             var i;
@@ -616,8 +620,7 @@ router.route('/:id')
                                                     });
                                                 }
                                             });
-                                        }
-                                        else{
+                                        } else {
 
                                             console.log(err);
                                             return;
@@ -686,14 +689,20 @@ router.route('/:id')
 
                         var auths = mongoose.model('Auth');
                         auths.find({
-                            email: {$in: uniqueRecipientEmails}
-                        })
+                                email: {
+                                    $in: uniqueRecipientEmails
+                                }
+                            })
                             .exec(authCallback);
                     };
                     var messages = mongoose.model('Message');
                     messages.find({
-                        $or: [{fromId: currentUserEmail}, {toId: currentUserEmail}]
-                    })
+                            $or: [{
+                                fromId: currentUserEmail
+                            }, {
+                                toId: currentUserEmail
+                            }]
+                        })
                         .exec(messagesCallback);
                 });
             }
@@ -735,7 +744,9 @@ router.route('/:id')
                             }
 
                             // Delete user comment.
-                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                            mongoose.model('Review').findOneAndRemove({
+                                userId: req.id
+                            }, function () {
                                 if (err) {
                                     console.log(err);
                                     return;
@@ -760,7 +771,9 @@ router.route('/:id')
                                 return;
                             }
                             // Delete user comment.
-                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                            mongoose.model('Review').findOneAndRemove({
+                                userId: req.id
+                            }, function () {
                                 if (err) {
                                     console.log(err);
                                     return;
@@ -786,7 +799,9 @@ router.route('/:id')
                             }
 
                             // Delete user comment
-                            mongoose.model('Review').findOneAndRemove({userId: req.id}, function(){
+                            mongoose.model('Review').findOneAndRemove({
+                                userId: req.id
+                            }, function () {
                                 if (err) {
                                     console.log(err);
                                     return;
@@ -830,7 +845,7 @@ function canEdit(signedInID, signedInAccountType, targetUserID) {
 // Check if the current user is allowed to make rating
 function canRate(signedInAccountType) {
     // if the request user is a user or fb user or an admin.
-    if (signedInAccountType == ACCOUNT_TYPE[0]||signedInAccountType == ACCOUNT_TYPE[1]||signedInAccountType == ACCOUNT_TYPE[2]) {
+    if (signedInAccountType == ACCOUNT_TYPE[0] || signedInAccountType == ACCOUNT_TYPE[1] || signedInAccountType == ACCOUNT_TYPE[2]) {
         return true;
     }
     return false;
@@ -864,7 +879,7 @@ router.route('/:id/edit')
             // Only the user can update their own password, execept for fb user who don't have password!
             var canUpdatePassword = (user.accountType != ACCOUNT_TYPE[0]) && (req.id == req.session.userId);
             console.log(req.id == req.session.userId)
-            // get account type of the request user
+                // get account type of the request user
             getAccountType(req.session.userId, function (err, requestAccountType) {
 
                 // Check if the logged in user can edit the user req.id
@@ -881,8 +896,8 @@ router.route('/:id/edit')
 
                             // Get a list of checked box for the cuisines.
                             var listOfCheckedBox = [];
-                            for (var i = 0; i < CUISINE.length; i ++) {
-                                if(restaurant.cuisine.indexOf(CUISINE[i]) != -1) {
+                            for (var i = 0; i < CUISINE.length; i++) {
+                                if (restaurant.cuisine.indexOf(CUISINE[i]) != -1) {
                                     listOfCheckedBox.push(true);
                                 } else {
                                     listOfCheckedBox.push(false);
@@ -928,8 +943,8 @@ router.route('/:id/edit')
 
                                 // Get a list of checked box for the cuisine.
                                 var listOfCheckedBox = [];
-                                for (var i = 0; i < CUISINE.length; i ++) {
-                                    if(displayUser.preferredCuisine.indexOf(CUISINE[i]) != -1) {
+                                for (var i = 0; i < CUISINE.length; i++) {
+                                    if (displayUser.preferredCuisine.indexOf(CUISINE[i]) != -1) {
                                         listOfCheckedBox.push(true);
                                     } else {
                                         listOfCheckedBox.push(false);
@@ -951,7 +966,7 @@ router.route('/:id/edit')
             });
         });
     })
-// update the user profile, this is an AJAX CALL !
+    // update the user profile, this is an AJAX CALL !
     .put(function (req, res) {
         // Get the account type of the current user.
         getAccountType(req.session.userId, function (err, requestAccountType) {
@@ -1008,7 +1023,7 @@ router.route('/:id/edit')
                                 // Also update the name in Auth table
                                 user.update({
                                     name: newName
-                                }, function(err, userId){
+                                }, function (err, userId) {
                                     if (err) {
                                         console.log(err);
                                         return;
@@ -1060,7 +1075,7 @@ router.route('/:id/edit')
                                 // Also update the name in Auth table
                                 user.update({
                                     name: newName
-                                }, function(err, userId){
+                                }, function (err, userId) {
                                     if (err) {
                                         console.log(err);
                                         return;
@@ -1111,7 +1126,7 @@ router.route('/:id/edit')
                                 // Also update the name in Auth table.
                                 user.update({
                                     name: newName
-                                }, function(err, userId){
+                                }, function (err, userId) {
                                     if (err) {
                                         console.log(err);
                                         return;
@@ -1149,21 +1164,17 @@ router.post('/:id/comment', function (req, res) {
         if (err) {
             res.send("There was a problem adding the review to the Review relation.");
         }
-        // comment and rating has been added
-    });
+        mongoose.model('Restaurant').find({}, function (err, restaurants) { // Find all the reaturants
+            if (restaurants) {
 
-    mongoose.model('Restaurant').find({}, function (err, restaurants) { // Find all the reaturants
-        if (restaurants) {
-
-            for (var i = 0; i < restaurants.length; i++) {
-                findreview(restaurants[i].auth); // For each restaurant find the associated reviews so that average rating can be calculated
+                for (var i = 0; i < restaurants.length; i++) {
+                    findreview(restaurants[i].auth); // For each restaurant find the associated reviews so that average rating can be calculated
+                }
             }
-        }
+        });
     });
-
 
     function findreview(restId) {
-
         mongoose.model('Review').find({
             restaurantId: restId
         }, function (err, reviews) {

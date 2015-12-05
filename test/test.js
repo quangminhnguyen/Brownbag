@@ -787,13 +787,21 @@ describe('Project Brownbag Test', function () {
         });
     });
 
-    
-    
+
+
     // Reuse data from Admin power.
     describe('Security Access control', function (done) {
         var agent = require('supertest').agent(url);
-        
-        it('Should not be able to access /users/main without login', function(done) {
+
+        after(function () {
+            agent
+                .get('/logout')
+                .end(function (err, response) {
+                    dropAllSchema();
+                });
+        });
+
+        it('Should not be able to access /users/main without login', function (done) {
             agent
                 .get('/users/main')
                 .end(function (err, response) {
@@ -803,8 +811,8 @@ describe('Project Brownbag Test', function () {
                 });
         });
 
-        
-        it('Should login as regular user restaurant1@mail.utoronto.ca', function(done) {
+
+        it('Should login as regular user restaurant1@mail.utoronto.ca', function (done) {
             agent
                 .post('/login')
                 .send({
@@ -817,19 +825,19 @@ describe('Project Brownbag Test', function () {
                     done();
                 });
         });
-        
-        
-        it('Should not let restaurant1@mail.utoronto.ca access to /users/admin', function(done) {
+
+
+        it('Should not let restaurant1@mail.utoronto.ca access to /users/admin', function (done) {
             agent
                 .get('/users/admin')
-                .end(function(err, response) {
+                .end(function (err, response) {
                     expect(response.text).to.include('Redirecting to /'); // being push back.
                     done();
                 });
         });
-        
-        
-        it('Should not let restaurant1@mail.utoronto.ca delete restaurant restaurant2@mail.utoronto.ca', function(done) {
+
+
+        it('Should not let restaurant1@mail.utoronto.ca delete restaurant restaurant2@mail.utoronto.ca', function (done) {
             mongoose.model('Auth').findOne({
                 email: 'restaurant2@mail.utoronto.ca'
             }, function (err, rest) {
@@ -847,9 +855,9 @@ describe('Project Brownbag Test', function () {
                         });
                     });
             });
-        }); 
-        
-        it('Should not let restaurant1@mail.utoronto.ca edit restaurant restaurant2@mail.utoronto.ca', function(done) {
+        });
+
+        it('Should not let restaurant1@mail.utoronto.ca edit restaurant restaurant2@mail.utoronto.ca', function (done) {
             mongoose.model('Auth').findOne({
                 email: 'restaurant2@mail.utoronto.ca'
             }, function (err, rest) {
