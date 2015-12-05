@@ -306,7 +306,7 @@ router.get('/main', function (req, res) {
 
     //Case 3
     else if (req.query.cuisine && req.query.rating) {
-        console.log('Searching for:' + req.query.cuisine + ' and:' + parseFloat(req.query.rating));
+        //console.log('Searching for:' + req.query.cuisine + ' and:' + parseFloat(req.query.rating));
         mongoose.model('Restaurant').find({
             'cuisine': req.query.cuisine,
             'rating': {
@@ -327,7 +327,7 @@ router.get('/main', function (req, res) {
 
     //Case 4
     else if (!req.query.cuisine && req.query.rating) {
-        console.log('Searching for:' + parseFloat(req.query.rating));
+        //console.log('Searching for:' + parseFloat(req.query.rating));
         mongoose.model('Restaurant').find({
             'rating': {
                 $gte: parseFloat(req.query.rating)
@@ -351,7 +351,7 @@ router.get('/admin', function (req, res) {
     getAccountType(req.session.userId, function (err, accountType) {
         // If is not an admin 
         if (accountType != ACCOUNT_TYPE[2]) {
-            console.log('accounttype: ' + ACCOUNT_TYPE[2]);
+            //console.log('accounttype: ' + ACCOUNT_TYPE[2]);
             res.redirect('back');
             return;
         }
@@ -416,7 +416,7 @@ router.get('/admin', function (req, res) {
                             for (var k = 0; k < allUsers.length; k++) {
                                 if (auth[i]._id.equals(allUsers[k].auth)) {
                                     allUsers[k]['accountType'] = auth[i].accountType;
-                                    console.log('account type: ' + allUsers[k]['accountType']);
+                                    //console.log('account type: ' + allUsers[k]['accountType']);
                                 }
                             }
                         }
@@ -442,7 +442,7 @@ router.get('/admin', function (req, res) {
                         for (var k = 0; k < allUsers.length; k++) {
                             if (auth[i]._id.equals(allUsers[k].auth)) {
                                 allUsers[k]['accountType'] = auth[i].accountType;
-                                console.log('account type: ' + allUsers[k]['accountType']);
+                               // console.log('account type: ' + allUsers[k]['accountType']);
                             }
                         }
                     }
@@ -1255,8 +1255,8 @@ router.post('/:id/avatar', function (req, res, next) {
                                             return;
                                         }
                                         console.log('avatar8');
-                                        console.log(restaurant.avatar);
-                                        console.log(picture._id);
+                                        //console.log(restaurant.avatar);
+                                        //console.log(picture._id);
 
                                         // Find and remove the document
                                         mongoose.model('Avatar').findByIdAndRemove(restaurant.avatar, function (err, doc, result) {
@@ -1265,7 +1265,7 @@ router.post('/:id/avatar', function (req, res, next) {
                                                 return;
                                             }
                                             console.log('avatar 9');
-                                            console.log(doc.avatar);
+                                            //console.log(doc.avatar);
                                             res.redirect('back');
                                         });
                                     });
@@ -1299,7 +1299,7 @@ router.post('/:id/avatar', function (req, res, next) {
                                                 console.log("NO TARGET FOUND!");
                                                 return;
                                             }
-                                            console.log(target);
+                                            //console.log(target);
                                             mongoose.model('Avatar').findByIdAndRemove(target.avatar, function (err, doc, result) {
                                                 if (err) {
                                                     console.log(err);
@@ -1325,8 +1325,8 @@ router.post('/:id/avatar', function (req, res, next) {
 
 // AJAX call to update the password.
 router.put('/:id/password', function (req, res) {
-    console.log('req.id: ' + req.id);
-    console.log('req.session.urserId' + req.session.userId);
+    //console.log('req.id: ' + req.id);
+    //console.log('req.session.urserId' + req.session.userId);
     var password = req.body.password;
     var newPassword = req.body.newPassword;
     var confirmPassword = req.body.confirmPassword;
