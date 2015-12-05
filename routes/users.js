@@ -521,6 +521,8 @@ router.route('/:id')
                                             }
                                             recommended = result;
                                         });
+
+
                                     //Find all reviews associated with this restaurant
                                     mongoose.model('Review').find({
                                         restaurantId: restaurant.auth
@@ -547,69 +549,79 @@ router.route('/:id')
                                             });
                                         }
 
-                                        for(i = 0; i<reviews.length; i++){ // For each review, collect associated username and rating
-                                            if(reviews[i].comment) {
-                                                item = {};
-                                                item["comment"] = reviews[i].comment;
-                                                item["rating"] = reviews[i].rating;
-                                                finduser(reviews[i].userId,item, counter);
-                                            }
-                                        }
-
-                                    });
-
-                                    //Function which finds username from "User" and "FBUser" tables given user id
-                                    function finduser(reviewerUserId, itemn, count) {
-                                        mongoose.model('User').findOne({
-                                            auth: reviewerUserId
-                                        }, function (err, reviewerUser) {
+                                        mongoose.model('User').find({
+                                        }, function (err, allUsers) {
                                             if (err) {
                                                 console.log(err);
                                                 return;
                                             }
-                                            if (reviewerUser) {
-                                                itemn["name"] = reviewerUser.name;
-                                                obj.push(itemn);
+                                            if (allUsers) {
+                                                mongoose.model('FBUser').find({
 
-                                                if(count==obj.length){ //All the comments have been collected, so render the restaurant page
-                                                    res.render('users/restaurant-profile', {
-                                                        restaurant: restaurant,
-                                                        email: viewedUser.email,
-                                                        canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                                        canRate: canRate(requestAccountType),
-                                                        comments: obj,
-                                                        auths: allAuths,
-                                                        recommended: recommended,
-                                                        canDelete: canDelete(req.session.userId, requestAccountType, req.id)
-                                                    });
-                                                }
-                                            }
-                                            else { // If user is not found in the "User" table, it's probably in "FBUser" table
+                                                }, function (err, allFbUsers) {
+                                                    if (allFbUsers) {
 
-                                                mongoose.model('FBUser').findOne({
-                                                    auth: reviewerUserId
-                                                }, function (err, reviewerFbUser) {
-                                                    if (reviewerFbUser) {
-                                                        itemn["name"] = reviewerFbUser.name;
-                                                        obj.push(itemn);
 
-                                                        if(count==obj.length){ //All the comments have been collected, so render the restaurant page
-                                                            res.render('users/restaurant-profile', {
-                                                                restaurant: restaurant,
-                                                                email: viewedUser.email,
-                                                                canEdit: canEdit(req.session.userId, requestAccountType, req.id),
-                                                                canRate: canRate(requestAccountType),
-                                                                comments: obj,
-                                                                auths: allAuths,
-                                                                recommended: recommended,
-                                                                canDelete: canDelete(req.session.userId, requestAccountType, req.id)
-                                                            });
+
+                                                        for(i = reviews.length-1; i>=0; i--){ // For each review, collect associated username and rating
+                                                            if(reviews[i].comment) {
+                                                                item = {};
+                                                                item["comment"] = reviews[i].comment;
+                                                                item["rating"] = reviews[i].rating;
+                                                                finduser(reviews[i].userId, item);
+                                                            }
                                                         }
+
+
+                                                        //Function which finds username from "User" and "FBUser" tables given user id
+                                                        function finduser(reviewerUserId, item) {
+                                                            var found = 0;
+
+                                                            var j;
+                                                            for(j=0; j<allUsers.length; j++ ){
+
+                                                                if(allUsers[j].auth.toString() == reviewerUserId.toString()){
+                                                                    item["name"] = allUsers[j].name;
+                                                                    obj.push(item);
+                                                                    console.log("Found name1" + allUsers[j].name);
+                                                                    found = 1;
+                                                                    break;
+                                                                }
+
+                                                            }
+
+                                                            if(!found){
+
+                                                                for(j=0; j<allFbUsers.length; j++ ){
+
+                                                                    if(allFbUsers[j].auth.toString() == reviewerUserId.toString()){
+                                                                        item["name"] = allFbUsers[j].name;
+                                                                        obj.push(item);
+                                                                        console.log("Found name2" + allFbUsers[j].name);
+                                                                        found = 1;
+                                                                        break;
+                                                                    }
+
+                                                                }
+                                                            }
+                                                        }
+
+                                                        res.render('users/restaurant-profile', {
+                                                            restaurant: restaurant,
+                                                            email: viewedUser.email,
+                                                            canEdit: canEdit(req.session.userId, requestAccountType, req.id),
+                                                            canRate: canRate(requestAccountType),
+                                                            comments: obj,
+                                                            auths: allAuths,
+                                                            recommended: recommended,
+                                                            canDelete: canDelete(req.session.userId, requestAccountType, req.id)
+                                                        });
+
                                                     }
                                                 });
                                             }
                                         });
-                                    }
+                                    });
                                 });
                             });
 
