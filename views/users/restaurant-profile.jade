@@ -62,9 +62,9 @@ block list
             h5 Do you like this place? Let others know
             br
             form.ratingg(action='/users/#{restaurant.auth}/comment', method='POST')
-              p Rate
+              p Choose rating
               fieldset.rating
-                input#star5(type='radio', name='rating', value='5')
+                input#star5(type='radio', name='rating', value='5', required='true')
                 label.full(for='star5', title='Awesome - 5 stars')
                 input#star4half(type='radio', name='rating', value='4.5')
                 label.half(for='star4half', title='Pretty good - 4.5 stars')
