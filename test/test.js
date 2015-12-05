@@ -596,7 +596,28 @@ describe('Project Brownbag Test', function () {
         });
         
         it('Should post a comment with rating', function (done) {
-            done();
+            mongoose.model('Auth').findOne({
+                email: 'restaurant3@mail.utoronto.ca'
+            }, function (err, rest) {
+                expect(rest).not.to.equal(null);
+                agent
+                // access the restaurant profile page of Restaurant3
+                    .get('/users/' + rest._id)
+                    .end(function (err, response) {
+                        // The profile page should contain all info about restaurant3.
+                        expect(response.statusCode).to.equal(200);
+                        expect(response.text).to.contain('restaurant3@mail.utoronto.ca'); // restaurant3 email.
+                        expect(response.text).to.contain('khongb') // its location
+                        agent 
+                            .post(/users/ + rest._id + '/comment')
+                            .end(function (err, response) {
+                                console.log(response.text);
+                                expect(response.text);
+                                expect(response.statuSCode)
+                                done();
+                        });
+                    });
+            });
         });
         it('Should be able to view the comment');
     });
