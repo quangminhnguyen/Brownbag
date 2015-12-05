@@ -1,0 +1,286 @@
+#restaurant-picture {
+    max-height: 400px;
+    max-width: 100%;
+    border-radius: 5px;
+    border: 2px solid;
+    border-color: grey;
+}
+
+#user-picture {
+    max-height: 400px;
+    max-width: 100%;
+    border-radius: 5px;
+    border: 2px solid;
+    border-color: grey;
+}
+
+h4 {
+    text-align: center;
+    color: dodgerblue
+}
+
+.topnav {
+  background-color: #589660;
+  padding: 5px;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.topnav a {
+    color: white;
+}
+
+.content {
+    padding: 0px;
+}
+
+.logo {
+    height: 60px;
+}
+
+.topnav-right {
+    text-align: right;
+    padding: 15px 15px 0 0;
+}
+
+.dl-horizontal dt {
+    text-align: left !important;
+}
+
+.signout {
+    margin-left: 10px;
+}
+
+.glowing-blue:hover {
+    box-shadow: 0 0 50px deepskyblue, 0 0 150px deepskyblue;
+}
+
+.logo-small {
+    margin: 10px;
+    width: 100px;
+    height: 100px;
+}
+
+#signupbox {
+  width: 70%;
+  margin: 10px auto;
+}
+
+#loginbox {
+  border-left: solid lightgrey;
+  padding-left: 10px;
+}
+
+.logo-small:hover {
+    width: 120px;
+    height: 120px;
+    margin: 0;
+}
+
+.heading {
+  margin: 16px 0px;
+}
+
+.inlinea {
+    word-wrap: break-word;
+    display: inline-block;
+}
+
+.display-block {
+    border: 2px solid;
+    border-color: grey;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.rating-block {
+    border: 2px solid;
+    border-color: lightgrey;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.helper {
+    padding: 2px;
+    color: indianred;
+    font-style: italic;
+}
+
+.success-mess{
+    padding: 2px;
+    font-style: italic;
+    color: limegreen;
+}
+
+#username {
+    color: #ffd;
+    font-weight: bold;
+}
+
+@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+fieldset,
+label {
+    margin: 0;
+    padding: 0;
+}
+
+/****** Style Star Rating Widget *****/
+
+.rating {
+    border: none;
+    float: left;
+}
+
+.rating > input {
+    display: none;
+}
+
+.rating > label:before {
+    margin: 5px;
+    font-size: 1.7em;
+    font-family: FontAwesome;
+    display: inline-block;
+    content: "\f005";
+}
+
+.rating > .half:before {
+    content: "\f089";
+    position: absolute;
+}
+
+.rating > label {
+    color: #ddd;
+    float: right;
+}
+/***** CSS Magic to Highlight Stars on Hover *****/
+
+.rating > input:checked ~ label,
+    /* show gold star when clicked */
+
+.rating:not(:checked) > label:hover,
+    /* hover current star */
+
+.rating:not(:checked) > label:hover ~ label {
+    color: #FFD700;
+}
+/* hover previous stars in list */
+
+.rating > input:checked + label:hover,
+    /* hover current star when changing rating */
+
+.rating > input:checked ~ label:hover,
+.rating > label:hover ~ input:checked ~ label,
+    /* lighten current selection */
+
+.rating > input:checked ~ label:hover ~ label {
+    color: limegreen;
+}
+
+
+.conversation {
+    width: 80%;
+    margin: auto;
+}
+
+.bubble {
+    background-color: #F2F2F2;
+    border-radius: 5px;
+    box-shadow: 0 0 6px #B2B2B2;
+    display: inline-block;
+    padding: 10px 18px;
+    position: relative;
+    vertical-align: top;
+}
+
+.bubble::before {
+    background-color: #F2F2F2;
+    content: "\00a0";
+    display: block;
+    height: 16px;
+    position: absolute;
+    top: 11px;
+    transform:             rotate( 29deg ) skew( -35deg );
+        -moz-transform:    rotate( 29deg ) skew( -35deg );
+        -ms-transform:     rotate( 29deg ) skew( -35deg );
+        -o-transform:      rotate( 29deg ) skew( -35deg );
+        -webkit-transform: rotate( 29deg ) skew( -35deg );
+    width:  20px;
+}
+
+.me {
+    float: left;   
+    margin: 5px 45px 5px 20px;   
+    background-color: #e5f2ff;      
+}
+
+.me::before {
+    box-shadow: -2px 2px 2px 0 rgba( 178, 178, 178, .4 );
+    left: -9px;           
+    background-color: #e5f2ff;      
+}
+
+.you {
+    float: right;    
+    margin: 5px 20px 5px 45px;         
+}
+
+.you::before {
+    box-shadow: 2px -2px 2px 0 rgba( 178, 178, 178, .4 );
+    right: -9px;    
+}
+ul.messages {
+    list-style-type: none !important;
+    margin-bottom: 40px;
+    padding: 0px;
+}
+.message-box {
+    width: 92% !important;
+    margin-right:10px;
+    display: inline !important;
+}
+
+.view-convo {
+    margin-bottom: 5px;
+}
+
+.img-recommended {
+    height:50px;
+    width : auto;
+    display: inline;
+    margin-right: 20px;
+}
+.recommended-name{
+    display: inline;
+}
+
+.recommended-restaurant {
+    margin-bottom: 10px;
+}
+
+.sendmessage {
+    margin-bottom: 10px;
+}
+
+.review {
+    display:inline;
+}
+
+.user-conversations {
+    text-align: right;
+}
+
+
+.btn-user-filter {
+    padding:0px;
+    margin-left: 5px;
+}
+
+.btn-restaurant-filter {
+    padding:0px;
+    margin-left: 5px;
+}
+.restaurant-filter {
+    margin-bottom: 10px;
+}
