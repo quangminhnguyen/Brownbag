@@ -35,10 +35,10 @@ var url = 'http://127.0.0.1:' + PORT;
 // Testing our http server.
 describe('Project Brownbag Test', function () {
 
-
     // Retrieve login page.
     describe('Login Page', function () {
         it('Should get index page', function (done) {
+            this.timeout(4000);
             request(url, function (err, response, body) {
                 expect(response.request.uri.href).to.equal(url + '/');
                 expect(response.headers['content-type']).to.equal('text/html; charset=utf-8');
@@ -47,6 +47,7 @@ describe('Project Brownbag Test', function () {
             });
         });
         it('Should redirect to login page when request ' + url + '/abc', function (done) {
+            this.timeout(4000);
             request(url + '/abc', function (err, response, body) {
                 // The page which the user gets redirected to. 
                 expect(response.request.uri.href).to.equal(url + '/');
@@ -60,6 +61,7 @@ describe('Project Brownbag Test', function () {
     // Retrieve the sign up page.
     describe('Sign up page', function (done) {
         it('Should get sign up page', function (done) {
+            this.timeout(4000);
             request(url + '/signup', function (err, response, body) {
                 expect(response.request.uri.href).to.equal(url + '/signup');
                 expect(response.headers['content-type']).to.equal('text/html; charset=utf-8');
@@ -429,6 +431,12 @@ describe('Project Brownbag Test', function () {
             dropAllSchema();
         });
         
+        after(function(){
+            agent
+                .get('\logout')
+                .end(function(err, response){});
+        });
+        
         it('Should create Restaurant1', function (done) {
             createRest({
                 type: 'owner',
@@ -520,7 +528,7 @@ describe('Project Brownbag Test', function () {
         });
 
 
-        it('Should display only the restaurant with Thai cuisine', function (done) {
+        it('Should display only the restaurant with Thai cuisine if the user ', function (done) {
             agent
                 .get('/users/main')
                 .query('cuisine=Thai')
@@ -532,12 +540,64 @@ describe('Project Brownbag Test', function () {
                     done();
                 });
         });
+        
+        it('Should not display the restaurant with Thai cuisine if the user selected Japanese as cuisine', function(done) {
+            agent
+                .get('/users/main')
+                .query('cuisine=Japanese')
+                .end(function(err, response) {
+                    expect(response.statusCode).to.equal(200);
+                    expect(response.text).to.include('Restaurant1'); // Restaurant 1 has Japanese as cuisine
+                    expect(response.text).not.to.include('Restaurant2'); // Restaurant 2 has Thai as cuisine
+                    expect(response.text).not.to.include('Restaurant3'); // Restaurant 3 also has Thai as cuisine
+                    done();
+            });
+        });
+        
     });
     
     
-    describe('Commenting & Rating', function(done) {
-        it('Should not post a comment without rating');
-        it('Should post a comment with rating');
+    // Reuse data created in "Searching & Filtering in users/main" test
+    describe('Commenting & Rating', function() {
+        var agent = require('supertest').agent(url); // Another agent to test this functionality
+        it('Should log in as admin', function (done) {
+            agent
+                .post('/login')
+                .send({
+                    email: 'user@mail.utoronto.ca',
+                    password: 'aaaaa'
+                })
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/admin');
+                    done();
+                });
+        });
+        
+        
+        it('Should transfer to a restaurant profile page', function(done) {
+            agent
+                .get('/users/admin')
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(200);
+                    mongoose.model('Auth').findOne({email: 'restaurant3@mail.utoronto.ca'}, function(err, rest) {
+                        expect(rest).not.to.equal(null);
+                        agent
+                            // access the restaurant profile page of Restaurant3
+                            .get('/users/' + rest._id)
+                            .end(function(err, response) {
+                                // The profile page should contain all info about restaurant3.
+                                expect(response.text).to.contain('restaurant3@mail.utoronto.ca'); // restaurant3 email.
+                                expect(response.text).to.contain('khongb') // its location
+                                done(); 
+                        });
+                    });
+            });
+        });
+        
+        it('Should post a comment with rating', function (done) {
+            done();
+        });
         it('Should be able to view the comment');
     });
     
