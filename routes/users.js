@@ -1210,7 +1210,6 @@ router.post('/:id/comment', function (req, res) {
 
 // /users/:id/avatar User update new avatar
 router.post('/:id/avatar', function (req, res, next) {
-    console.log('avatar1');
     var form = new formidable.IncomingForm();
     // Get the files in the form
     form.parse(req, function (err, fields, files) {
@@ -1219,15 +1218,14 @@ router.post('/:id/avatar', function (req, res, next) {
             return;
         }
         var pic = files.profilePicture;
-        console.log('avatar2', pic, fields);
+
 
         // Check if the file size is > 0
         if (pic.size > 0) {
-            console.log('avatar3');
 
             // Read the file
             fs.readFile(pic.path, function (err, data) {
-                console.log('avatar4');
+
                 if (err) throw err;
 
                 // Create image object
@@ -1238,7 +1236,6 @@ router.post('/:id/avatar', function (req, res, next) {
 
                 // Find the target user in Auth
                 mongoose.model('Auth').findById(req.id, function (err, user) {
-                    console.log('avatar5');
                     if (err) {
                         console.log('PUT Error, there was problem retrieving: ' + err);
                         return;
@@ -1246,7 +1243,6 @@ router.post('/:id/avatar', function (req, res, next) {
 
                     // check if the requester has permission to update the target user.
                     getAccountType(req.session.userId, function (err, requestAccountType) {
-                        console.log('avatar6');
 
                         // If the requester has permission
                         if (canEdit(req.session.userId, requestAccountType, req.id)) {
@@ -1254,7 +1250,6 @@ router.post('/:id/avatar', function (req, res, next) {
                             mongoose.model('Avatar').create({
                                 img: img
                             }, function (err, picture) {
-                                console.log('avatar7');
                                 // Restaurant user
                                 if (user.accountType == ACCOUNT_TYPE[3]) {
 
@@ -1268,7 +1263,6 @@ router.post('/:id/avatar', function (req, res, next) {
                                             console.log(err);
                                             return;
                                         }
-                                        console.log('avatar8');
                                         //console.log(restaurant.avatar);
                                         //console.log(picture._id);
 
@@ -1278,7 +1272,6 @@ router.post('/:id/avatar', function (req, res, next) {
                                                 console.log(err);
                                                 return;
                                             }
-                                            console.log('avatar 9');
                                             //console.log(doc.avatar);
                                             res.redirect('back');
                                         });
