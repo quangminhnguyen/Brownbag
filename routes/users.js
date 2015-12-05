@@ -561,8 +561,6 @@ router.route('/:id')
                                                 }, function (err, allFbUsers) {
                                                     if (allFbUsers) {
 
-
-
                                                         for(i = reviews.length-1; i>=0; i--){ // For each review, collect associated username and rating
                                                             if(reviews[i].comment) {
                                                                 item = {};
@@ -583,7 +581,6 @@ router.route('/:id')
                                                                 if(allUsers[j].auth.toString() == reviewerUserId.toString()){
                                                                     item["name"] = allUsers[j].name;
                                                                     obj.push(item);
-                                                                    console.log("Found name1" + allUsers[j].name);
                                                                     found = 1;
                                                                     break;
                                                                 }
@@ -597,7 +594,6 @@ router.route('/:id')
                                                                     if(allFbUsers[j].auth.toString() == reviewerUserId.toString()){
                                                                         item["name"] = allFbUsers[j].name;
                                                                         obj.push(item);
-                                                                        console.log("Found name2" + allFbUsers[j].name);
                                                                         found = 1;
                                                                         break;
                                                                     }
