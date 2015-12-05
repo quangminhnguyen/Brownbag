@@ -850,7 +850,7 @@ function canDelete(signedInId, signedInAccountType, targetUserID) {
 }
 
 
-
+// "/users/:id/edit"
 router.route('/:id/edit')
     // get the edit user or restaurant profile page
     .get(function (req, res) {
@@ -966,6 +966,7 @@ router.route('/:id/edit')
                     if (user == null) {
                         console.log("There is no such a user with id " + req.id + " in the database.");
                         res.send("fail");
+                        return;
                     }
                     // If the user is an admin or regular user, then update the User table.
                     if (user.accountType == ACCOUNT_TYPE[1] || user.accountType == ACCOUNT_TYPE[2]) {
@@ -989,6 +990,7 @@ router.route('/:id/edit')
 
                         if (errorMess != '') {
                             res.send(errorMess);
+                            return;
                         }
 
                         mongoose.model('User').findOneAndUpdate({
@@ -1039,6 +1041,7 @@ router.route('/:id/edit')
 
                         if (errorMess != '') {
                             res.send(errorMess);
+                            return;
                         }
 
                         // console.log(req.body);
@@ -1131,7 +1134,7 @@ router.route('/:id/edit')
 
 // Request handler for commenting
 router.post('/:id/comment', function (req, res) {
-
+    console.log(req.body);
     if (!req.body.rating) {
         req.body.rating = 0;
     }

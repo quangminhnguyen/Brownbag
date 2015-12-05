@@ -106,30 +106,6 @@ describe('Project Brownbag Test', function () {
         });
     });
 
-
-    //    describe('Post a new user', function() {
-    //        it('Should have a new user', function(done) {
-    //            this.timeout(1000);
-    //            request({
-    //                headers: {'content-type' : 'multipart/form-data'},
-    //                url: url + '/users',
-    //                method: "POST",
-    //                form: {
-    //                    email: 'crazy@mail.utoronto.ca',
-    //                    password: 'aloooo'
-    //                }
-    //            }, function(err, response, body) {
-    //                if (err) {
-    //                    console.log(err);
-    //                }
-    //                console.log(response);
-    //                console.log(body);
-    //                expect(response.statusCode).to.equal(200);
-    //                done();
-    //            });
-    //        });
-    //    });
-
     describe('Registering a new user', function () {
 
         // DropAllSchema before each test.
@@ -426,17 +402,17 @@ describe('Project Brownbag Test', function () {
 
     describe('Searching & Filtering in users/main', function () {
         var agent = require('supertest').agent(url); // Another agent!
-        
-        before(function(){
+
+        before(function () {
             dropAllSchema();
         });
-        
-        after(function(){
+
+        after(function () {
             agent
-                .get('\logout')
-                .end(function(err, response){});
+                .get('/logout')
+                .end(function (err, response) {});
         });
-        
+
         it('Should create Restaurant1', function (done) {
             createRest({
                 type: 'owner',
@@ -528,7 +504,7 @@ describe('Project Brownbag Test', function () {
         });
 
 
-        it('Should display only the restaurant with Thai cuisine if the user ', function (done) {
+        it('Should display only the restaurant with Thai cuisine if the user selected Thai as cuisine', function (done) {
             agent
                 .get('/users/main')
                 .query('cuisine=Thai')
@@ -540,27 +516,34 @@ describe('Project Brownbag Test', function () {
                     done();
                 });
         });
-        
-        it('Should not display the restaurant with Thai cuisine if the user selected Japanese as cuisine', function(done) {
+
+        it('Should not display the restaurant with Thai cuisine if the user selected Japanese as cuisine', function (done) {
             agent
                 .get('/users/main')
                 .query('cuisine=Japanese')
-                .end(function(err, response) {
+                .end(function (err, response) {
                     expect(response.statusCode).to.equal(200);
                     expect(response.text).to.include('Restaurant1'); // Restaurant 1 has Japanese as cuisine
                     expect(response.text).not.to.include('Restaurant2'); // Restaurant 2 has Thai as cuisine
                     expect(response.text).not.to.include('Restaurant3'); // Restaurant 3 also has Thai as cuisine
                     done();
-            });
+                });
         });
-        
+
     });
-    
-    
+
+
     // Reuse data created in "Searching & Filtering in users/main" test
-    describe('Commenting & Rating', function() {
+    describe('Commenting & Rating', function () {
         var agent = require('supertest').agent(url); // Another agent to test this functionality
-        it('Should log in as admin', function (done) {
+
+        after(function () {
+            agent
+                .get('/logout')
+                .end(function (err, response) {});
+        });
+
+        it('Should log in as a user', function (done) {
             agent
                 .post('/login')
                 .send({
@@ -573,28 +556,30 @@ describe('Project Brownbag Test', function () {
                     done();
                 });
         });
-        
-        
-        it('Should transfer to a restaurant profile page', function(done) {
+
+
+        it('Should transfer to a restaurant profile page', function (done) {
             agent
                 .get('/users/admin')
                 .end(function (err, response) {
                     expect(response.statusCode).to.equal(200);
-                    mongoose.model('Auth').findOne({email: 'restaurant3@mail.utoronto.ca'}, function(err, rest) {
+                    mongoose.model('Auth').findOne({
+                        email: 'restaurant3@mail.utoronto.ca'
+                    }, function (err, rest) {
                         expect(rest).not.to.equal(null);
                         agent
-                            // access the restaurant profile page of Restaurant3
+                        // access the restaurant profile page of Restaurant3
                             .get('/users/' + rest._id)
-                            .end(function(err, response) {
+                            .end(function (err, response) {
                                 // The profile page should contain all info about restaurant3.
                                 expect(response.text).to.contain('restaurant3@mail.utoronto.ca'); // restaurant3 email.
                                 expect(response.text).to.contain('khongb') // its location
-                                done(); 
-                        });
+                                done();
+                            });
                     });
-            });
+                });
         });
-        
+
         it('Should post a comment with rating', function (done) {
             mongoose.model('Auth').findOne({
                 email: 'restaurant3@mail.utoronto.ca'
@@ -608,35 +593,290 @@ describe('Project Brownbag Test', function () {
                         expect(response.statusCode).to.equal(200);
                         expect(response.text).to.contain('restaurant3@mail.utoronto.ca'); // restaurant3 email.
                         expect(response.text).to.contain('khongb') // its location
-                        agent 
+                        agent
                             .post(/users/ + rest._id + '/comment')
+                            .send({
+                                rating: 5,
+                                comment: 'Test comment'
+                            })
                             .end(function (err, response) {
-                                console.log(response.text);
-                                expect(response.text);
-                                expect(response.statuSCode)
-                                done();
+                                expect(response.statusCode).to.equal(302);
+                                expect(response.text).to.contain('Redirecting to /'); //redirect to the comment page.
+                                mongoose.model('Review').findOne({
+                                    restaurantId: rest.id
+                                }, function (err, rest) {
+                                    expect(rest.rating).to.equal('5');
+                                    expect(rest.comment).to.equal('Test comment');
+                                    done();
+                                });
+                            });
+                    });
+            });
+        });
+
+        it('Should be able to view the comment', function (done) {
+            mongoose.model('Auth').findOne({
+                email: 'restaurant3@mail.utoronto.ca'
+            }, function (err, rest) {
+                expect(rest).not.to.equal(null);
+                agent
+                    .get('/users/' + rest._id)
+                    .end(function (err, response) {
+                        expect(response.statusCode).to.equal(200);
+                        expect(response.text).to.contain('Test comment'); // The comment that posted above.
+                        expect(response.text).to.contain('IamUser') // Name of the user made comment for this restaurant.
+                        done();
+                    });
+            });
+        });
+    });
+
+    // Reuse data created in "Searching & Filtering in users/main" test
+    describe('Messaging Between Users', function (done) {
+        var agent = require('supertest').agent(url); // Another agent to test this functionality
+
+        after(function () {
+            agent
+                .get('/logout')
+                .end(function (err, response) {});
+        });
+
+        it('Should log in as a user named IamUser', function (done) {
+            agent
+                .post('/login')
+                .send({
+                    email: 'user@mail.utoronto.ca',
+                    password: 'aaaaa'
+                })
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/admin');
+                    done();
+                });
+        });
+
+        it('Should go to restaurant profile page of restaurant3@mail.utoronto.ca and post a message', function (done) {
+            mongoose.model('Auth').findOne({
+                email: 'restaurant3@mail.utoronto.ca'
+            }, function (err, rest) {
+                expect(rest).not.to.equal(null);
+                agent
+                    .get('/users/' + rest._id)
+                    .end(function (err, response) {
+                        expect(response.statusCode).to.equal(200);
+                        // the profile page should contain information about the restaurant.
+                        expect(response.text).to.include('restaurant3@mail.utoronto.ca');
+                        expect(response.text).to.include('Restaurant3');
+
+                        agent
+                            .post('/messages/sendMessage')
+                            .send({
+                                recipient: 'restaurant3@mail.utoronto.ca',
+                                message: 'I hate you so much'
+                            })
+                            .end(function (err, response) {
+                                expect(response.statusCode).to.equal(302);
+                                mongoose.model('Message').findOne({
+                                    fromId: 'user@mail.utoronto.ca'
+                                }, function (err, message) {
+                                    expect(message.toId).to.equal('restaurant3@mail.utoronto.ca');
+                                    agent
+                                        .get('/logout')
+                                        .end(function (err, response) {
+                                            done();
+                                        });
+                                });
+                            });
+                    });
+            });
+        });
+
+        it('Should login as restaurant3', function (done) {
+            agent
+                .post('/login')
+                .send({
+                    email: 'restaurant3@mail.utoronto.ca',
+                    password: 'aaaaa'
+                })
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/main');
+                    done();
+                });
+        });
+
+        it('Should be able view message sent by IamUser in the chat page.', function (done) {
+            agent
+                .get('/messages/conversation/user@mail.utoronto.ca')
+                .end(function (err, response) {
+                    expect(response.text).to.include('I hate you so much');
+                    done();
+                });
+        });
+    });
+
+    // Reuse data created in "Searching & Filtering in users/main" test
+    describe('Admin Power', function (done) {
+        var agent = require('supertest').agent(url); // Another agent to test this functionality
+
+        after(function () {
+            agent
+                .get('/logout')
+                .end(function (err, response) {});
+        });
+
+        it('Should log in as admin user', function (done) {
+            agent
+                .post('/login')
+                .send({
+                    email: 'user@mail.utoronto.ca',
+                    password: 'aaaaa'
+                })
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/admin');
+                    done();
+                });
+        });
+
+        it('Should be able to edit profile of another user', function (done) {
+            mongoose.model('Auth').findOne({
+                email: 'restaurant3@mail.utoronto.ca'
+            }, function (err, rest) {
+                expect(rest).not.to.equal(null);
+                // make request to edit user profile
+                agent
+                    .put('/users/' + rest._id + '/edit')
+                    .send({
+                        age: '12',
+                        name: 'Restaurant3.1',
+                        location: 'Cambodia',
+                        'cuisine[]': ['Thai', 'Korean', 'Vietnamese']
+                    }) // Change the restaurant name.
+                    .end(function (err, response) {
+                        expect(response.text).to.equal('success');
+                        mongoose.model('Restaurant').findOne({
+                            name: 'Restaurant3.1'
+                        }, function (err, restaurant) {
+                            expect(restaurant).not.to.equal(null);
+                            expect(restaurant.location).to.equal('Cambodia');
+                            done();
                         });
                     });
             });
         });
-        it('Should be able to view the comment');
-    });
-    
-    describe('Messaging Between Users', function(done) {
-        it('Should create a message');
-    });
-    
-    describe('Admin Power', function(done) {
-        it('Should be able to edit profile of another user');
-        it('Should be able to delete another user');
-    });
-    
-    describe('Security Access control', function(done) {
-        it('Should not be able to access to the admin page, if is not an admin.')
-    });
-    
-    
 
+        it('Should be able to delete another user', function (done) {
+            mongoose.model('Auth').findOne({
+                email: 'restaurant3@mail.utoronto.ca'
+            }, function (err, rest) {
+                agent // our agent is admin
+                    .delete('/users/' + rest._id)
+                    .end(function (err, response) {
+                        expect(response.statusCode).to.equal(302);
+                        expect(response.text).to.include('/users/admin');
+                        mongoose.model('Auth').findOne({
+                            email: 'restaurant3@mail.utoronto.ca'
+                        }, function (err, restaurant) {
+                            // should not be able to find the deleted user.
+                            expect(restaurant).to.equal(null);
+                            done();
+                        });
+                    });
+            });
+        });
+    });
+
+    
+    
+    // Reuse data from Admin power.
+    describe('Security Access control', function (done) {
+        var agent = require('supertest').agent(url);
+        
+        it('Should not be able to access /users/main without login', function(done) {
+            agent
+                .get('/users/main')
+                .end(function (err, response) {
+                    // not admin, so be redirected back to login page.
+                    expect(response.text).to.contain('Redirecting to /');
+                    done();
+                });
+        });
+
+        
+        it('Should login as regular user restaurant1@mail.utoronto.ca', function(done) {
+            agent
+                .post('/login')
+                .send({
+                    email: 'restaurant1@mail.utoronto.ca',
+                    password: 'aaaaa'
+                })
+                .end(function (err, response) {
+                    expect(response.statusCode).to.equal(302);
+                    expect(response.text).to.include('Redirecting to /users/main');
+                    done();
+                });
+        });
+        
+        
+        it('Should not let restaurant1@mail.utoronto.ca access to /users/admin', function(done) {
+            agent
+                .get('/users/admin')
+                .end(function(err, response) {
+                    expect(response.text).to.include('Redirecting to /'); // being push back.
+                    done();
+                });
+        });
+        
+        
+        it('Should not let restaurant1@mail.utoronto.ca delete restaurant restaurant2@mail.utoronto.ca', function(done) {
+            mongoose.model('Auth').findOne({
+                email: 'restaurant2@mail.utoronto.ca'
+            }, function (err, rest) {
+                agent // our agent is admin
+                    .delete('/users/' + rest._id)
+                    .end(function (err, response) {
+                        expect(response.statusCode).to.equal(200);
+                        expect(response.text).to.equal("You don't have permission to delete this user.");
+                        mongoose.model('Auth').findOne({
+                            email: 'restaurant2@mail.utoronto.ca'
+                        }, function (err, restaurant) {
+                            // should not be able to find the deleted user.
+                            expect(restaurant).not.to.equal(null);
+                            done();
+                        });
+                    });
+            });
+        }); 
+        
+        it('Should not let restaurant1@mail.utoronto.ca edit restaurant restaurant2@mail.utoronto.ca', function(done) {
+            mongoose.model('Auth').findOne({
+                email: 'restaurant2@mail.utoronto.ca'
+            }, function (err, rest) {
+                expect(rest).not.to.equal(null);
+                // make request to edit user profile, this request should not made any change to the user profile.
+                agent
+                    .put('/users/' + rest._id + '/edit')
+                    .send({
+                        age: '22',
+                        name: 'Restaurant2',
+                        location: 'France',
+                        'cuisine[]': ['Thai', 'Chinese', 'Vietnamese']
+                    }) // Change the restaurant name.
+                    .end(function (err, response) {
+                        expect(response.text).to.equal('You do not have permission to update this user account');
+                        mongoose.model('Restaurant').findOne({
+                            name: 'Restaurant2'
+                        }, function (err, restaurant) {
+                            expect(restaurant).not.to.equal(null);
+                            expect(restaurant.cuisine[0]).to.equal('Thai'); // still remain Thai, because not modified.
+                            expect(restaurant.location).to.equal('khongb');
+                            done();
+                        });
+                    });
+            });
+        });
+    });
 });
 
 

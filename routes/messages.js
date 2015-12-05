@@ -4,6 +4,7 @@ var router = express.Router();
 
 // sends message to recipient
 router.post('/sendMessage', function(req, res) {
+  console.log('a' + req.body);
   var sender = res.locals.currentUser.email; 
   var recipientEmail  = req.body.recipient; 
   var message = req.body.message; 
@@ -12,6 +13,7 @@ router.post('/sendMessage', function(req, res) {
     if (err) {
       console.log(err);
       res.send("There was a problem adding the MESSAGE to the database.");
+      return;
     }
     req.session.successAlert = "Message sent";
     res.redirect('back')
@@ -32,11 +34,13 @@ router.get('/conversation/:email', function(req, res) {
     
     if (err) {
       res.send("There was a problem retrieving messages");
+      return;
     }
 
     mongoose.model('Auth').findOne({email: recipientEmail}, function (err, auth) {
       if (err) {
         console.log("error", err);
+        return;
       }
       res.format({
         html: function(){
