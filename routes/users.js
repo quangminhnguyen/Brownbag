@@ -1155,7 +1155,7 @@ router.post('/:id/comment', function (req, res) {
 
                 var avgrating = 0;
                 for (var j = 0; j < reviews.length; j++) {
-                    avgrating += parseInt(reviews[j].rating);
+                    avgrating += parseFloat(reviews[j].rating);
                 }
                 if (reviews.length)
                     avgrating /= reviews.length;
