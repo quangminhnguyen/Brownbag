@@ -28,6 +28,7 @@
     "request": "^2.67.0",
     "serve-favicon": "~2.3.0",
     "should": "^7.1.1",
+    "super-request": "^0.1.0",
     "supertest": "^1.1.0"
   },
   "description": "Restaurant Searching Web App",
